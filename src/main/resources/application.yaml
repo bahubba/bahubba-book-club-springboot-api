@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    platform: postgresql
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${BOOK_CLUB_DB_HOST}/${BOOK_CLUB_DB_NAME:book_club} #jdbc:postgresql://${BOOK_CLUB_DB_HOST:127.0.0.1}:${BOOK_CLUB_DB_PORT:5432}/${BOOK_CLUB_DB_NAME:book_club}
+    username: ${BOOK_CLUB_DB_USERNAME:postgres}
+    password: ${BOOK_CLUB_DB_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    user:
+      name: ${BOOK_CLUB_USER_NAME}
+      password: ${BOOK_CLUB_USER_PASSWORD}
+
+logging:
+  level:
+    org.springframework: info
+    org.hibernate: info
+
+server:
+  port: ${BOOK_CLUB_APP_PORT:8000}
+
+app:
+  properties:
+    secret_key: ${BOOK_CLUB_SECRET_KEY}
