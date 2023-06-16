@@ -29,7 +29,6 @@ public class Reader implements UserDetails, Serializable {
     @Id
     @Column(nullable = false, unique = true)
     @GeneratedValue(strategy = GenerationType.UUID)
-    @NotNull
     private UUID id;
 
     @Column(nullable = false, unique = true)
@@ -83,7 +82,7 @@ public class Reader implements UserDetails, Serializable {
 
     @Override
     public boolean isAccountNonExpired() {
-        return departed != null;
+        return departed == null;
     }
 
     @Override
@@ -98,6 +97,6 @@ public class Reader implements UserDetails, Serializable {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
