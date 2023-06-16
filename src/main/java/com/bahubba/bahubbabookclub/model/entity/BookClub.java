@@ -27,7 +27,6 @@ public class BookClub implements Serializable {
     @Id
     @Column(nullable = false, unique = true)
     @GeneratedValue(strategy = GenerationType.UUID)
-    @NotNull
     private UUID id;
 
     @Column(nullable = false, unique = true)
