@@ -27,7 +27,6 @@ public class JWTService {
     @Value("${app.properties.auth_cookie_name}")
     private String authCookie;
 
-    // TODO - Test
     public String getJwtFromCookies(HttpServletRequest req) {
         Cookie cookie = WebUtils.getCookie(req, authCookie);
         if (cookie != null) {
