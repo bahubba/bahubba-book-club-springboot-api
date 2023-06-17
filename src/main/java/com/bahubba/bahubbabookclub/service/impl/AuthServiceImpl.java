@@ -10,6 +10,7 @@ import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -30,9 +31,9 @@ public class AuthServiceImpl implements AuthService {
         Reader reader = readerMapper.modelToEntity(newReader);
         reader = readerRepo.save(reader);
 
-        String jwtToken = jwtService.generateToken(reader);
+        ResponseCookie jwtCookie = jwtService.generateJwtCookie(reader);
 
-        return AuthDTO.builder().token(jwtToken).build();
+        return AuthDTO.builder().reader(readerMapper.entityToDTO(reader)).token(jwtCookie).build();
     }
 
     public AuthDTO authenticate(AuthRequest req) {
@@ -41,8 +42,8 @@ public class AuthServiceImpl implements AuthService {
         Reader reader = readerRepo.findByUsernameOrEmail(req.getUsernameOrEmail(), req.getUsernameOrEmail())
             .orElseThrow(() -> new ReaderNotFoundException(req.getUsernameOrEmail()));
 
-        String jwtToken = jwtService.generateToken(reader);
+        ResponseCookie jwtCookie = jwtService.generateJwtCookie(reader);
 
-        return AuthDTO.builder().token(jwtToken).build();
+        return AuthDTO.builder().reader(readerMapper.entityToDTO(reader)).token(jwtCookie).build();
     }
 }

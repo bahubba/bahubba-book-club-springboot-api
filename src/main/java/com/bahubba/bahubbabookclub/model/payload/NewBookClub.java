@@ -4,8 +4,6 @@ import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Component
 public class NewBookClub {

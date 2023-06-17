@@ -5,9 +5,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.WebUtils;
 
 import java.security.Key;
 import java.util.Date;
@@ -19,6 +23,27 @@ import java.util.function.Function;
 public class JWTService {
     @Value("${app.properties.secret_key}")
     private String SECRET_KEY;
+
+    @Value("${app.properties.auth_cookie_name}")
+    private String authCookie;
+
+    public String getJwtFromCookies(HttpServletRequest req) {
+        Cookie cookie = WebUtils.getCookie(req, authCookie);
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+
+        return null;
+    }
+
+    public ResponseCookie generateJwtCookie(UserDetails userDetails) {
+        String jwt = generateToken(new HashMap<>(), userDetails);
+        return ResponseCookie.from(authCookie, jwt).path("/api").maxAge(60L * 60L).httpOnly(true).build();
+    }
+
+    public ResponseCookie getCleanJwtCookie() {
+        return ResponseCookie.from(authCookie, null).path("/api").build();
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
