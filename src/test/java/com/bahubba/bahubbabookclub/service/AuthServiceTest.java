@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import java.time.LocalDateTime;
@@ -53,12 +54,13 @@ public class AuthServiceTest {
                 .build()
         );
 
-        when(jwtService.generateToken(any(Reader.class))).thenReturn("token");
+        when(jwtService.generateJwtCookie(any(Reader.class))).thenReturn(
+            ResponseCookie.from("foo", "bar").build()
+        );
 
         AuthDTO result = authService.register(NewReader.builder().password("password").build());
 
-        verify(jwtService, times(1)).generateToken(any(Reader.class));
-        assertEquals("token", result.getToken());
+        verify(jwtService, times(1)).generateJwtCookie(any(Reader.class));
     }
 
     @Test
@@ -79,14 +81,15 @@ public class AuthServiceTest {
             )
         );
 
-        when(jwtService.generateToken(any(Reader.class))).thenReturn("token");
+        when(jwtService.generateJwtCookie(any(Reader.class))).thenReturn(
+                ResponseCookie.from("foo", "bar").build()
+        );
 
         AuthDTO result = authService.authenticate(
             AuthRequest.builder().usernameOrEmail("username").password("password").build()
         );
 
-        verify(jwtService, times(1)).generateToken(any(Reader.class));
-        assertEquals("token", result.getToken());
+        verify(jwtService, times(1)).generateJwtCookie(any(Reader.class));
     }
 
     @Test
