@@ -20,29 +20,39 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class JWTService {
+public class JwtService {
     @Value("${app.properties.secret_key}")
-    private String SECRET_KEY;
+    private String secretKey;
 
     @Value("${app.properties.auth_cookie_name}")
-    private String authCookie;
+    private String authCookieName;
 
-    public String getJwtFromCookies(HttpServletRequest req) {
-        Cookie cookie = WebUtils.getCookie(req, authCookie);
-        if (cookie != null) {
-            return cookie.getValue();
-        }
-
-        return null;
-    }
+    @Value("${app.properties.refresh_cookie_name}")
+    private String refreshCookieName;
 
     public ResponseCookie generateJwtCookie(UserDetails userDetails) {
         String jwt = generateToken(new HashMap<>(), userDetails);
-        return ResponseCookie.from(authCookie, jwt).path("/api").maxAge(60L * 60L).httpOnly(true).build();
+        return generateCookie(authCookieName, jwt, "/api");
+    }
+
+    public ResponseCookie generateJwtRefreshCookie(String refreshToken) {
+        return generateCookie(refreshCookieName, refreshToken, "/api/v1/auth/refresh");
+    }
+
+    public String getJwtFromCookies(HttpServletRequest req) {
+        return getCookieValueByName(req, authCookieName);
+    }
+
+    public String getJwtRefreshFromCookies(HttpServletRequest req) {
+        return getCookieValueByName(req, refreshCookieName);
     }
 
     public ResponseCookie getCleanJwtCookie() {
-        return ResponseCookie.from(authCookie, null).path("/api").build();
+        return ResponseCookie.from(authCookieName, "").path("/api").build();
+    }
+
+    public ResponseCookie getCleanJwtRefreshCookie() {
+        return ResponseCookie.from(refreshCookieName, "").path("/api/v1/auth/refresh").build();
     }
 
     public String extractUsername(String token) {
@@ -60,10 +70,11 @@ public class JWTService {
             .setSubject(userDetails.getUsername())
             .setIssuedAt(new Date(System.currentTimeMillis()))
             .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60)) // 1 hr validity
-            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact();
     }
 
+    // TODO - Update validity checks with error handling (see https://www.bezkoder.com/spring-security-refresh-token/)
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
@@ -74,12 +85,25 @@ public class JWTService {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token).getBody();
+    private ResponseCookie generateCookie(String name, String value, String path) {
+        return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).build();
     }
 
-    private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+    private String getCookieValueByName(HttpServletRequest req, String name) {
+        Cookie cookie = WebUtils.getCookie(req, name);
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+
+        return null;
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+    }
+
+    private Key getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

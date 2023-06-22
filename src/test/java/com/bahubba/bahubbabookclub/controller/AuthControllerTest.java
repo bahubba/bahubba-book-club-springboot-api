@@ -31,9 +31,12 @@ class AuthControllerTest {
             AuthDTO.builder()
                 .reader(new ReaderDTO())
                 .token(ResponseCookie.from("foo", "bar").build())
+                .refreshToken(ResponseCookie.from("bar", "foo").build())
                 .build()
         );
+
         ResponseEntity<ReaderDTO> rsp = authController.register(new NewReader());
+
         verify(authService, times(1)).register(any(NewReader.class));
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
@@ -45,9 +48,12 @@ class AuthControllerTest {
             AuthDTO.builder()
                 .reader(new ReaderDTO())
                 .token(ResponseCookie.from("foo", "bar").build())
+                .refreshToken(ResponseCookie.from("bar", "foo").build())
                 .build()
         );
+
         ResponseEntity<ReaderDTO> rsp = authController.authenticate(new AuthRequest());
+
         verify(authService, times(1)).authenticate(any(AuthRequest.class));
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
