@@ -4,14 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.ResponseCookie;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthDTO {
-    ReaderDTO reader;
-    ResponseCookie token;
-    ResponseCookie refreshToken;
+@Builder
+public class MessageResponseDTO {
+    private String message;
 }

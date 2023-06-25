@@ -32,3 +32,5 @@ server:
 app:
   properties:
     secret_key: ${BOOK_CLUB_SECRET_KEY}
+    auth_cookie_name: ${BOOK_CLUB_AUTH_COOKIE:bbcm_auth}
+    refresh_cookie_name: ${BOOK_CLUB_REFRESH_COOKIE:bbcm_refresh}
