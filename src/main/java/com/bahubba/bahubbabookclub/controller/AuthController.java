@@ -32,6 +32,7 @@ public class AuthController {
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authDTO.getToken().toString())
             .header(HttpHeaders.SET_COOKIE, authDTO.getRefreshToken().toString())
+            .header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
             .body(authDTO.getReader());
     }
 
@@ -41,6 +42,7 @@ public class AuthController {
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authDTO.getToken().toString())
             .header(HttpHeaders.SET_COOKIE, authDTO.getRefreshToken().toString())
+                .header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
             .body(authDTO.getReader());
     }
 

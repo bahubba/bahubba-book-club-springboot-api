@@ -14,6 +14,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -48,12 +50,13 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("*");
+        config.setAllowedOrigins(List.of("http://localhost:3000", "localhost:3000"));
         config.addAllowedHeader("Accept");
         config.addAllowedHeader("Content-Type");
         config.addAllowedHeader("X-Requested-With");
         config.addAllowedHeader("Authorization");
         config.addAllowedHeader("Access-Control-Allow-Origin");
+        config.addAllowedHeader("Access-Control-Allow-Credentials");
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
         config.addAllowedMethod("DELETE");
