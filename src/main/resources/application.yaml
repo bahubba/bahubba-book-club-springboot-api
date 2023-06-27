@@ -27,7 +27,15 @@ logging:
     org.hibernate: info
 
 server:
-  port: ${BOOK_CLUB_APP_PORT:8000}
+  port: ${BOOK_CLUB_APP_PORT:8443}
+  ssl:
+    key-store-type: ${BC_KEYSTORE_TYPE}
+    key-store: ${BC_KEYSTORE}
+    key-store-password: ${BC_KEYSTORE_PW}
+    key-alias: ${BC_KEYSTORE_ALIAS}
+
+security:
+  require-ssl: true
 
 app:
   properties:
