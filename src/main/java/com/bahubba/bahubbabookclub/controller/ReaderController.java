@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.service.ReaderService;
@@ -11,10 +12,16 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/readers")
+@RequestMapping("/api/v1/readers")
 public class ReaderController {
     @Autowired
     private ReaderService readerService;
+
+    // DELETEME
+    @GetMapping("/dummy")
+    public ResponseEntity<MessageResponseDTO> dummy() {
+        return ResponseEntity.ok(MessageResponseDTO.builder().message("HERE YOU GO").build());
+    }
 
     @PostMapping("/create")
     public ResponseEntity<ReaderDTO> create(@RequestBody NewReader newReader) {

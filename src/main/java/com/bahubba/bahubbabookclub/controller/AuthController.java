@@ -3,7 +3,6 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
-import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.service.AuthService;
@@ -32,7 +31,6 @@ public class AuthController {
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authDTO.getToken().toString())
             .header(HttpHeaders.SET_COOKIE, authDTO.getRefreshToken().toString())
-            .header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
             .body(authDTO.getReader());
     }
 
@@ -42,7 +40,6 @@ public class AuthController {
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authDTO.getToken().toString())
             .header(HttpHeaders.SET_COOKIE, authDTO.getRefreshToken().toString())
-                .header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
             .body(authDTO.getReader());
     }
 

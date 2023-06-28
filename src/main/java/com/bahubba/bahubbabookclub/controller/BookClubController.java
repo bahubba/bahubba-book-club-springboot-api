@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/book-clubs")
+@RequestMapping("/api/v1/book-clubs")
 public class BookClubController {
     @Autowired
     private BookClubService bookClubService;

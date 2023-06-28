@@ -50,13 +50,13 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "localhost:3000", "https://localhost:3000"));
         config.addAllowedHeader("Accept");
         config.addAllowedHeader("Content-Type");
         config.addAllowedHeader("X-Requested-With");
         config.addAllowedHeader("Authorization");
         config.addAllowedHeader("Access-Control-Allow-Origin");
-        config.addAllowedHeader("Access-Control-Allow-Credentials");
+        config.setAllowCredentials(true);
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
         config.addAllowedMethod("DELETE");
