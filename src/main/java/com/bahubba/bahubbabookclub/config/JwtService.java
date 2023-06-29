@@ -42,6 +42,7 @@ public class JwtService {
     }
 
     public String getJwtFromCookies(HttpServletRequest req) {
+        log.info("req: " + req);
         log.info("CHECKING COOKIES! " + authCookieName + ": " + getCookieValueByName(req, authCookieName)); // DELETEME
         return getCookieValueByName(req, authCookieName);
     }
@@ -72,7 +73,7 @@ public class JwtService {
             .setClaims(extraClaims)
             .setSubject(userDetails.getUsername())
             .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60)) // 1 hr validity
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact();
     }
