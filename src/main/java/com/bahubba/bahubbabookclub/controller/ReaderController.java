@@ -4,6 +4,7 @@ import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.service.ReaderService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/readers")
+@Log4j2 // DELETEME
 public class ReaderController {
     @Autowired
     private ReaderService readerService;
@@ -20,6 +22,7 @@ public class ReaderController {
     // DELETEME
     @GetMapping("/dummy")
     public ResponseEntity<MessageResponseDTO> dummy() {
+        log.info("HERE");
         return ResponseEntity.ok(MessageResponseDTO.builder().message("HERE YOU GO").build());
     }
 

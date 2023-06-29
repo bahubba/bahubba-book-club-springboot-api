@@ -7,6 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@Log4j2 // DELETEME
 public class JwtService {
     @Value("${app.properties.secret_key}")
     private String secretKey;
@@ -40,6 +42,7 @@ public class JwtService {
     }
 
     public String getJwtFromCookies(HttpServletRequest req) {
+        log.info("CHECKING COOKIES! " + authCookieName + ": " + getCookieValueByName(req, authCookieName)); // DELETEME
         return getCookieValueByName(req, authCookieName);
     }
 
