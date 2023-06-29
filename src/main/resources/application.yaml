@@ -29,10 +29,10 @@ logging:
 server:
   port: ${BOOK_CLUB_APP_PORT:8443}
   ssl:
-    key-store-type: ${BC_KEYSTORE_TYPE}
-    key-store: ${BC_KEYSTORE}
-    key-store-password: ${BC_KEYSTORE_PW}
-    key-alias: ${BC_KEYSTORE_ALIAS}
+    key-store-type: ${BC_KEYSTORE_TYPE:PKCS12}
+    key-store: ${BC_KEYSTORE:classpath:BBCMDevKS.p12}
+    key-store-password: ${BC_KEYSTORE_PW:bbcmDevKS}
+    key-alias: ${BC_KEYSTORE_ALIAS:BBCMDevKS}
 
 security:
   require-ssl: true
