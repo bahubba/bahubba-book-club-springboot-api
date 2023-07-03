@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/readers")
+@RequestMapping("/api/v1/readers")
 public class ReaderController {
     @Autowired
     private ReaderService readerService;

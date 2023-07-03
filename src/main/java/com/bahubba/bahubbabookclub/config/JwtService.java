@@ -69,7 +69,7 @@ public class JwtService {
             .setClaims(extraClaims)
             .setSubject(userDetails.getUsername())
             .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60)) // 1 hr validity
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact();
     }
@@ -86,7 +86,7 @@ public class JwtService {
     }
 
     private ResponseCookie generateCookie(String name, String value, String path) {
-        return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).build();
+        return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).secure(true).domain(null).sameSite("None").build();
     }
 
     private String getCookieValueByName(HttpServletRequest req, String name) {

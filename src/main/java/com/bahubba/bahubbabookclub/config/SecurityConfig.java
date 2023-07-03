@@ -11,8 +11,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
@@ -29,6 +27,22 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
             .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(request -> {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOrigins(List.of("http://localhost:3000", "localhost:3000", "https://localhost:3000", "https://127.0.0.1:3000"));
+                config.addAllowedHeader("Accept");
+                config.addAllowedHeader("Content-Type");
+                config.addAllowedHeader("X-Requested-With");
+                config.addAllowedHeader("Authorization");
+                config.addAllowedHeader("Access-Control-Allow-Origin");
+                config.setAllowCredentials(true);
+                config.addAllowedMethod("GET");
+                config.addAllowedMethod("POST");
+                config.addAllowedMethod("DELETE");
+                config.addAllowedMethod("OPTIONS");
+                config.setMaxAge(3600L);
+                return config;
+            }))
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests.requestMatchers(
@@ -42,22 +56,7 @@ public class SecurityConfig {
                 .authenticated()
             )
             .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .cors(AbstractHttpConfigurer::disable); // TODO - Stand up a proxy in front of the app
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
-    }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
-        config.setAllowedHeaders(List.of(
-            "Accept", "Content-Type", "X-Requested-With", "Authorization", "Access-Control-Allow-Origin", "Set-Cookie"
-        ));
-        config.setAllowedMethods(List.of("GET", "POST", "DELETE", "OPTIONS"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
     }
 }

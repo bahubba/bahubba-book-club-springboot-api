@@ -54,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
 
         ResponseCookie jwtCookie = jwtService.generateJwtCookie(reader);
 
-        // Delete any pre-existing refresh cookies
+        // Delete existing refresh cookies
         refreshTokenService.deleteByReaderID(reader.getId());
 
         ResponseCookie refreshCookie = jwtService.generateJwtRefreshCookie(
