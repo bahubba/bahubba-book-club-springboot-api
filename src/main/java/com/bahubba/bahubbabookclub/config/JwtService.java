@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-@Log4j2 // DELETEME
 public class JwtService {
     @Value("${app.properties.secret_key}")
     private String secretKey;
@@ -42,8 +41,6 @@ public class JwtService {
     }
 
     public String getJwtFromCookies(HttpServletRequest req) {
-        log.info("req: " + req);
-        log.info("CHECKING COOKIES! " + authCookieName + ": " + getCookieValueByName(req, authCookieName)); // DELETEME
         return getCookieValueByName(req, authCookieName);
     }
 
@@ -90,7 +87,7 @@ public class JwtService {
     }
 
     private ResponseCookie generateCookie(String name, String value, String path) {
-        return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).secure(true).sameSite("None").domain(null).build();
+        return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).secure(true).domain(null).sameSite("None").build();
     }
 
     private String getCookieValueByName(HttpServletRequest req, String name) {

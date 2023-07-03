@@ -14,17 +14,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/readers")
-@Log4j2 // DELETEME
 public class ReaderController {
     @Autowired
     private ReaderService readerService;
-
-    // DELETEME
-    @GetMapping("/dummy")
-    public ResponseEntity<MessageResponseDTO> dummy() {
-        log.info("HERE");
-        return ResponseEntity.ok(MessageResponseDTO.builder().message("HERE YOU GO").build());
-    }
 
     @PostMapping("/create")
     public ResponseEntity<ReaderDTO> create(@RequestBody NewReader newReader) {
