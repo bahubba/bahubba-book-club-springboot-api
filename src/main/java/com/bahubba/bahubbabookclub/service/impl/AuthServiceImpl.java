@@ -1,6 +1,5 @@
 package com.bahubba.bahubbabookclub.service.impl;
 
-import com.bahubba.bahubbabookclub.config.JwtService;
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
@@ -9,7 +8,6 @@ import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.service.AuthService;
-import com.bahubba.bahubbabookclub.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,18 +22,16 @@ public class AuthServiceImpl implements AuthService {
 
     private final ReaderMapper readerMapper;
 
-    private final JwtService jwtService;
+    private final JwtServiceImpl jwtService;
 
     private final AuthenticationManager authManager;
-
-    private final RefreshTokenService refreshTokenService;
 
     public AuthDTO register(NewReader newReader) {
         Reader reader = readerRepo.save(readerMapper.modelToEntity(newReader));
 
         ResponseCookie jwtCookie = jwtService.generateJwtCookie(reader);
         ResponseCookie refreshCookie = jwtService.generateJwtRefreshCookie(
-            refreshTokenService.createRefreshToken(reader.getId()).getToken()
+            jwtService.createRefreshToken(reader.getId()).getToken()
         );
 
         return AuthDTO
@@ -55,10 +51,10 @@ public class AuthServiceImpl implements AuthService {
         ResponseCookie jwtCookie = jwtService.generateJwtCookie(reader);
 
         // Delete existing refresh cookies
-        refreshTokenService.deleteByReaderID(reader.getId());
+        jwtService.deleteByReaderID(reader.getId());
 
         ResponseCookie refreshCookie = jwtService.generateJwtRefreshCookie(
-            refreshTokenService.createRefreshToken(reader.getId()).getToken()
+            jwtService.createRefreshToken(reader.getId()).getToken()
         );
 
         return AuthDTO

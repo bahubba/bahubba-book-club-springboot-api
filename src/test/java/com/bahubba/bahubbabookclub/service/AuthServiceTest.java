@@ -1,6 +1,5 @@
 package com.bahubba.bahubbabookclub.service;
 
-import com.bahubba.bahubbabookclub.config.JwtService;
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
@@ -10,6 +9,7 @@ import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
+import com.bahubba.bahubbabookclub.service.impl.JwtServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,16 +34,13 @@ class AuthServiceTest {
     ReaderRepo readerRepo;
 
     @MockBean
-    JwtService jwtService;
+    JwtServiceImpl jwtService;
 
     @MockBean
     AuthenticationManager authManager;
 
     @MockBean
     RefreshTokenRepo refreshTokenRepo;
-
-    @MockBean
-    RefreshTokenService refreshTokenService;
 
     @Test
     void testRegister() {
@@ -61,11 +58,11 @@ class AuthServiceTest {
                 .build()
         );
 
-        when(refreshTokenService.createRefreshToken(any(UUID.class))).thenReturn(
-                RefreshToken
-                        .builder()
-                        .token("foobar")
-                        .build()
+        when(jwtService.createRefreshToken(any(UUID.class))).thenReturn(
+            RefreshToken
+                .builder()
+                .token("foobar")
+                .build()
         );
 
         when(jwtService.generateJwtCookie(any(Reader.class))).thenReturn(
@@ -110,7 +107,7 @@ class AuthServiceTest {
             )
         );
 
-        when(refreshTokenService.createRefreshToken(any(UUID.class))).thenReturn(
+        when(jwtService.createRefreshToken(any(UUID.class))).thenReturn(
             RefreshToken
                 .builder()
                 .token("foobar")
