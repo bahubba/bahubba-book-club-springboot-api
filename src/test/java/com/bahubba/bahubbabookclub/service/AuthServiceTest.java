@@ -1,6 +1,5 @@
 package com.bahubba.bahubbabookclub.service;
 
-import com.bahubba.bahubbabookclub.config.JwtService;
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
@@ -42,9 +41,6 @@ class AuthServiceTest {
     @MockBean
     RefreshTokenRepo refreshTokenRepo;
 
-    @MockBean
-    RefreshTokenService refreshTokenService;
-
     @Test
     void testRegister() {
         UUID tstUUID = UUID.randomUUID();
@@ -61,11 +57,11 @@ class AuthServiceTest {
                 .build()
         );
 
-        when(refreshTokenService.createRefreshToken(any(UUID.class))).thenReturn(
-                RefreshToken
-                        .builder()
-                        .token("foobar")
-                        .build()
+        when(jwtService.createRefreshToken(any(UUID.class))).thenReturn(
+            RefreshToken
+                .builder()
+                .token("foobar")
+                .build()
         );
 
         when(jwtService.generateJwtCookie(any(Reader.class))).thenReturn(
@@ -110,7 +106,7 @@ class AuthServiceTest {
             )
         );
 
-        when(refreshTokenService.createRefreshToken(any(UUID.class))).thenReturn(
+        when(jwtService.createRefreshToken(any(UUID.class))).thenReturn(
             RefreshToken
                 .builder()
                 .token("foobar")

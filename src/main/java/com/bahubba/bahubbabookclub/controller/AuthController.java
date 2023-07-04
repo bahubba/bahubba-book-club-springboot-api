@@ -6,7 +6,7 @@ import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.service.AuthService;
-import com.bahubba.bahubbabookclub.service.RefreshTokenService;
+import com.bahubba.bahubbabookclub.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    private final RefreshTokenService refreshTokenService;
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<ReaderDTO> register (@RequestBody NewReader newReader) {
@@ -45,10 +45,10 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<MessageResponseDTO> refreshToken(HttpServletRequest req) {
-        String refreshToken = refreshTokenService.getJwtRefreshFromCookies(req);
+        String refreshToken = jwtService.getJwtRefreshFromCookies(req);
 
         if (refreshToken != null && refreshToken.length() > 0) {
-            return refreshTokenService.refreshToken(refreshToken);
+            return jwtService.refreshToken(refreshToken);
         }
 
         return ResponseEntity.badRequest().body(MessageResponseDTO.builder().message("Refresh token empty").build());
