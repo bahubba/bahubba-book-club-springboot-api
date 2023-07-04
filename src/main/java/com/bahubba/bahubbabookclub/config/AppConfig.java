@@ -14,6 +14,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * App Configuration
+ * Configure beans to be used within the application
+ */
 @Configuration
 @PropertySource("classpath:application.yaml")
 @RequiredArgsConstructor
@@ -21,12 +25,20 @@ public class AppConfig {
 
     private final ReaderRepo readerRepo;
 
+    /**
+     * userDetailsService
+     * @return UserDetailsService
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> readerRepo.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    /**
+     * authenticationProvider
+     * @return AuthenticationProvider
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
