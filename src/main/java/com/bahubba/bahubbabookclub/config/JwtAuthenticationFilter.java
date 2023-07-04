@@ -17,6 +17,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * JwtAuthenticationFilter:
+ * Filter all requests to non-auth endpoints by validity of JWT from the request's auth cookie
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -24,11 +28,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * shouldNotFilter: Exclude auth endpoints from filters
+     * @param request HTTP request from the client
+     * @return true for auth endpoints
+     * @throws ServletException
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return request.getRequestURI().startsWith("/api/v1/auth");
     }
 
+    /**
+     * doFilterInternal
+     * @param request HTTP request from the client
+     * @param response HTTP response to send back to the client
+     * @param filterChain Full chain of filters to run the request through
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doFilterInternal(
         @NonNull HttpServletRequest request,

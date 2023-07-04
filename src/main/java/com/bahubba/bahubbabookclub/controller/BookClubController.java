@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * BookClubController:
+ *
+ */
 @RestController
 @RequestMapping("/api/v1/book-clubs")
 public class BookClubController {

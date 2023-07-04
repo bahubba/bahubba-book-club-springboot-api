@@ -15,8 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * App Configuration
- * Configure beans to be used within the application
+ * Configures beans to be used within the application
  */
 @Configuration
 @PropertySource("classpath:application.yaml")
@@ -26,7 +25,7 @@ public class AppConfig {
     private final ReaderRepo readerRepo;
 
     /**
-     * userDetailsService
+     * userDetailsService: Create a UserDetailsService for loading users by username
      * @return UserDetailsService
      */
     @Bean
@@ -36,7 +35,7 @@ public class AppConfig {
     }
 
     /**
-     * authenticationProvider
+     * authenticationProvider: Create an AuthenticationProvider
      * @return AuthenticationProvider
      */
     @Bean
@@ -47,11 +46,21 @@ public class AppConfig {
         return authProvider;
     }
 
+    /**
+     * authenticationManager: Create an AuthenticationManager
+     * @param authConfig authentication configuration
+     * @return AuthenticationConfiguration
+     * @throws Exception
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
+    /**
+     * passwordEncoder: Create a password encoder
+     * @return PasswordEncoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
