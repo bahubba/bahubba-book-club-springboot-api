@@ -1,6 +1,6 @@
 package com.bahubba.bahubbabookclub.config;
 
-import com.bahubba.bahubbabookclub.service.impl.JwtServiceImpl;
+import com.bahubba.bahubbabookclub.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtServiceImpl jwtService;
+    private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     @Override

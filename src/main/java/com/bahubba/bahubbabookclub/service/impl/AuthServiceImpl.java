@@ -8,6 +8,7 @@ import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.service.AuthService;
+import com.bahubba.bahubbabookclub.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,7 +23,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final ReaderMapper readerMapper;
 
-    private final JwtServiceImpl jwtService;
+    private final JwtService jwtService;
 
     private final AuthenticationManager authManager;
 

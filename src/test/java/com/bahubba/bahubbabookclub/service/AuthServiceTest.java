@@ -9,7 +9,6 @@ import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
-import com.bahubba.bahubbabookclub.service.impl.JwtServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +33,7 @@ class AuthServiceTest {
     ReaderRepo readerRepo;
 
     @MockBean
-    JwtServiceImpl jwtService;
+    JwtService jwtService;
 
     @MockBean
     AuthenticationManager authManager;
