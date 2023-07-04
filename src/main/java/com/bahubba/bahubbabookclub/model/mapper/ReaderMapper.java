@@ -11,6 +11,9 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
+/**
+ * Mapping logic for readers (users)
+ */
 @Mapper(componentModel = "spring", uses = PasswordEncoderMapper.class)
 public interface ReaderMapper {
     @Generated

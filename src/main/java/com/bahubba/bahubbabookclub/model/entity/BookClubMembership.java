@@ -11,6 +11,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * Membership of readers (users) in book clubs
+ */
 @Entity
 @Table(name = "book_club_readers")
 @Data

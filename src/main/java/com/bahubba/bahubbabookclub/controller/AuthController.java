@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Authentication endpoints
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -25,6 +28,11 @@ public class AuthController {
 
     private final JwtService jwtService;
 
+    /**
+     * Registers a reader (user)
+     * @param newReader New reader (user) information
+     * @return persisted reader information
+     */
     @PostMapping("/register")
     public ResponseEntity<ReaderDTO> register (@RequestBody NewReader newReader) {
         AuthDTO authDTO = authService.register(newReader);
@@ -34,6 +42,11 @@ public class AuthController {
             .body(authDTO.getReader());
     }
 
+    /**
+     * Accepts user credentials and returns auth and refresh JWTs in HTTP-Only cookies
+     * @param req user credentials (username and password)
+     * @return the user's stored info
+     */
     @PostMapping("/authenticate")
     public ResponseEntity<ReaderDTO> authenticate (@RequestBody AuthRequest req) {
         AuthDTO authDTO = authService.authenticate(req);
@@ -43,6 +56,11 @@ public class AuthController {
             .body(authDTO.getReader());
     }
 
+    /**
+     * Generates a new auth (and refresh) token based on a valid refresh token
+     * @param req HTTP request from the client
+     * @return a string message with success status of the re-authentication
+     */
     @PostMapping("/refresh")
     public ResponseEntity<MessageResponseDTO> refreshToken(HttpServletRequest req) {
         String refreshToken = jwtService.getJwtRefreshFromCookies(req);

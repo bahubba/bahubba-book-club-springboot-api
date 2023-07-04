@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Readers (users)
+ */
 @Entity
 @Table(name = "reader")
 @Data

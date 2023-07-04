@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Book Clubs, or discussion groups for books, which can be created, joined, managed, etc. Heart of the application
+ */
 @Entity
 @Table(name = "book_club")
 @Data
