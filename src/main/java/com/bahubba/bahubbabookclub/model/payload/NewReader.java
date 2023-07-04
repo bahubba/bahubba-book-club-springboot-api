@@ -5,6 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data sent for creating a new reader (user)
+ * @deprecated
+ */
+@Deprecated
 @Data
 @Builder
 @AllArgsConstructor

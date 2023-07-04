@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Refresh tokens (JWT) entities
+ */
 @Entity
 @Table(name = "refresh_token")
 @Data

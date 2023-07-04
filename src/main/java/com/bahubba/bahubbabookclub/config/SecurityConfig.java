@@ -15,7 +15,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import java.util.List;
 
 /**
- * SecurityConfig:
  * Security configuration for the app
  */
 @Configuration
@@ -28,7 +27,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
 
     /**
-     * securityFilterChain: set up security for the application
+     * Sets up security for the application
      * @param httpSecurity HTTP security object for Spring
      * @return SecurityFilterChain
      * @throws Exception

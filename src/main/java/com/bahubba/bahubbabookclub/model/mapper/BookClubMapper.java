@@ -9,6 +9,9 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
+/**
+ * Mapping logic for Book Clubs
+ */
 @Mapper(componentModel = "spring")
 public interface BookClubMapper {
     @Generated

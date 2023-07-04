@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data sent with HTTP request for authentication
+ */
 @Data
 @Builder
 @AllArgsConstructor

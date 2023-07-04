@@ -4,6 +4,9 @@ import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
+/**
+ * Data sent with HTTP request for creating a new book club
+ */
 @Getter
 @Component
 public class NewBookClub {

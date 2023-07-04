@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * AuthController:
  * Authentication endpoints
  */
 @RestController
@@ -30,7 +29,7 @@ public class AuthController {
     private final JwtService jwtService;
 
     /**
-     * register: Register a reader (user)
+     * Registers a reader (user)
      * @param newReader New reader (user) information
      * @return persisted reader information
      */
@@ -44,7 +43,7 @@ public class AuthController {
     }
 
     /**
-     * authenticate: Accept user credentials and return auth and refresh JWTs in HTTP-Only cookies
+     * Accepts user credentials and returns auth and refresh JWTs in HTTP-Only cookies
      * @param req user credentials (username and password)
      * @return the user's stored info
      */
@@ -58,7 +57,7 @@ public class AuthController {
     }
 
     /**
-     * refreshToken: Generate a new auth (and refresh) token based on a valid refresh token
+     * Generates a new auth (and refresh) token based on a valid refresh token
      * @param req HTTP request from the client
      * @return a string message with success status of the re-authentication
      */

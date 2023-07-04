@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Reader (user) information to be returned to clients
+ */
 @Data
 @Builder
 @AllArgsConstructor

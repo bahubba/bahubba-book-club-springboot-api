@@ -25,7 +25,7 @@ public class AppConfig {
     private final ReaderRepo readerRepo;
 
     /**
-     * userDetailsService: Create a UserDetailsService for loading users by username
+     * Creates a UserDetailsService for loading users by username
      * @return UserDetailsService
      */
     @Bean
@@ -35,7 +35,7 @@ public class AppConfig {
     }
 
     /**
-     * authenticationProvider: Create an AuthenticationProvider
+     * Creates an AuthenticationProvider
      * @return AuthenticationProvider
      */
     @Bean
@@ -47,7 +47,7 @@ public class AppConfig {
     }
 
     /**
-     * authenticationManager: Create an AuthenticationManager
+     * Creates an AuthenticationManager
      * @param authConfig authentication configuration
      * @return AuthenticationConfiguration
      * @throws Exception
@@ -58,7 +58,7 @@ public class AppConfig {
     }
 
     /**
-     * passwordEncoder: Create a password encoder
+     * Creates a password encoder
      * @return PasswordEncoder
      */
     @Bean

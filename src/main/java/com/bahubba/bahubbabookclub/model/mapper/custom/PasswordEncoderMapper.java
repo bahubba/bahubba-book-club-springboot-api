@@ -6,6 +6,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Mapping logic for encoding a password
+ */
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
