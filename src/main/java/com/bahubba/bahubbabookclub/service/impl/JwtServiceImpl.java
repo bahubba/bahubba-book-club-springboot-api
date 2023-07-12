@@ -70,35 +70,8 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public ResponseCookie getCleanJwtCookie() {
-        return ResponseCookie.from(authCookieName, "").path("/api").build();
-    }
-
-    @Override
-    public ResponseCookie getCleanJwtRefreshCookie() {
-        return ResponseCookie.from(refreshCookieName, "").path("/api/v1/auth/refresh").build();
-    }
-
-    @Override
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
-    }
-
-    @Override
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    @Override
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts
-            .builder()
-            .setClaims(extraClaims)
-            .setSubject(userDetails.getUsername())
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
-            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-            .compact();
     }
 
     // TODO - Update validity checks with error handling (see https://www.bezkoder.com/spring-security-refresh-token/)
@@ -114,6 +87,7 @@ public class JwtServiceImpl implements JwtService {
         return claimsResolver.apply(claims);
     }
 
+    // TODO - Gracefully handle exceptions for expired token and missing Reader in tokens
     @Override
     public ResponseEntity<MessageResponseDTO> refreshToken(String refreshToken) {
         return getByToken(refreshToken)
@@ -167,6 +141,17 @@ public class JwtServiceImpl implements JwtService {
         );
     }
 
+    private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        return Jwts
+            .builder()
+            .setClaims(extraClaims)
+            .setSubject(userDetails.getUsername())
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
+            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+            .compact();
+    }
+
     private ResponseCookie generateCookie(String name, String value, String path) {
         return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).secure(true).domain(null).sameSite("None").build();
     }
@@ -180,6 +165,7 @@ public class JwtServiceImpl implements JwtService {
         return null;
     }
 
+    // FIXME - Gracefully handle io.jsonwebtoken.ExpiredJwtException
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
     }
