@@ -87,6 +87,7 @@ public class JwtServiceImpl implements JwtService {
         return claimsResolver.apply(claims);
     }
 
+    // TODO - Gracefully handle exceptions for expired token and missing Reader in tokens
     @Override
     public ResponseEntity<MessageResponseDTO> refreshToken(String refreshToken) {
         return getByToken(refreshToken)
