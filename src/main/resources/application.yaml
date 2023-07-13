@@ -6,13 +6,15 @@ spring:
     username: ${BOOK_CLUB_DB_USERNAME:postgres}
     password: ${BOOK_CLUB_DB_PASSWORD}
   jpa:
+#    generate-ddl: true
     properties:
       hibernate:
+        default_schema: ${BOOK_CLUB_DB_SCHEMA:public}
         format_sql: true
         jdbc:
           time_zone: UTC
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
