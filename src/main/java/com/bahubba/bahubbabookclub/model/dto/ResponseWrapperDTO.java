@@ -14,6 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ResponseWrapperDTO<T> {
-    private MessageResponseDTO message;
+    private String message;
     private T data;
 }

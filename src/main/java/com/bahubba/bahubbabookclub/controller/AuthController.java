@@ -48,7 +48,7 @@ public class AuthController {
                 .body(
                     ResponseWrapperDTO
                         .<ReaderDTO>builder()
-                        .message(MessageResponseDTO.builder().message("User registered successfully").build())
+                        .message("User registered successfully")
                         .data(authDTO.getReader())
                         .build()
                 );
@@ -57,7 +57,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 ResponseWrapperDTO
                     .<ReaderDTO>builder()
-                    .message(MessageResponseDTO.builder().message("Username or email already exists").build())
+                    .message("Username or email already exists")
                     .build()
             );
         }
@@ -69,12 +69,29 @@ public class AuthController {
      * @return the user's stored info and JWTs
      */
     @PostMapping("/authenticate")
-    public ResponseEntity<ReaderDTO> authenticate (@RequestBody AuthRequest req) {
-        AuthDTO authDTO = authService.authenticate(req);
-        return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, authDTO.getToken().toString())
-            .header(HttpHeaders.SET_COOKIE, authDTO.getRefreshToken().toString())
-            .body(authDTO.getReader());
+    public ResponseEntity<ResponseWrapperDTO<ReaderDTO>> authenticate (@RequestBody AuthRequest req) {
+        try {
+            AuthDTO authDTO = authService.authenticate(req);
+
+            // On success, return the user's info and JWTs in HTTP-Only cookies
+            return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, authDTO.getToken().toString())
+                .header(HttpHeaders.SET_COOKIE, authDTO.getRefreshToken().toString())
+                .body(
+                    ResponseWrapperDTO
+                        .<ReaderDTO>builder()
+                        .message("User authenticated successfully")
+                        .data(authDTO.getReader())
+                        .build()
+                );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ResponseWrapperDTO
+                    .<ReaderDTO>builder()
+                    .message("Invalid credentials")
+                    .build()
+            );
+        }
     }
 
     /**
