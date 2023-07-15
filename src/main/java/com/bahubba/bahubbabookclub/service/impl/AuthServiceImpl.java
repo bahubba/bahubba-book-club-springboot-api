@@ -15,6 +15,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+/**
+ * Registration and authentication logic
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -27,6 +30,11 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authManager;
 
+    /**
+     * Registers a reader (user)
+     * @param newReader New reader (user) information
+     * @return persisted reader information
+     */
     public AuthDTO register(NewReader newReader) {
         Reader reader = readerRepo.save(readerMapper.modelToEntity(newReader));
 
@@ -43,6 +51,11 @@ public class AuthServiceImpl implements AuthService {
             .build();
     }
 
+    /**
+     * Accepts user credentials and returns auth and refresh JWTs in HTTP-Only cookies
+     * @param req user credentials (username and password)
+     * @return the user's stored info and JWTs
+     */
     public AuthDTO authenticate(AuthRequest req) {
         authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsernameOrEmail(), req.getPassword()));
 

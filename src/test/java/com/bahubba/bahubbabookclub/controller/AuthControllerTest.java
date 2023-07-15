@@ -3,6 +3,7 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
+import com.bahubba.bahubbabookclub.model.dto.ResponseWrapperDTO;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.service.AuthService;
@@ -46,11 +47,14 @@ class AuthControllerTest {
                 .build()
         );
 
-        ResponseEntity<ReaderDTO> rsp = authController.register(new NewReader());
+        ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.register(new NewReader());
 
         verify(authService, times(1)).register(any(NewReader.class));
         assertThat(rsp).isNotNull();
+        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(rsp.getBody()).isNotNull();
+        assertThat(rsp.getBody().getData()).isNotNull();
+        assertThat(rsp.getBody().getData()).isNotNull();
     }
 
     @Test
