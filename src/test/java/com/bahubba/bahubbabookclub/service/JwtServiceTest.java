@@ -2,6 +2,7 @@ package com.bahubba.bahubbabookclub.service;
 
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
+import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
@@ -148,10 +149,35 @@ public class JwtServiceTest {
         assertThat(result).isFalse();
     }
 
-//    @Test
-//    void testIsTokenValid_Expired() {
-//        // TODO - Gracefully handle exception from expired token
-//    }
+    @Test
+    void testRefreshTokenFromReq() {
+        when(refreshTokenRepo.findByToken(anyString())).thenReturn(
+            Optional.of(
+                RefreshToken
+                    .builder()
+                    .reader(
+                        Reader
+                            .builder()
+                            .username("someuser")
+                            .build()
+                    )
+                    .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
+                    .build()
+            )
+        );
+
+        MockHttpServletRequest mockReq = new MockHttpServletRequest();
+        mockReq.setCookies(new Cookie(refreshCookieName, "sometoken"));
+
+        AuthDTO result = jwtService.refreshToken(mockReq);
+
+        verify(refreshTokenRepo, times(1)).findByToken(anyString());
+        assertThat(result).isNotNull();
+        assertThat(result.getReader()).isNotNull();
+        assertThat(result.getToken()).isNotNull();
+        assertThat(result.getRefreshToken()).isNotNull();
+    }
+
     // TODO - Add test for exception from missing Reader in token
     @Test
     void testRefreshToken() {
@@ -170,13 +196,13 @@ public class JwtServiceTest {
             )
         );
 
-        ResponseEntity<MessageResponseDTO> result = jwtService.refreshToken("sometoken");
+        AuthDTO result = jwtService.refreshToken("sometoken");
 
         verify(refreshTokenRepo, times(1)).findByToken(anyString());
         assertThat(result).isNotNull();
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getMessage()).isEqualTo("Token refreshed");
+        assertThat(result.getReader()).isNotNull();
+        assertThat(result.getToken()).isNotNull();
+        assertThat(result.getRefreshToken()).isNotNull();
     }
 
     @Test
@@ -209,7 +235,14 @@ public class JwtServiceTest {
         // Test that the exception is thrown
         assertThatThrownBy(() -> jwtService.refreshToken("sometoken"))
             .isInstanceOf(TokenRefreshException.class)
-            .hasMessageContaining("Refresh token doesn't exist");
+            .hasMessageContaining("Refresh token missing");
+    }
+
+    @Test
+    void testRefreshToken_missingToken() {
+        assertThatThrownBy(() -> jwtService.refreshToken(new MockHttpServletRequest()))
+            .isInstanceOf(TokenRefreshException.class)
+            .hasMessageContaining("Refresh token missing");
     }
 
     @Test

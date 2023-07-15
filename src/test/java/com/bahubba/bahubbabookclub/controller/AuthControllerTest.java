@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
@@ -109,41 +110,28 @@ class AuthControllerTest {
 
     @Test
     void testRefreshToken() {
-        when(jwtService.getJwtRefreshFromCookies(any(HttpServletRequest.class))).thenReturn("sometoken");
-        when(jwtService.refreshToken(anyString())).thenReturn(
-            ResponseEntity.ok().body(MessageResponseDTO.builder().message("ok").build())
+        when(jwtService.refreshToken(any(HttpServletRequest.class))).thenReturn(
+            AuthDTO.builder()
+                .token(ResponseCookie.from("foo", "bar").build())
+                .refreshToken(ResponseCookie.from("bar", "foo").build())
+                .build()
         );
 
         ResponseEntity<MessageResponseDTO> rsp = authController.refreshToken(new MockHttpServletRequest());
 
-        verify(jwtService, times(1)).getJwtRefreshFromCookies(any(HttpServletRequest.class));
-        verify(jwtService, times(1)).refreshToken(anyString());
+        verify(jwtService, times(1)).refreshToken(any(HttpServletRequest.class));
         assertThat(rsp.getBody()).isNotNull();
     }
 
     @Test
-    void testRefreshToken_nullRefreshToken() {
-        when(jwtService.getJwtRefreshFromCookies(any(HttpServletRequest.class))).thenReturn(null);
+    void testRefreshToken_invalidRefreshToken() {
+        when(jwtService.refreshToken(any(HttpServletRequest.class))).thenThrow(new TokenRefreshException("sometoken", "some error"));
 
         ResponseEntity<MessageResponseDTO> rsp = authController.refreshToken(new MockHttpServletRequest());
 
-        verify(jwtService, times(1)).getJwtRefreshFromCookies(any(HttpServletRequest.class));
-        verify(jwtService, times(0)).refreshToken(anyString());
-        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        verify(jwtService, times(1)).refreshToken(any(HttpServletRequest.class));
+        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(rsp.getBody()).isNotNull();
-        assertThat("Refresh token empty").isEqualTo(rsp.getBody().getMessage());
-    }
-
-    @Test
-    void testRefreshToken_emptyRefreshToken() {
-        when(jwtService.getJwtRefreshFromCookies(any(HttpServletRequest.class))).thenReturn("");
-
-        ResponseEntity<MessageResponseDTO> rsp = authController.refreshToken(new MockHttpServletRequest());
-
-        verify(jwtService, times(1)).getJwtRefreshFromCookies(any(HttpServletRequest.class));
-        verify(jwtService, times(0)).refreshToken(anyString());
-        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(rsp.getBody()).isNotNull();
-        assertThat("Refresh token empty").isEqualTo(rsp.getBody().getMessage());
+        assertThat(rsp.getBody().getMessage()).contains("some error");
     }
 }

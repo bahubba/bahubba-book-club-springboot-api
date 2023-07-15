@@ -2,9 +2,11 @@ package com.bahubba.bahubbabookclub.service.impl;
 
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
+import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
+import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
 import com.bahubba.bahubbabookclub.service.JwtService;
@@ -48,6 +50,9 @@ public class JwtServiceImpl implements JwtService {
     @Autowired
     private ReaderRepo readerRepo;
 
+    @Autowired
+    private ReaderMapper readerMapper;
+
     @Override
     public ResponseCookie generateJwtCookie(UserDetails userDetails) {
         String jwt = generateToken(new HashMap<>(), userDetails);
@@ -87,20 +92,30 @@ public class JwtServiceImpl implements JwtService {
         return claimsResolver.apply(claims);
     }
 
-    // TODO - Gracefully handle exceptions for expired token and missing Reader in tokens
     @Override
-    public ResponseEntity<MessageResponseDTO> refreshToken(String refreshToken) {
+    public AuthDTO refreshToken(HttpServletRequest req) {
+        String refreshToken = getJwtRefreshFromCookies(req);
+        if(refreshToken == null || refreshToken.isEmpty()) {
+            throw new TokenRefreshException(refreshToken, "Refresh token missing");
+        }
+        return refreshToken(getJwtRefreshFromCookies(req));
+    }
+
+    @Override
+    public AuthDTO refreshToken(String refreshToken) {
         return getByToken(refreshToken)
             .map(this::verifyExpiration)
             .map(RefreshToken::getReader)
             .map(reader -> {
                 ResponseCookie jwtCookie = this.generateJwtCookie(reader);
 
-                return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                    .body(MessageResponseDTO.builder().message("Token refreshed").build());
+                return AuthDTO.builder()
+                    .reader(readerMapper.entityToDTO(reader))
+                    .token(jwtCookie)
+                    .refreshToken(this.generateJwtRefreshCookie(refreshToken))
+                    .build();
             })
-            .orElseThrow(() -> new TokenRefreshException(refreshToken, "Refresh token doesn't exist"));
+            .orElseThrow(() -> new TokenRefreshException(refreshToken, "Refresh token missing"));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
@@ -102,12 +103,21 @@ public class AuthController {
      */
     @PostMapping("/refresh")
     public ResponseEntity<MessageResponseDTO> refreshToken(HttpServletRequest req) {
-        String refreshToken = jwtService.getJwtRefreshFromCookies(req);
 
-        if (refreshToken != null && refreshToken.length() > 0) {
-            return jwtService.refreshToken(refreshToken);
+        try {
+            AuthDTO authDTO = jwtService.refreshToken(req);
+
+            // On success, return the user's info and refreshed JWTs in HTTP-Only cookies
+            return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, authDTO.getToken().toString())
+                .header(HttpHeaders.SET_COOKIE, authDTO.getRefreshToken().toString())
+                .body(
+                    MessageResponseDTO.builder().message("Token refreshed successfully").build()
+                );
+        } catch(TokenRefreshException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                MessageResponseDTO.builder().message(e.getMessage()).build()
+            );
         }
-
-        return ResponseEntity.badRequest().body(MessageResponseDTO.builder().message("Refresh token empty").build());
     }
 }
