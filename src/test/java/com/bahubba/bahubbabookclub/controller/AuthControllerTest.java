@@ -13,10 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,6 +60,20 @@ class AuthControllerTest {
     }
 
     @Test
+    void testRegister_duplicateUsernameOrEmail() {
+        when(authService.register(any(NewReader.class))).thenThrow(new DataIntegrityViolationException("some error"));
+
+        ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.register(new NewReader());
+
+        verify(authService, times(1)).register(any(NewReader.class));
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(rsp.getBody()).isNotNull();
+        assertThat(rsp.getBody().getMessage()).isNotNull();
+        assertThat(rsp.getBody().getData()).isNull();
+    }
+
+    @Test
     void testAuthenticate() {
         when(authService.authenticate(any(AuthRequest.class))).thenReturn(
             AuthDTO.builder()
@@ -67,11 +83,28 @@ class AuthControllerTest {
                 .build()
         );
 
-        ResponseEntity<ReaderDTO> rsp = authController.authenticate(new AuthRequest());
+        ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.authenticate(new AuthRequest());
 
         verify(authService, times(1)).authenticate(any(AuthRequest.class));
         assertThat(rsp).isNotNull();
+        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(rsp.getBody()).isNotNull();
+        assertThat(rsp.getBody().getMessage()).isNotNull();
+        assertThat(rsp.getBody().getData()).isNotNull();
+    }
+
+    @Test
+    void testAuthenticate_invalidCredentials() {
+        when(authService.authenticate(any(AuthRequest.class))).thenThrow(new BadCredentialsException("some error"));
+
+        ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.authenticate(new AuthRequest());
+
+        verify(authService, times(1)).authenticate(any(AuthRequest.class));
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(rsp.getBody()).isNotNull();
+        assertThat(rsp.getBody().getMessage()).isNotNull();
+        assertThat(rsp.getBody().getData()).isNull();
     }
 
     @Test

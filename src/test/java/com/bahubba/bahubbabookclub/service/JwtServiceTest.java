@@ -7,7 +7,6 @@ import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -18,15 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -195,7 +191,7 @@ public class JwtServiceTest {
                             .username("someuser")
                             .build()
                     )
-                    .expiryDate(Instant.now())
+                    .expiryDate(Instant.now().minusMillis(1000L * 60L * 60L))
                     .build()
             )
         );
