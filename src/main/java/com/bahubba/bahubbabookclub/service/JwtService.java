@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.service;
 
+import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import io.jsonwebtoken.Claims;
@@ -8,7 +9,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -28,7 +28,9 @@ public interface JwtService {
 
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 
-    ResponseEntity<MessageResponseDTO> refreshToken(String token);
+    AuthDTO refreshToken(HttpServletRequest req);
+
+    AuthDTO refreshToken(String token);
 
     Optional<RefreshToken> getByToken(String token);
 
