@@ -31,6 +31,7 @@ public class SecurityConfig {
      * @param httpSecurity HTTP security object for Spring
      * @return SecurityFilterChain
      * @throws Exception
+     * TODO - Update allowed origins after deploying and setting up a reverse proxy
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -38,7 +39,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("http://localhost:3000", "localhost:3000", "https://localhost:3000", "https://127.0.0.1:3000"));
+                config.setAllowedOrigins(List.of("https://localhost:3000", "https://127.0.0.1:3000"));
                 config.addAllowedHeader("Accept");
                 config.addAllowedHeader("Content-Type");
                 config.addAllowedHeader("X-Requested-With");
