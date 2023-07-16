@@ -1,12 +1,10 @@
 package com.bahubba.bahubbabookclub.service;
 
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
-import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
