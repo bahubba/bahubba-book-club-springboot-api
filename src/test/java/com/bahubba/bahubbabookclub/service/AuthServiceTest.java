@@ -9,17 +9,20 @@ import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseCookie;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -133,5 +136,16 @@ class AuthServiceTest {
                 AuthRequest.builder().usernameOrEmail("username").password("password").build()
             )
         );
+    }
+
+    @Test
+    void testLogout() {
+        AuthDTO result = authService.logout(new MockHttpServletRequest());
+
+        verify(jwtService, times(1)).deleteRefreshToken(any(HttpServletRequest.class));
+        assertThat(result.getToken()).isNotNull();
+        assertThat(result.getToken().getValue()).isNull();
+        assertThat(result.getRefreshToken()).isNotNull();
+        assertThat(result.getRefreshToken().getValue()).isNull();
     }
 }

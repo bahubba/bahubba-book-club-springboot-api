@@ -290,4 +290,30 @@ public class JwtServiceTest {
             .isInstanceOf(ReaderNotFoundException.class)
             .hasMessageContaining("Reader could not be found");
     }
+
+    @Test
+    void testDeleteRefreshToken() {
+        when(refreshTokenRepo.findByToken(anyString())).thenReturn(
+            Optional.of(
+                RefreshToken
+                    .builder()
+                    .reader(
+                        Reader
+                            .builder()
+                            .username("someuser")
+                            .build()
+                    )
+                    .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
+                    .build()
+            )
+        );
+
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setCookies(new Cookie(refreshCookieName, "sometoken"));
+
+        jwtService.deleteRefreshToken(req);
+
+        verify(refreshTokenRepo, times(1)).findByToken(anyString());
+        verify(refreshTokenRepo, times(1)).delete(any(RefreshToken.class));
+    }
 }

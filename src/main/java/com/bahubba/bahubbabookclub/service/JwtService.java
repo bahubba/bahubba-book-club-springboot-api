@@ -37,4 +37,8 @@ public interface JwtService {
     RefreshToken verifyExpiration(RefreshToken token);
 
     int deleteByReaderID(UUID readerID);
+
+    ResponseCookie generateCookie(String name, String value, String path);
+
+    void deleteRefreshToken(HttpServletRequest req);
 }
