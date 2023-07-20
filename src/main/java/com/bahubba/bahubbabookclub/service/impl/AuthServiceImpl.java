@@ -97,8 +97,8 @@ public class AuthServiceImpl implements AuthService {
         jwtService.deleteRefreshToken(req);
 
         return AuthDTO.builder()
-            .token(jwtService.generateCookie(authCookieName, null, null))
-            .refreshToken(jwtService.generateCookie(refreshCookieName, null, null))
+            .token(jwtService.generateCookie(authCookieName, "", ""))
+            .refreshToken(jwtService.generateCookie(refreshCookieName, "", ""))
             .build();
     }
 }
