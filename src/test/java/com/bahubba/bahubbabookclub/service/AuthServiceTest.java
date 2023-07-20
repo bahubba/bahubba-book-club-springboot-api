@@ -140,12 +140,17 @@ class AuthServiceTest {
 
     @Test
     void testLogout() {
+        when(jwtService.generateCookie(anyString(), anyString(), anyString())).thenReturn(
+            ResponseCookie.from("foo", "").build()
+        );
+
         AuthDTO result = authService.logout(new MockHttpServletRequest());
 
         verify(jwtService, times(1)).deleteRefreshToken(any(HttpServletRequest.class));
+        verify(jwtService, times(2)).generateCookie(anyString(), anyString(), anyString());
         assertThat(result.getToken()).isNotNull();
-        assertThat(result.getToken().getValue()).isNull();
+        assertThat(result.getToken().getValue()).isEmpty();
         assertThat(result.getRefreshToken()).isNotNull();
-        assertThat(result.getRefreshToken().getValue()).isNull();
+        assertThat(result.getRefreshToken().getValue()).isEmpty();
     }
 }
