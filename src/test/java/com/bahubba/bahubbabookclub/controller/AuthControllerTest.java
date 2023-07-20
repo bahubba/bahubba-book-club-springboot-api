@@ -134,4 +134,22 @@ class AuthControllerTest {
         assertThat(rsp.getBody()).isNotNull();
         assertThat(rsp.getBody().getMessage()).contains("some error");
     }
+
+    @Test
+    void testLogout() {
+        when(authService.logout(any(HttpServletRequest.class))).thenReturn(
+            AuthDTO.builder()
+                .token(ResponseCookie.from("foo", "bar").build())
+                .refreshToken(ResponseCookie.from("bar", "foo").build())
+                .build()
+
+        );
+
+        ResponseEntity<MessageResponseDTO> rsp = authController.logout(new MockHttpServletRequest());
+
+        verify(authService, times(1)).logout(any(HttpServletRequest.class));
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getBody()).isNotNull();
+        assertThat(rsp.getBody().getMessage()).isNotNull();
+    }
 }

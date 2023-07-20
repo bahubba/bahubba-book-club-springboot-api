@@ -120,4 +120,21 @@ public class AuthController {
             );
         }
     }
+
+    /**
+     * Logs out the user by deleting the auth and refresh tokens
+     * @param req HTTP request from the client
+     * @return a string message with success status of the logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<MessageResponseDTO> logout(HttpServletRequest req) {
+        AuthDTO authDTO = authService.logout(req);
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, authDTO.getToken().toString())
+            .header(HttpHeaders.SET_COOKIE, authDTO.getRefreshToken().toString())
+            .body(
+                MessageResponseDTO.builder().message("Logout successful").build()
+            );
+    }
 }

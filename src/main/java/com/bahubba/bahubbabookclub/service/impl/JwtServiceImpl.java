@@ -153,6 +153,20 @@ public class JwtServiceImpl implements JwtService {
         );
     }
 
+    @Override
+    public ResponseCookie generateCookie(String name, String value, String path) {
+        return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).secure(true).domain(null).sameSite("None").build();
+    }
+
+    @Override
+    public void deleteRefreshToken(HttpServletRequest req) {
+        String refreshToken = getJwtRefreshFromCookies(req);
+        if(refreshToken != null && !refreshToken.isEmpty()) {
+            Optional<RefreshToken> refreshTokenEntity = refreshTokenRepo.findByToken(refreshToken);
+            refreshTokenEntity.ifPresent(token -> refreshTokenRepo.delete(token));
+        }
+    }
+
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts
             .builder()
@@ -162,10 +176,6 @@ public class JwtServiceImpl implements JwtService {
             .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact();
-    }
-
-    private ResponseCookie generateCookie(String name, String value, String path) {
-        return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).secure(true).domain(null).sameSite("None").build();
     }
 
     private String getCookieValueByName(HttpServletRequest req, String name) {
