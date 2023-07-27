@@ -2,6 +2,7 @@ package com.bahubba.bahubbabookclub.model.entity;
 
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,10 +31,12 @@ public class Notification implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "source_reader_id")
+    @NotNull
     private Reader sourceReader;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "target_reader_id")
+    @NotNull
     private Reader targetReader;
 
     @ManyToOne
@@ -41,13 +44,17 @@ public class Notification implements Serializable {
     private BookClub bookClub;
 
     @Column(nullable = false)
+    @NotNull
+    @Enumerated(EnumType.STRING)
     private NotificationType type;
 
     @Column(name = "action_link")
     private String actionLink;
 
-    @Column
-    private LocalDateTime generated;
+    @Column(nullable = false)
+    @NotNull
+    @Builder.Default
+    private LocalDateTime generated = LocalDateTime.now();
 
     @OneToMany(mappedBy = "notification", fetch = FetchType.LAZY)
     private Set<NotificationViews> views;

@@ -1,6 +1,7 @@
 package com.bahubba.bahubbabookclub.model.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,10 +24,12 @@ public class NotificationViews implements Serializable {
     @Id
     @ManyToOne(optional = false)
     @JoinColumn(name = "notification_id")
+    @NotNull
     private Notification notification;
 
     @Id
     @ManyToOne(optional = false)
     @JoinColumn(name = "reader_id")
+    @NotNull
     private Reader reader;
 }
