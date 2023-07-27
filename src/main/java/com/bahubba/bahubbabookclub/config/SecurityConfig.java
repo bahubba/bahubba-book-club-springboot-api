@@ -53,9 +53,11 @@ public class SecurityConfig {
                 config.setMaxAge(3600L);
                 return config;
             }))
-            .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(authorizeRequests ->
-                authorizeRequests.requestMatchers(
+            .sessionManagement(
+                sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(
+                authorizeRequests -> authorizeRequests.requestMatchers(
                     "/v3/api-docs",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
