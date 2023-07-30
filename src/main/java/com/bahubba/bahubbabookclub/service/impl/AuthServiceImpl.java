@@ -2,11 +2,13 @@ package com.bahubba.bahubbabookclub.service.impl;
 
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
+import com.bahubba.bahubbabookclub.model.entity.Notification;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
-import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
+import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
+import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.service.AuthService;
 import com.bahubba.bahubbabookclub.service.JwtService;
@@ -17,8 +19,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * Registration and authentication logic
@@ -39,6 +39,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtService jwtService;
 
+    private final NotificationRepo notificationRepo;
+
     private final AuthenticationManager authManager;
 
     /**
@@ -48,13 +50,26 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public AuthDTO register(NewReader newReader) {
+        // Generate and persist a Reader entity
         Reader reader = readerRepo.save(readerMapper.modelToEntity(newReader));
 
+        // Generate and persist a notification
+        notificationRepo.save(
+            Notification
+                .builder()
+                .sourceReader(reader)
+                .targetReader(reader)
+                .type(NotificationType.NEW_READER)
+                .build()
+        );
+
+        // Generate auth and refresh JWTs
         ResponseCookie jwtCookie = jwtService.generateJwtCookie(reader);
         ResponseCookie refreshCookie = jwtService.generateJwtRefreshCookie(
             jwtService.createRefreshToken(reader.getId()).getToken()
         );
 
+        // Return the reader's stored info and JWTs
         return AuthDTO
             .builder()
             .reader(readerMapper.entityToDTO(reader))

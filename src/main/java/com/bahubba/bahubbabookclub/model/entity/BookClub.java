@@ -3,10 +3,7 @@ package com.bahubba.bahubbabookclub.model.entity;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -50,7 +47,8 @@ public class BookClub implements Serializable {
     @Builder.Default
     private Publicity publicity = Publicity.PRIVATE;
 
-    @OneToMany(mappedBy = "bookClub", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "bookClub", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
     private Set<BookClubMembership> members;
 
     @Column(nullable = false)

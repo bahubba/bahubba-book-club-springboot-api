@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
- * Membership of readers (users) in book clubs
+ * Membership of {@link Reader}s (users) in {@link BookClub}s
+ * TODO - Utilize composite key instead of having a dedicated id
  */
 @Entity
 @Table(name = "book_club_readers")
@@ -25,11 +27,14 @@ public class BookClubMembership implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Column(nullable = false, unique = true)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
     @ManyToOne
     @JoinColumn(name = "book_club_id", referencedColumnName = "id")
     private BookClub bookClub;
 
-    @Id
     @ManyToOne
     @JoinColumn(name = "reader_id", referencedColumnName = "id")
     private Reader reader;

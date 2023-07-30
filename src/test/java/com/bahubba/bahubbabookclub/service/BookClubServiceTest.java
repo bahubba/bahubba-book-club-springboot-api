@@ -3,9 +3,16 @@ package com.bahubba.bahubbabookclub.service;
 import com.bahubba.bahubbabookclub.exception.BookClubNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
+import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
+import com.bahubba.bahubbabookclub.model.entity.Notification;
+import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
+import com.bahubba.bahubbabookclub.repository.NotificationRepo;
+import com.bahubba.bahubbabookclub.util.SecurityUtil;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,6 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the {@link BookClubService} business logic
+ */
 @SpringBootTest
 class BookClubServiceTest {
     @Autowired
@@ -28,11 +38,21 @@ class BookClubServiceTest {
     @MockBean
     BookClubRepo bookClubRepo;
 
+    @MockBean
+    BookClubMembershipRepo bookClubMembershipRepo;
+
+    @MockBean
+    NotificationRepo notificationRepo;
+
     @Test
     void testCreate() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(new Reader());
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
         BookClubDTO result = bookClubService.create(new NewBookClub());
         verify(bookClubRepo, times(1)).save(any(BookClub.class));
+        verify(bookClubMembershipRepo, times(1)).save(any(BookClubMembership.class));
+        verify(notificationRepo, times(1)).save(any(Notification.class));
         assertThat(result).isNotNull();
     }
 
