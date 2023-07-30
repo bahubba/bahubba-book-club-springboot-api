@@ -4,12 +4,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * Custom exception for issues when creating a refresh auth token
  */
 @ResponseStatus(HttpStatus.FORBIDDEN)
-public class TokenRefreshException extends RuntimeException {
+public class TokenRefreshException extends RuntimeException implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
