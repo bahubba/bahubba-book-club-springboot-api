@@ -40,9 +40,19 @@ public class BookClubController {
     }
 
     /**
+     * Retrieves all book clubs for a given reader
+     * @returns all book clubs that the requesting reader has a role in
+     */
+    @GetMapping("/all-for-reader")
+    public ResponseEntity<List<BookClubDTO>> getAllForReader() {
+        return ResponseEntity.ok(bookClubService.findAllForReader());
+    }
+
+    /**
      * Retrieves all book clubs
      * @return persisted version of the new book club
      */
+    // TODO - pre-authorize this endpoint to only allow admins to access it
     @GetMapping("/all")
     public ResponseEntity<List<BookClubDTO>> getAll() {
         return ResponseEntity.ok(bookClubService.findAll());

@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface BookClubService {
-    public BookClubDTO create(NewBookClub newBookClub);
+    BookClubDTO create(NewBookClub newBookClub);
 
-    public BookClubDTO findByID(UUID id);
+    BookClubDTO findByID(UUID id);
 
-    public List<BookClubDTO> findAll();
+    List<BookClubDTO> findAllForReader();
 
-    public BookClubDTO disbandBookClub(UUID id);
+    List<BookClubDTO> findAll();
+
+    BookClubDTO disbandBookClub(UUID id);
 }
