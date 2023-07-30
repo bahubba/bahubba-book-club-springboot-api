@@ -2,11 +2,13 @@ package com.bahubba.bahubbabookclub.service;
 
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
+import com.bahubba.bahubbabookclub.model.entity.Notification;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import com.bahubba.bahubbabookclub.model.enums.Role;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
+import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,6 +46,9 @@ class AuthServiceTest {
     @MockBean
     RefreshTokenRepo refreshTokenRepo;
 
+    @MockBean
+    NotificationRepo notificationRepo;
+
     @Test
     void testRegister() {
         UUID tstUUID = UUID.randomUUID();
@@ -73,6 +78,7 @@ class AuthServiceTest {
 
         AuthDTO result = authService.register(NewReader.builder().password("password").build());
 
+        verify(notificationRepo, times(1)).save(any(Notification.class));
         verify(jwtService, times(1)).generateJwtCookie(any(Reader.class));
     }
 

@@ -11,6 +11,7 @@ import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.service.BookClubService;
@@ -37,6 +38,9 @@ public class BookClubServiceImpl implements BookClubService {
     private BookClubMapper bookClubMapper;
 
     @Autowired
+    private BookClubMembershipRepo bookClubMembershipRepo;
+
+    @Autowired
     private NotificationRepo notificationRepo;
 
     /**
@@ -54,22 +58,24 @@ public class BookClubServiceImpl implements BookClubService {
 
         // Convert the book club to an entity, add the reader as a member/creator, and persist it
         BookClub newBookClubEntity = bookClubMapper.modelToEntity(newBookClub);
-        newBookClubEntity.setMembers(Set.of(
-            BookClubMembership
-                .builder()
-                .bookClub(newBookClubEntity)
-                .reader(reader)
-                .clubRole(BookClubRole.ADMIN)
-                .isCreator(true)
-                .build()
-        ));
         newBookClubEntity = bookClubRepo.save(newBookClubEntity);
+
+        // Add the reader as a member/creator
+        bookClubMembershipRepo.save(BookClubMembership
+            .builder()
+            .bookClub(newBookClubEntity)
+            .reader(reader)
+            .clubRole(BookClubRole.ADMIN)
+            .isCreator(true)
+            .build()
+        );
 
         // Generate a notification for the book club's creation
         notificationRepo.save(
             Notification
                 .builder()
                 .sourceReader(reader)
+                .targetReader(reader)
                 .bookClub(newBookClubEntity)
                 .type(NotificationType.BOOK_CLUB_CREATED)
                 .build()
