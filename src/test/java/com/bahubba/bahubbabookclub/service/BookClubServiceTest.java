@@ -3,9 +3,11 @@ package com.bahubba.bahubbabookclub.service;
 import com.bahubba.bahubbabookclub.exception.BookClubNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
+import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
@@ -37,6 +39,9 @@ class BookClubServiceTest {
     BookClubRepo bookClubRepo;
 
     @MockBean
+    BookClubMembershipRepo bookClubMembershipRepo;
+
+    @MockBean
     NotificationRepo notificationRepo;
 
     @Test
@@ -46,6 +51,7 @@ class BookClubServiceTest {
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
         BookClubDTO result = bookClubService.create(new NewBookClub());
         verify(bookClubRepo, times(1)).save(any(BookClub.class));
+        verify(bookClubMembershipRepo, times(1)).save(any(BookClubMembership.class));
         verify(notificationRepo, times(1)).save(any(Notification.class));
         assertThat(result).isNotNull();
     }
