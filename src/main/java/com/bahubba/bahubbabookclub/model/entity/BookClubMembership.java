@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * Membership of readers (users) in book clubs
+ * Membership of {@link Reader}s (users) in {@link BookClub}s
  */
 @Entity
 @Table(name = "book_club_readers")
