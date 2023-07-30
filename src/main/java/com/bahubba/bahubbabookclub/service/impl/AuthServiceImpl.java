@@ -3,7 +3,6 @@ package com.bahubba.bahubbabookclub.service.impl;
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
-import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
@@ -17,8 +16,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * Registration and authentication logic

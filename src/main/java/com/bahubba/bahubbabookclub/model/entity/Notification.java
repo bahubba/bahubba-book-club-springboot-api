@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Notification entity
+ */
 @Entity
 @Table(name = "notification")
 @Data
