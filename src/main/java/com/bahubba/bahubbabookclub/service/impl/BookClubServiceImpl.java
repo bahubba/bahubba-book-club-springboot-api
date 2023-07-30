@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -98,8 +97,13 @@ public class BookClubServiceImpl implements BookClubService {
     
     @Override
     public List<BookClubDTO> findAllForReader() {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
 
-        return bookClubMapper.entityListToDTO(bookClubRepo.findAll());
+        return bookClubMapper.entityListToDTO(bookClubRepo.findAllForReader(reader.getId()));
     }
 
     /**
