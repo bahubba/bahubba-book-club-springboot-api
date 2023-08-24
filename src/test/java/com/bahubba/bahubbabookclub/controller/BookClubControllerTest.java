@@ -43,6 +43,15 @@ class BookClubControllerTest {
     }
 
     @Test
+    void testGetByName() {
+        when(bookClubService.findByName(anyString())).thenReturn(new BookClubDTO());
+        ResponseEntity<BookClubDTO> rsp = bookClubController.getByName("foo");
+        verify(bookClubService, times(1)).findByName(anyString());
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getBody()).isNotNull();
+    }
+
+    @Test
     void testGetAll() {
         when(bookClubService.findAll()).thenReturn(new ArrayList<>());
         ResponseEntity<List<BookClubDTO>> rsp = bookClubController.getAll();

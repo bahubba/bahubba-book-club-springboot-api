@@ -71,6 +71,20 @@ class BookClubServiceTest {
     }
 
     @Test
+    void testFindByName() {
+        when(bookClubRepo.findByName(anyString())).thenReturn(Optional.of(new BookClub()));
+        BookClubDTO result = bookClubService.findByName("foo");
+        verify(bookClubRepo, times(1)).findByName(anyString());
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void testFindByName_NotFound() {
+        when(bookClubRepo.findByName(anyString())).thenReturn(Optional.empty());
+        assertThrows(BookClubNotFoundException.class, () -> bookClubService.findByName("foo"));
+    }
+
+    @Test
     void testFindAll() {
         when(bookClubRepo.findAll()).thenReturn(new ArrayList<>(List.of(new BookClub())));
         List<BookClubDTO> result = bookClubService.findAll();

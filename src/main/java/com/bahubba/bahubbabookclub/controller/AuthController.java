@@ -11,6 +11,7 @@ import com.bahubba.bahubbabookclub.service.AuthService;
 import com.bahubba.bahubbabookclub.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Log4j2
 public class AuthController {
 
     private final AuthService authService;
@@ -87,6 +89,15 @@ public class AuthController {
                         .build()
                 );
         } catch (BadCredentialsException e) {
+            log.error("Login error: " + e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ResponseWrapperDTO
+                    .<ReaderDTO>builder()
+                    .message("Invalid credentials")
+                    .build()
+            );
+        } catch (Exception e) {
+            log.error("Some other login error: " + e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ResponseWrapperDTO
                     .<ReaderDTO>builder()

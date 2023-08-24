@@ -94,6 +94,19 @@ public class BookClubServiceImpl implements BookClubService {
             bookClubRepo.findById(id).orElseThrow(() -> new BookClubNotFoundException(id))
         );
     }
+
+    /**
+     * Find a book club by its name
+     * @param name - The name of the book club to find
+     * @return The found book club
+     * @throws BookClubNotFoundException if the book club is not found
+     */
+    @Override
+    public BookClubDTO findByName(String name) {
+        return bookClubMapper.entityToDTO(
+            bookClubRepo.findByName(name).orElseThrow(() -> new BookClubNotFoundException(name))
+        );
+    }
     
     @Override
     public List<BookClubDTO> findAllForReader() {

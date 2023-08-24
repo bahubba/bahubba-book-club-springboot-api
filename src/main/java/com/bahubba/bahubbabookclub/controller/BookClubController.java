@@ -32,11 +32,21 @@ public class BookClubController {
     /**
      * Retrieves a book club by ID
      * @param id book club ID
-     * @return persisted version of the new book club
+     * @return a book club
      */
     @GetMapping("/{id}")
     public ResponseEntity<BookClubDTO> getByID(@PathVariable  UUID id) {
         return ResponseEntity.ok(bookClubService.findByID(id));
+    }
+
+    /**
+     * Retrieves a book club by name
+     * @param name - book club name
+     * @returns a book club
+     */
+    @GetMapping("/{name}")
+    public ResponseEntity<BookClubDTO> getByName(@PathVariable String name) {
+        return ResponseEntity.ok(bookClubService.findByName(name));
     }
 
     /**

@@ -11,6 +11,8 @@ public interface BookClubService {
 
     BookClubDTO findByID(UUID id);
 
+    BookClubDTO findByName(String name);
+
     List<BookClubDTO> findAllForReader();
 
     List<BookClubDTO> findAll();

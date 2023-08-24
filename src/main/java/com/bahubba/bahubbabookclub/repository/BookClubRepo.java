@@ -6,10 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
+    Optional<BookClub> findByName(final String name);
+
     @Query(
         nativeQuery = true,
         value = "SELECT bc.* FROM book_club bc " +
