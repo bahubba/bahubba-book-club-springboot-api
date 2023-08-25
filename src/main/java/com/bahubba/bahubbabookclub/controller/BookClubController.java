@@ -34,24 +34,24 @@ public class BookClubController {
      * @param id book club ID
      * @return a book club
      */
-    @GetMapping("/{id}")
+    @GetMapping("/by-id/{id}")
     public ResponseEntity<BookClubDTO> getByID(@PathVariable  UUID id) {
         return ResponseEntity.ok(bookClubService.findByID(id));
     }
 
     /**
      * Retrieves a book club by name
-     * @param name - book club name
-     * @returns a book club
+     * @param name book club name
+     * @return a book club
      */
-    @GetMapping("/{name}")
+    @GetMapping("/by-name/{name}")
     public ResponseEntity<BookClubDTO> getByName(@PathVariable String name) {
         return ResponseEntity.ok(bookClubService.findByName(name));
     }
 
     /**
      * Retrieves all book clubs for a given reader
-     * @returns all book clubs that the requesting reader has a role in
+     * @return all book clubs that the requesting reader has a role in
      */
     @GetMapping("/all-for-reader")
     public ResponseEntity<List<BookClubDTO>> getAllForReader() {
