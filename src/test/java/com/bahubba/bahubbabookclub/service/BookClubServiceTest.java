@@ -6,6 +6,7 @@ import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
@@ -54,6 +55,31 @@ class BookClubServiceTest {
         verify(bookClubMembershipRepo, times(1)).save(any(BookClubMembership.class));
         verify(notificationRepo, times(1)).save(any(Notification.class));
         assertThat(result).isNotNull();
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testUpdate() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(new Reader());
+        when(bookClubRepo.findById(any(UUID.class))).thenReturn(Optional.of(new BookClub()));
+        when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
+
+        BookClubDTO result = bookClubService.update(
+            BookClubDTO
+                .builder()
+                .id(UUID.randomUUID())
+                .name("foo")
+                .description("bar")
+                .imageURL("baz")
+                .publicity(Publicity.PUBLIC)
+                .build()
+        );
+
+        verify(bookClubRepo, times(1)).findById(any(UUID.class));
+        verify(bookClubRepo, times(1)).save(any(BookClub.class));
+        assertThat(result).isNotNull();
+        securityUtilMockedStatic.close();
     }
 
     @Test

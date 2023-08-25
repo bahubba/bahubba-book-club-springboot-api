@@ -9,6 +9,8 @@ import java.util.UUID;
 public interface BookClubService {
     BookClubDTO create(NewBookClub newBookClub);
 
+    BookClubDTO update(BookClubDTO bookClubDTO);
+
     BookClubDTO findByID(UUID id);
 
     BookClubDTO findByName(String name);

@@ -30,6 +30,16 @@ public class BookClubController {
     }
 
     /**
+     * Updates a book club
+     * @param bookClub new book club metadata
+     * @return persisted version of the new book club
+     */
+    @PatchMapping("/update")
+    public ResponseEntity<BookClubDTO> update(@RequestBody BookClubDTO bookClub) {
+        return ResponseEntity.ok(bookClubService.update(bookClub));
+    }
+
+    /**
      * Retrieves a book club by ID
      * @param id book club ID
      * @return a book club
