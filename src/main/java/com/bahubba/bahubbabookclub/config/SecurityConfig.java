@@ -47,6 +47,8 @@ public class SecurityConfig {
                 config.addAllowedHeader("Access-Control-Allow-Origin");
                 config.setAllowCredentials(true);
                 config.addAllowedMethod("GET");
+                config.addAllowedMethod("PUT");
+                config.addAllowedMethod("PATCH");
                 config.addAllowedMethod("POST");
                 config.addAllowedMethod("DELETE");
                 config.addAllowedMethod("OPTIONS");

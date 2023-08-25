@@ -84,6 +84,37 @@ public class BookClubServiceImpl implements BookClubService {
     }
 
     /**
+     * Update a book club
+     * @param bookClubDTO The book club's new metadata
+     * @return The updated book club's persisted entity
+     */
+    public BookClubDTO update(BookClubDTO bookClubDTO) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Find the book club to update
+        BookClub bookClub = bookClubRepo
+            .findById(bookClubDTO.getId())
+            .orElseThrow(() -> new BookClubNotFoundException(bookClubDTO.getId()));
+
+        // Update the book club's metadata
+        bookClub.setName(bookClubDTO.getName());
+        bookClub.setDescription(bookClubDTO.getDescription());
+        bookClub.setImageURL(bookClubDTO.getImageURL());
+        bookClub.setPublicity(bookClubDTO.getPublicity());
+
+        // Persist the updated book club
+        bookClub = bookClubRepo.save(bookClub);
+
+        // TODO - Add notifications for each piece of metadata that was updated
+
+        return bookClubMapper.entityToDTO(bookClub);
+    }
+
+    /**
      * Find a book club by its ID
      * @param id The ID of the book club to find
      * @return The found book club entity or null
@@ -92,6 +123,19 @@ public class BookClubServiceImpl implements BookClubService {
     public BookClubDTO findByID(UUID id) {
         return bookClubMapper.entityToDTO(
             bookClubRepo.findById(id).orElseThrow(() -> new BookClubNotFoundException(id))
+        );
+    }
+
+    /**
+     * Find a book club by its name
+     * @param name - The name of the book club to find
+     * @return The found book club
+     * @throws BookClubNotFoundException if the book club is not found
+     */
+    @Override
+    public BookClubDTO findByName(String name) {
+        return bookClubMapper.entityToDTO(
+            bookClubRepo.findByName(name).orElseThrow(() -> new BookClubNotFoundException(name))
         );
     }
     

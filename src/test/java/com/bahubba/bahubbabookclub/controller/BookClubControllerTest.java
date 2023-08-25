@@ -34,10 +34,28 @@ class BookClubControllerTest {
     }
 
     @Test
+    void testUpdate() {
+        when(bookClubService.update(any(BookClubDTO.class))).thenReturn(new BookClubDTO());
+        ResponseEntity<BookClubDTO> rsp = bookClubController.update(new BookClubDTO());
+        verify(bookClubService, times(1)).update(any(BookClubDTO.class));
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getBody()).isNotNull();
+    }
+
+    @Test
     void testGetByID() {
         when(bookClubService.findByID(any(UUID.class))).thenReturn(new BookClubDTO());
         ResponseEntity<BookClubDTO> rsp = bookClubController.getByID(UUID.randomUUID());
         verify(bookClubService, times(1)).findByID(any(UUID.class));
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getBody()).isNotNull();
+    }
+
+    @Test
+    void testGetByName() {
+        when(bookClubService.findByName(anyString())).thenReturn(new BookClubDTO());
+        ResponseEntity<BookClubDTO> rsp = bookClubController.getByName("foo");
+        verify(bookClubService, times(1)).findByName(anyString());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }
