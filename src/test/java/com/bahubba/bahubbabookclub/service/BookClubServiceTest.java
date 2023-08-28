@@ -133,4 +133,12 @@ class BookClubServiceTest {
         when(bookClubRepo.findById(any(UUID.class))).thenReturn(Optional.empty());
         assertThrows(BookClubNotFoundException.class, () -> bookClubService.disbandBookClub(UUID.randomUUID()));
     }
+
+    @Test
+    void testSearch() {
+        when(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(any(Publicity.class), anyString())).thenReturn(new ArrayList<>(List.of(new BookClub())));
+        List<BookClubDTO> result = bookClubService.search("foo");
+        verify(bookClubRepo, times(1)).findAllByPublicityNotAndNameContainsIgnoreCase(any(Publicity.class), anyString());
+        assertThat(result).isNotNull().isNotEmpty();
+    }
 }

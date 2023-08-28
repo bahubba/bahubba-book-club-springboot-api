@@ -1,6 +1,7 @@
 package com.bahubba.bahubbabookclub.repository;
 
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
+import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -25,4 +26,6 @@ public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
             "AND r.id = :readerId"
     )
     List<BookClub> findAllForReader(final UUID readerId);
+
+    List<BookClub> findAllByPublicityNotAndNameContainsIgnoreCase(final Publicity publicity, final String searchTerm);
 }

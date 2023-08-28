@@ -1,6 +1,7 @@
 package com.bahubba.bahubbabookclub.controller;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import org.junit.jupiter.api.Test;
@@ -74,6 +75,15 @@ class BookClubControllerTest {
         when(bookClubService.disbandBookClub(any(UUID.class))).thenReturn(new BookClubDTO());
         ResponseEntity<BookClubDTO> rsp = bookClubController.disbandBookClub(UUID.randomUUID());
         verify(bookClubService, times(1)).disbandBookClub(any(UUID.class));
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getBody()).isNotNull();
+    }
+
+    @Test
+    void testSearch() {
+        when(bookClubService.search(anyString())).thenReturn(new ArrayList<>());
+        ResponseEntity<List<BookClubDTO>> rsp = bookClubController.search(BookClubSearch.builder().searchTerm("foo").build());
+        verify(bookClubService, times(1)).search(anyString());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }

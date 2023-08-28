@@ -48,6 +48,7 @@ public class BookClub implements Serializable {
     private Publicity publicity = Publicity.PRIVATE;
 
     @OneToMany(mappedBy = "bookClub", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<BookClubMembership> members;
 
