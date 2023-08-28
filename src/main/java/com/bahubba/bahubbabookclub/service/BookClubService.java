@@ -20,4 +20,6 @@ public interface BookClubService {
     List<BookClubDTO> findAll();
 
     BookClubDTO disbandBookClub(UUID id);
+
+    List<BookClubDTO> search(String searchTerm);
 }

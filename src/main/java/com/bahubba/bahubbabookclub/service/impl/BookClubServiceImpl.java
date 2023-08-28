@@ -9,6 +9,7 @@ import com.bahubba.bahubbabookclub.model.entity.Notification;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
+import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
@@ -168,5 +169,15 @@ public class BookClubServiceImpl implements BookClubService {
         BookClub bookClub = bookClubRepo.findById(id).orElseThrow(() -> new BookClubNotFoundException(id));
         bookClub.setDisbanded(LocalDateTime.now());
         return bookClubMapper.entityToDTO(bookClubRepo.save(bookClub));
+    }
+
+    /**
+     * Search for book clubs by name
+     * @param searchTerm The name to search for
+     * @return A list of book clubs that match the search term
+     */
+    @Override
+    public List<BookClubDTO> search(String searchTerm) {
+        return bookClubMapper.entityListToDTO(bookClubRepo.findByPublicityNotAndNameContainingIgnoreCase(Publicity.PRIVATE, searchTerm));
     }
 }

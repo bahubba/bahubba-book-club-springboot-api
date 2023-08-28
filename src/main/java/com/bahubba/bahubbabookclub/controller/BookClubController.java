@@ -1,6 +1,7 @@
 package com.bahubba.bahubbabookclub.controller;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,5 +87,10 @@ public class BookClubController {
     @DeleteMapping("/{id}")
     public ResponseEntity<BookClubDTO> disbandBookClub(@PathVariable UUID id) {
         return ResponseEntity.ok(bookClubService.disbandBookClub(id));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<List<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch) {
+        return ResponseEntity.ok(bookClubService.search(bookClubSearch.getSearchTerm()));
     }
 }
