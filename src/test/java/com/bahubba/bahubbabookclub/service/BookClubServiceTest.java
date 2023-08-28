@@ -138,7 +138,7 @@ class BookClubServiceTest {
     void testSearch() {
         when(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(any(Publicity.class), anyString())).thenReturn(new ArrayList<>(List.of(new BookClub())));
         List<BookClubDTO> result = bookClubService.search("foo");
-//        verify(bookClubRepo, times(1)).findAllByPublicityNotAndNameContainingIgnoreCase(any(Publicity.class), anyString());
+        verify(bookClubRepo, times(1)).findAllByPublicityNotAndNameContainsIgnoreCase(any(Publicity.class), anyString());
         assertThat(result).isNotNull().isNotEmpty();
     }
 }
