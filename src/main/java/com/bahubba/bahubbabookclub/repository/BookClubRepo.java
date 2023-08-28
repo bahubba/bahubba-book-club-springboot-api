@@ -27,5 +27,5 @@ public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
     )
     List<BookClub> findAllForReader(final UUID readerId);
 
-    List<BookClub> findByPublicityNotAndNameContainingIgnoreCase(final Publicity publicity, final String searchTerm);
+    List<BookClub> findAllByPublicityNotAndNameContainsIgnoreCase(final Publicity publicity, final String searchTerm);
 }

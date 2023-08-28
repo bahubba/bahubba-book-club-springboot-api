@@ -4,6 +4,7 @@ import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -89,7 +90,7 @@ public class BookClubController {
         return ResponseEntity.ok(bookClubService.disbandBookClub(id));
     }
 
-    @PostMapping("/search")
+    @PostMapping(value = "/search")
     public ResponseEntity<List<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch) {
         return ResponseEntity.ok(bookClubService.search(bookClubSearch.getSearchTerm()));
     }
