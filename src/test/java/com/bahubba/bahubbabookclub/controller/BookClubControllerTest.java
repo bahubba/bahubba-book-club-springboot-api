@@ -2,7 +2,6 @@ package com.bahubba.bahubbabookclub.controller;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
-import com.bahubba.bahubbabookclub.model.enums.Role;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
