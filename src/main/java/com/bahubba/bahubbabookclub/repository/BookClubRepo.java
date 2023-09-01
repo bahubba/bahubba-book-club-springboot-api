@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * JPA Repository for the {@link BookClub} entity
+ */
 @Repository
 public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
     Optional<BookClub> findByName(final String name);

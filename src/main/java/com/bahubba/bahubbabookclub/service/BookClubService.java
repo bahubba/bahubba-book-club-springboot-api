@@ -1,6 +1,8 @@
 package com.bahubba.bahubbabookclub.service;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
+import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 
 import java.util.List;
@@ -22,4 +24,8 @@ public interface BookClubService {
     BookClubDTO disbandBookClub(UUID id);
 
     List<BookClubDTO> search(String searchTerm);
+
+    BookClubRole getRole(String bookClubName);
+
+    BookClubMembershipDTO getMembership(String bookClubName);
 }

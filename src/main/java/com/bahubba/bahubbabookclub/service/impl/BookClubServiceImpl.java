@@ -1,8 +1,10 @@
 package com.bahubba.bahubbabookclub.service.impl;
 
 import com.bahubba.bahubbabookclub.exception.BookClubNotFoundException;
+import com.bahubba.bahubbabookclub.exception.MembershipNotFoundException;
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
@@ -11,6 +13,8 @@ import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
+import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
+import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
@@ -36,6 +40,12 @@ public class BookClubServiceImpl implements BookClubService {
 
     @Autowired
     private BookClubMapper bookClubMapper;
+
+    @Autowired
+    private ReaderMapper readerMapper;
+
+    @Autowired
+    private BookClubMembershipMapper bookClubMembershipMapper;
 
     @Autowired
     private BookClubMembershipRepo bookClubMembershipRepo;
@@ -119,25 +129,42 @@ public class BookClubServiceImpl implements BookClubService {
      * Find a book club by its ID
      * @param id The ID of the book club to find
      * @return The found book club entity or null
+     * @throws BookClubNotFoundException if the book club is not found, or if it is private and the reader is not a member
+     * @throws ReaderNotFoundException if the book club is private and reader is not logged in
      */
     @Override
-    public BookClubDTO findByID(UUID id) {
-        return bookClubMapper.entityToDTO(
-            bookClubRepo.findById(id).orElseThrow(() -> new BookClubNotFoundException(id))
-        );
+    public BookClubDTO findByID(UUID id) throws BookClubNotFoundException, ReaderNotFoundException {
+        // Get the book club by ID
+        BookClub bookClub = bookClubRepo.findById(id).orElseThrow(() -> new BookClubNotFoundException(id));
+
+        // If the book club is not private, return it
+        if(bookClub.getPublicity() != Publicity.PRIVATE) {
+            return bookClubMapper.entityToDTO(bookClub);
+        }
+
+        // Otherwise, check if the current reader is a member of the book club
+        return checkBookClubMembership(bookClub);
     }
 
     /**
      * Find a book club by its name
      * @param name - The name of the book club to find
      * @return The found book club
-     * @throws BookClubNotFoundException if the book club is not found
+     * @throws BookClubNotFoundException if the book club is not found, or if it is private and the reader is not a member
+     * @throws ReaderNotFoundException if the book club is private and reader is not logged in
      */
     @Override
-    public BookClubDTO findByName(String name) {
-        return bookClubMapper.entityToDTO(
-            bookClubRepo.findByName(name).orElseThrow(() -> new BookClubNotFoundException(name))
-        );
+    public BookClubDTO findByName(String name) throws BookClubNotFoundException, ReaderNotFoundException {
+        // Get the book club by name
+        BookClub bookClub = bookClubRepo.findByName(name).orElseThrow(() -> new BookClubNotFoundException(name));
+
+        // If the book club is not private, return it
+        if(bookClub.getPublicity() != Publicity.PRIVATE) {
+            return bookClubMapper.entityToDTO(bookClub);
+        }
+
+        // Otherwise, check if the current reader is a member of the book club
+        return checkBookClubMembership(bookClub);
     }
     
     @Override
@@ -179,5 +206,81 @@ public class BookClubServiceImpl implements BookClubService {
     @Override
     public List<BookClubDTO> search(String searchTerm) {
         return bookClubMapper.entityListToDTO(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(Publicity.PRIVATE, searchTerm));
+    }
+
+    /**
+     * Get the role of a reader in a book club
+     * @param bookClubName The name of the book club
+     * @return The reader's role in the book club
+     */
+    @Override
+    public BookClubRole getRole(String bookClubName) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Get the reader's role in the book club (if any)
+        BookClubMembership membership = bookClubMembershipRepo
+            .findByBookClubNameAndReaderId(bookClubName, reader.getId())
+            .orElseThrow(() -> new MembershipNotFoundException(reader.getUsername(), bookClubName));
+
+        // Return the reader's role
+        return membership.getClubRole();
+    }
+
+    /**
+     * Get a reader's membership in a book club (or lack thereof) and the book club
+     * @param bookClubName The name of the book club
+     * @return The reader's membership in the book club (or lack thereof) and the book club
+     */
+    public BookClubMembershipDTO getMembership(String bookClubName) throws ReaderNotFoundException {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Get the reader's membership in the book club (if any)
+        BookClubMembership membership = bookClubMembershipRepo.findByBookClubNameAndReaderId(bookClubName, reader.getId()).orElse(null);
+
+        // If there is no membership, create a transient one with the reader and no role
+        if(membership == null) {
+            BookClub bookClub = bookClubRepo.findByName(bookClubName).orElseThrow(() -> new BookClubNotFoundException(bookClubName));
+
+            return BookClubMembershipDTO
+                .builder()
+                .bookClub(bookClubMapper.entityToDTO(bookClub))
+                .reader(readerMapper.entityToDTO(reader))
+                .clubRole(BookClubRole.NONE)
+                .isCreator(false)
+                .build();
+        }
+
+        // Otherwise return the membership
+        return bookClubMembershipMapper.entityToDTO(membership);
+    }
+
+    /**
+     * Ensure a reader is a member of a book club before returning the book club
+     * @param bookClub The book club to check
+     * @return The book club if the reader is a member
+     * @throws BookClubNotFoundException if the reader is not a member of the book club
+     * @throws ReaderNotFoundException if the reader is not logged in
+     */
+    private BookClubDTO checkBookClubMembership(BookClub bookClub) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException();
+        }
+
+        // Check if the reader is a member of the book club
+        if(!bookClubMembershipRepo.existsByBookClubIdAndReaderId(bookClub.getId(), reader.getId())) {
+            throw new BookClubNotFoundException(bookClub.getId());
+        }
+
+        return bookClubMapper.entityToDTO(bookClub);
     }
 }

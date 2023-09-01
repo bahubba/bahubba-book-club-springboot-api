@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * Custom exception for when a client searches for a book club that doesn't exist (in an active state)
  */
-@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Reader not found")
+@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Book Club not found")
 public class BookClubNotFoundException extends RuntimeException {
 
     /**

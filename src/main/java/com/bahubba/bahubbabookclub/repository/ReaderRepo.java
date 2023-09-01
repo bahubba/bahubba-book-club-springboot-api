@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * JPA Repository for the {@link Reader} entity
+ */
 @Repository
 public interface ReaderRepo extends JpaRepository<Reader, UUID> {
     Optional<Reader> findByUsername(final String username);
