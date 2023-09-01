@@ -6,6 +6,7 @@ import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
@@ -84,10 +85,14 @@ class BookClubServiceTest {
 
     @Test
     void testFindByID() {
-        when(bookClubRepo.findById(any(UUID.class))).thenReturn(Optional.of(new BookClub()));
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
+        when(bookClubRepo.findById(any(UUID.class))).thenReturn(Optional.of(BookClub.builder().id(UUID.randomUUID()).build()));
+        when(bookClubMembershipRepo.existsByBookClubIdAndReaderId(any(UUID.class), any(UUID.class))).thenReturn(true);
         BookClubDTO result = bookClubService.findByID(UUID.randomUUID());
         verify(bookClubRepo, times(1)).findById(any(UUID.class));
         assertThat(result).isNotNull();
+        securityUtilMockedStatic.close();
     }
 
     @Test
@@ -98,10 +103,14 @@ class BookClubServiceTest {
 
     @Test
     void testFindByName() {
-        when(bookClubRepo.findByName(anyString())).thenReturn(Optional.of(new BookClub()));
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
+        when(bookClubRepo.findByName(anyString())).thenReturn(Optional.of(BookClub.builder().id(UUID.randomUUID()).build()));
+        when(bookClubMembershipRepo.existsByBookClubIdAndReaderId(any(UUID.class), any(UUID.class))).thenReturn(true);
         BookClubDTO result = bookClubService.findByName("foo");
         verify(bookClubRepo, times(1)).findByName(anyString());
         assertThat(result).isNotNull();
+        securityUtilMockedStatic.close();
     }
 
     @Test
@@ -140,5 +149,16 @@ class BookClubServiceTest {
         List<BookClubDTO> result = bookClubService.search("foo");
         verify(bookClubRepo, times(1)).findAllByPublicityNotAndNameContainsIgnoreCase(any(Publicity.class), anyString());
         assertThat(result).isNotNull().isNotEmpty();
+    }
+
+    @Test
+    void testGetRole() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderId(anyString(), any(UUID.class))).thenReturn(Optional.of(new BookClubMembership()));
+        BookClubRole result = bookClubService.getRole("foo");
+        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderId(anyString(), any(UUID.class));
+        assertThat(result).isNotNull();
+        securityUtilMockedStatic.close();
     }
 }

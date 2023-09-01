@@ -28,4 +28,12 @@ class MembershipRequestControllerTest {
         verify(membershipRequestService, times(1)).requestMembership(any(NewMembershipRequest.class));
         assertThat(rsp).isNotNull();
     }
+
+    @Test
+    void testHasPendingRequest() {
+        when(membershipRequestService.hasPendingRequest(anyString())).thenReturn(true);
+        ResponseEntity<Boolean> rsp = membershipRequestController.hasPendingRequest("foo");
+        verify(membershipRequestService, times(1)).hasPendingRequest(anyString());
+        assertThat(rsp).isNotNull();
+    }
 }

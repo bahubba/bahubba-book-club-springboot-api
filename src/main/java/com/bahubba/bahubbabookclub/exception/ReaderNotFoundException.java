@@ -12,6 +12,13 @@ import java.util.UUID;
 public class ReaderNotFoundException extends RuntimeException {
 
     /**
+     * Generates exception for missing reader in security context
+     */
+    public ReaderNotFoundException() {
+        super("Not logged in or reader not found");
+    }
+
+    /**
      * Generates exception for missing reader by username or email
      * @param usernameOrEmail reader username or email
      */

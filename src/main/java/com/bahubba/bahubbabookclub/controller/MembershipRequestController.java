@@ -28,4 +28,13 @@ public class MembershipRequestController {
     public ResponseEntity<MembershipRequestDTO> requestMembership(@RequestBody NewMembershipRequest newMembershipRequest) {
         return ResponseEntity.ok(membershipRequestService.requestMembership(newMembershipRequest));
     }
+
+    /**
+     * See if a user has a pending request for a given book club
+     * @param bookClubName name of the book club
+     */
+    @PostMapping("/has-pending-request")
+    public ResponseEntity<Boolean> hasPendingRequest(@RequestBody String bookClubName) {
+        return ResponseEntity.ok(membershipRequestService.hasPendingRequest(bookClubName));
+    }
 }

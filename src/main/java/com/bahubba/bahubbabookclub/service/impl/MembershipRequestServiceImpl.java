@@ -6,6 +6,7 @@ import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.MembershipRequest;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
 import com.bahubba.bahubbabookclub.model.mapper.MembershipRequestMapper;
 import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
@@ -16,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import java.util.List;
 
 /**
  * {@link MembershipRequest} business logic implementation
@@ -48,7 +49,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
 
         // Get the book club to request membership in
         BookClub bookClub = bookClubRepo
-            .findById(newMembershipRequest.getBookClubId())
+            .findByName(newMembershipRequest.getBookClubName())
             .orElseThrow(() -> new BookClubNotFoundException("Book club not found"));
 
         // Create the membership request and persist it
@@ -63,5 +64,26 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
                         .build()
                 )
             );
+    }
+
+    /**
+     * Check if a reader has a pending membership request for a given book club
+     * @param bookClubName The name of the book club
+     * @return True if the reader has a pending membership request for the book club, false otherwise
+     */
+    @Override
+    public Boolean hasPendingRequest(String bookClubName) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Check if the reader has a pending membership request for the book club
+        return membershipRequestRepo.existsByBookClubNameAndReaderIdAndStatusIn(
+            bookClubName,
+            reader.getId(),
+            List.of(RequestStatus.OPEN, RequestStatus.VIEWED)
+        );
     }
 }

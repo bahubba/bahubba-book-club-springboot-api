@@ -1,10 +1,15 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import com.bahubba.bahubbabookclub.exception.BookClubNotFoundException;
+import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
+import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +62,13 @@ public class BookClubController {
      */
     @GetMapping("/by-name/{name}")
     public ResponseEntity<BookClubDTO> getByName(@PathVariable String name) {
-        return ResponseEntity.ok(bookClubService.findByName(name));
+        try {
+            return ResponseEntity.ok(bookClubService.findByName(name));
+        } catch (ReaderNotFoundException rnfe) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (BookClubNotFoundException bcnfe) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     /**
@@ -89,8 +100,33 @@ public class BookClubController {
         return ResponseEntity.ok(bookClubService.disbandBookClub(id));
     }
 
+    /**
+     * Searches for book clubs by name
+     * @param bookClubSearch search term and pagination info
+     * @return list of book clubs
+     */
     @PostMapping(value = "/search")
     public ResponseEntity<List<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch) {
         return ResponseEntity.ok(bookClubService.search(bookClubSearch.getSearchTerm()));
+    }
+
+    /**
+     * Gets user's role in a book club
+     * @param bookClubName name of the book club
+     * @return user's role in the book club
+     */
+    @GetMapping("/role/{bookClubName}")
+    public ResponseEntity<BookClubRole> getRole(@PathVariable String bookClubName) {
+        return ResponseEntity.ok(bookClubService.getRole(bookClubName));
+    }
+
+    /**
+     * Get a non-private book club and the user's role (or lack thereof) in it
+     * @param bookClubName name of the book club
+     * @return book club and user's role in it
+     */
+    @GetMapping("/membership/{bookClubName}")
+    public ResponseEntity<BookClubMembershipDTO> getMembership(@PathVariable String bookClubName) {
+        return ResponseEntity.ok(bookClubService.getMembership(bookClubName));
     }
 }
