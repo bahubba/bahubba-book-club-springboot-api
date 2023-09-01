@@ -5,10 +5,7 @@ import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
 import com.bahubba.bahubbabookclub.service.MembershipRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Membership Request endpoints
@@ -33,8 +30,8 @@ public class MembershipRequestController {
      * See if a user has a pending request for a given book club
      * @param bookClubName name of the book club
      */
-    @PostMapping("/has-pending-request")
-    public ResponseEntity<Boolean> hasPendingRequest(@RequestBody String bookClubName) {
+    @GetMapping("/has-pending-request/{bookClubName}")
+    public ResponseEntity<Boolean> hasPendingRequest(@PathVariable String bookClubName) {
         return ResponseEntity.ok(membershipRequestService.hasPendingRequest(bookClubName));
     }
 }
