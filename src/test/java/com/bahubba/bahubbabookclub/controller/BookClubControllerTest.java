@@ -1,6 +1,9 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import com.bahubba.bahubbabookclub.exception.BookClubNotFoundException;
+import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
@@ -9,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class BookClubControllerTest {
     @Autowired
     BookClubController bookClubController;
@@ -63,6 +69,33 @@ class BookClubControllerTest {
     }
 
     @Test
+    void testGetByName_Unauthorized() {
+        when(bookClubService.findByName(anyString())).thenThrow(new ReaderNotFoundException());
+        ResponseEntity<BookClubDTO> rsp = bookClubController.getByName("foo");
+        verify(bookClubService, times(1)).findByName(anyString());
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void testGetByName_BookClubNotFound() {
+        when(bookClubService.findByName(anyString())).thenThrow(new BookClubNotFoundException("foo"));
+        ResponseEntity<BookClubDTO> rsp = bookClubController.getByName("foo");
+        verify(bookClubService, times(1)).findByName(anyString());
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void testGetAllForReader() {
+        when(bookClubService.findAllForReader()).thenReturn(new ArrayList<>());
+        ResponseEntity<List<BookClubDTO>> rsp = bookClubController.getAllForReader();
+        verify(bookClubService, times(1)).findAllForReader();
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getBody()).isNotNull();
+    }
+
+    @Test
     void testGetAll() {
         when(bookClubService.findAll()).thenReturn(new ArrayList<>());
         ResponseEntity<List<BookClubDTO>> rsp = bookClubController.getAll();
@@ -96,5 +129,13 @@ class BookClubControllerTest {
         verify(bookClubService, times(1)).getRole(anyString());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
+    }
+
+    @Test
+    void testGetMembership() {
+        when(bookClubService.getMembership(anyString())).thenReturn(BookClubMembershipDTO.builder().build());
+        ResponseEntity<BookClubMembershipDTO> rsp = bookClubController.getMembership("foo");
+        verify(bookClubService, times(1)).getMembership(anyString());
+        assertThat(rsp).isNotNull();
     }
 }

@@ -63,7 +63,7 @@ public class BookClubServiceImpl implements BookClubService {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+            throw new ReaderNotFoundException();
         }
 
         // Convert the book club to an entity, add the reader as a member/creator, and persist it
@@ -103,7 +103,7 @@ public class BookClubServiceImpl implements BookClubService {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+            throw new ReaderNotFoundException();
         }
 
         // Find the book club to update
@@ -172,7 +172,7 @@ public class BookClubServiceImpl implements BookClubService {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+            throw new ReaderNotFoundException();
         }
 
         return bookClubMapper.entityListToDTO(bookClubRepo.findAllForReader(reader.getId()));

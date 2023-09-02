@@ -44,7 +44,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+            throw new ReaderNotFoundException();
         }
 
         // Get the book club to request membership in

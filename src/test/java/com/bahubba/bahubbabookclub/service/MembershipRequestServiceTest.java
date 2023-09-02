@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.service;
 
+import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.MembershipRequest;
@@ -13,15 +14,18 @@ import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class MembershipRequestServiceTest {
     @Autowired
     MembershipRequestService membershipRequestService;
@@ -38,10 +42,24 @@ class MembershipRequestServiceTest {
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(new Reader());
         when(bookClubRepo.findByName(anyString())).thenReturn(Optional.of(new BookClub()));
         when(membershipRequestRepo.save(any(MembershipRequest.class))).thenReturn(new MembershipRequest());
+
         MembershipRequestDTO result = membershipRequestService.requestMembership(NewMembershipRequest.builder().bookClubName("foo").build());
+
         verify(bookClubRepo, times(1)).findByName(anyString());
         verify(membershipRequestRepo, times(1)).save(any(MembershipRequest.class));
         assertThat(result).isNotNull();
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testRequestMembership_ReaderNotFound() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
+
+        assertThrows(ReaderNotFoundException.class, () -> {
+            membershipRequestService.requestMembership(NewMembershipRequest.builder().bookClubName("foo").build());
+        });
+
         securityUtilMockedStatic.close();
     }
 
@@ -61,6 +79,18 @@ class MembershipRequestServiceTest {
             anyList()
         );
         assertThat(result).isNotNull();
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testHasPendingRequest_ReaderNotFound() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
+
+        assertThrows(ReaderNotFoundException.class, () -> {
+            membershipRequestService.hasPendingRequest("foo");
+        });
+
         securityUtilMockedStatic.close();
     }
 }
