@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseCookie;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
 import java.util.Date;
@@ -33,7 +34,8 @@ import static org.mockito.Mockito.*;
  * Unit tests for the JwtService
  */
 @SpringBootTest
-public class JwtServiceTest {
+@ActiveProfiles("test")
+class JwtServiceTest {
 
     @Autowired
     JwtService jwtService;
