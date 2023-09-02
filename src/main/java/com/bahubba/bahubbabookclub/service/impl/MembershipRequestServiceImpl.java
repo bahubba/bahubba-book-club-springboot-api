@@ -1,14 +1,18 @@
 package com.bahubba.bahubbabookclub.service.impl;
 
-import com.bahubba.bahubbabookclub.exception.BookClubNotFoundException;
-import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
+import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
+import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.MembershipRequest;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
+import com.bahubba.bahubbabookclub.model.enums.RequestAction;
 import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
 import com.bahubba.bahubbabookclub.model.mapper.MembershipRequestMapper;
+import com.bahubba.bahubbabookclub.model.payload.MembershipRequestAction;
 import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
+import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.MembershipRequestRepo;
 import com.bahubba.bahubbabookclub.service.MembershipRequestService;
@@ -17,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * {@link MembershipRequest} business logic implementation
@@ -33,6 +37,9 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
 
     @Autowired
     private BookClubRepo bookClubRepo;
+
+    @Autowired
+    private BookClubMembershipRepo bookClubMembersipRepo;
 
     /**
      * Create a new membership request
@@ -80,10 +87,72 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
         }
 
         // Check if the reader has a pending membership request for the book club
-        return membershipRequestRepo.existsByBookClubNameAndReaderIdAndStatusIn(
+        return membershipRequestRepo.existsByBookClubNameAndReaderIdAndStatus(
             bookClubName,
             reader.getId(),
-            List.of(RequestStatus.OPEN, RequestStatus.VIEWED)
+            RequestStatus.OPEN
         );
+    }
+
+    /**
+     * Approve or reject a membership request
+     * @param membershipRequestAction The action to take on the membership request
+     * @return The updated membership request
+     */
+    @Override
+    public MembershipRequestDTO reviewMembershipRequest(MembershipRequestAction membershipRequestAction) {
+        // Get the current reader from the security context
+        Reader reviewer = SecurityUtil.getCurrentUserDetails();
+        if(reviewer == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Get the membership request to review
+        MembershipRequest membershipRequest = membershipRequestRepo
+            .findById(membershipRequestAction.getMembershipRequest().getId())
+            .orElseThrow(() -> new MembershipRequestNotFoundException(
+                membershipRequestAction.getMembershipRequest().getReader().getUsername(),
+                membershipRequestAction.getMembershipRequest().getBookClub().getName()
+            ));
+
+        // Ensure the reviewer is an admin of the book club
+        BookClubMembership reviewerMembership = membershipRequest.getBookClub().getMembers().stream()
+            .filter(member -> member.getId().equals(reviewer.getId()))
+            .findFirst()
+            .orElseThrow(() -> new ReaderNotFoundException(
+                reviewer.getUsername(), membershipRequest.getBookClub().getName()
+            ));
+        if(!reviewerMembership.getClubRole().equals(BookClubRole.ADMIN)) {
+            throw new UnauthorizedBookClubActionException();
+        }
+
+        // Ensure the membership request is still open
+        if(!membershipRequest.getStatus().equals(RequestStatus.OPEN)) {
+            throw new BadBookClubActionException();
+        }
+
+        // Add the reader to the book club with the specified role if the request was approved
+        if(membershipRequestAction.getAction().equals(RequestAction.APPROVE)) {
+            bookClubMembersipRepo.save(BookClubMembership
+                .builder()
+                .bookClub(membershipRequest.getBookClub())
+                .reader(membershipRequest.getReader())
+                .clubRole(membershipRequestAction.getRole())
+                .build()
+            );
+        }
+
+        // Update the membership request
+        membershipRequest.setStatus(
+            membershipRequestAction.getAction().equals(RequestAction.APPROVE)
+                ? RequestStatus.APPROVED
+                : RequestStatus.REJECTED
+        );
+        membershipRequest.setReviewer(reviewer);
+        membershipRequest.setReviewMessage(membershipRequestAction.getReviewMessage());
+        membershipRequest.setReviewed(LocalDateTime.now());
+
+        // Persist the updated membership request
+        return membershipRequestMapper.entityToDTO(membershipRequestRepo.save(membershipRequest));
     }
 }

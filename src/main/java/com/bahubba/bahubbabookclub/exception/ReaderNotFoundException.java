@@ -33,4 +33,11 @@ public class ReaderNotFoundException extends RuntimeException {
     public ReaderNotFoundException(UUID id) {
         super("Reader could not be found with ID '" + id + "'");
     }
+
+    /**
+     * Generates an exception for a reader not being found in a book club
+     */
+    public ReaderNotFoundException(String username, String bookClubName) {
+        super("Reader '" + username + "' not found in book club '" + bookClubName + "'");
+    }
 }

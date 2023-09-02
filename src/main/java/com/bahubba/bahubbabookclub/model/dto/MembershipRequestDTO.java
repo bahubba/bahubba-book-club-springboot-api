@@ -22,6 +22,7 @@ public class MembershipRequestDTO {
     private BookClubDTO bookClub;
     private String message;
     private RequestStatus status;
+    private Boolean viewed;
     private ReaderDTO reviewer;
     private LocalDateTime requested;
     private LocalDateTime reviewed;

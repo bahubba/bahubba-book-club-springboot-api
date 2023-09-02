@@ -46,9 +46,16 @@ public class MembershipRequest implements Serializable {
     @Builder.Default
     private RequestStatus status = RequestStatus.OPEN;
 
+    @Column
+    @Builder.Default
+    private Boolean viewed = false;
+
     @ManyToOne
     @JoinColumn(name = "reviewer_id", referencedColumnName = "id")
     private Reader reviewer;
+
+    @Column(name = "review_message")
+    private String reviewMessage;
 
     @Column(nullable = false)
     @Builder.Default

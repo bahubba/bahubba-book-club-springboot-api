@@ -5,6 +5,7 @@ import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.MembershipRequest;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
 import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.MembershipRequestRepo;
@@ -67,16 +68,18 @@ class MembershipRequestServiceTest {
     void testHasPendingRequest() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
-        when(membershipRequestRepo.existsByBookClubNameAndReaderIdAndStatusIn(
+        when(membershipRequestRepo.existsByBookClubNameAndReaderIdAndStatus(
             anyString(),
             any(UUID.class),
-            anyList()
+            any(RequestStatus.class)
         )).thenReturn(true);
+
         Boolean result = membershipRequestService.hasPendingRequest("foo");
-        verify(membershipRequestRepo, times(1)).existsByBookClubNameAndReaderIdAndStatusIn(
+
+        verify(membershipRequestRepo, times(1)).existsByBookClubNameAndReaderIdAndStatus(
             anyString(),
             any(UUID.class),
-            anyList()
+            any(RequestStatus.class)
         );
         assertThat(result).isNotNull();
         securityUtilMockedStatic.close();
