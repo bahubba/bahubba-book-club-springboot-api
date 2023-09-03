@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * {@link MembershipRequest} business logic implementation
@@ -92,6 +93,43 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
             reader.getId(),
             RequestStatus.OPEN
         );
+    }
+
+    /**
+     * Get all membership requests for a given book club
+     * @param bookClubName The name of the book club
+     * @return A list of membership requests for the book club
+     * @throws BookClubNotFoundException If the book club doesn't exist
+     * @throws ReaderNotFoundException If the reader isn't a member of the book club
+     * @throws UnauthorizedBookClubActionException If the reader isn't an admin of the book club
+     * TODO - Pagination, custom sorting, filters?
+     */
+    @Override
+    public List<MembershipRequestDTO> getMembershipRequestsForBookClub(String bookClubName) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Get the book club
+        BookClub bookClub = bookClubRepo
+            .findByName(bookClubName)
+            .orElseThrow(() -> new BookClubNotFoundException("Book club not found"));
+
+        // Ensure the reader is an admin of the book club
+        BookClubMembership membership = bookClub.getMembers().stream()
+            .filter(member -> member.getReader().getId().equals(reader.getId()))
+            .findFirst()
+            .orElseThrow(() -> new ReaderNotFoundException(
+                reader.getUsername(), bookClub.getName()
+            ));
+        if(!membership.getClubRole().equals(BookClubRole.ADMIN)) {
+            throw new UnauthorizedBookClubActionException();
+        }
+
+        // Return the membership requests for the book club
+        return membershipRequestMapper.entityListToDTO(membershipRequestRepo.findALlByBookClubIdOrderByRequestedDesc(bookClub.getId()));
     }
 
     /**

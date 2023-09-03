@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Membership Request endpoints
  */
@@ -35,6 +37,16 @@ public class MembershipRequestController {
     @GetMapping("/has-pending-request/{bookClubName}")
     public ResponseEntity<Boolean> hasPendingRequest(@PathVariable String bookClubName) {
         return ResponseEntity.ok(membershipRequestService.hasPendingRequest(bookClubName));
+    }
+
+    /**
+     * Get all memberships for a given book club
+     * @param bookClubName name of the book club
+     * @return list of membership requests for the book club
+     */
+    @GetMapping("/all-for-club/{bookClubName}")
+    public ResponseEntity<List<MembershipRequestDTO>> getMembershipRequestsForBookClub(@PathVariable String bookClubName) {
+        return ResponseEntity.ok(membershipRequestService.getMembershipRequestsForBookClub(bookClubName));
     }
 
     /**

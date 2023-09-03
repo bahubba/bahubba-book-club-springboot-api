@@ -17,6 +17,8 @@ public interface MembershipRequestRepo extends JpaRepository<MembershipRequest, 
 
     Boolean existsByBookClubNameAndReaderIdAndStatusIn(final String bookClubName, final UUID readerId, final List<RequestStatus> statuses);
 
+    List<MembershipRequest> findALlByBookClubIdOrderByRequestedDesc(final UUID bookClubId);
+
     @Modifying
     @Query("UPDATE MembershipRequest mr SET mr.status = :status WHERE mr.id = :id")
     Integer updateMembershipRequest(final UUID id, final RequestStatus status);

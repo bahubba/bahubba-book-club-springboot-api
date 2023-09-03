@@ -11,6 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -37,6 +39,16 @@ class MembershipRequestControllerTest {
         when(membershipRequestService.hasPendingRequest(anyString())).thenReturn(true);
         ResponseEntity<Boolean> rsp = membershipRequestController.hasPendingRequest("foo");
         verify(membershipRequestService, times(1)).hasPendingRequest(anyString());
+        assertThat(rsp).isNotNull();
+    }
+
+    @Test
+    void testGetMembershipRequestsForBookClub() {
+        when(membershipRequestService.getMembershipRequestsForBookClub(anyString())).thenReturn(List.of(new MembershipRequestDTO()));
+
+        ResponseEntity<List<MembershipRequestDTO>> rsp = membershipRequestController.getMembershipRequestsForBookClub("foo");
+
+        verify(membershipRequestService, times(1)).getMembershipRequestsForBookClub(anyString());
         assertThat(rsp).isNotNull();
     }
 
