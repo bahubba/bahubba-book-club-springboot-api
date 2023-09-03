@@ -117,7 +117,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
 
         // Ensure the reviewer is an admin of the book club
         BookClubMembership reviewerMembership = membershipRequest.getBookClub().getMembers().stream()
-            .filter(member -> member.getId().equals(reviewer.getId()))
+            .filter(member -> member.getReader().getId().equals(reviewer.getId()))
             .findFirst()
             .orElseThrow(() -> new ReaderNotFoundException(
                 reviewer.getUsername(), membershipRequest.getBookClub().getName()
@@ -131,8 +131,19 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
             throw new BadBookClubActionException();
         }
 
-        // Add the reader to the book club with the specified role if the request was approved
+        // Attempt to add the reader to the book club with the specified role if the request was approved
         if(membershipRequestAction.getAction().equals(RequestAction.APPROVE)) {
+            // Ensure the reader isn't already a member of the book club
+            BookClubMembership existingMembership = membershipRequest.getBookClub().getMembers().stream()
+                .filter(member -> member.getReader().getId().equals(membershipRequest.getReader().getId()))
+                .findFirst()
+                .orElse(null);
+
+            if(existingMembership != null) {
+                throw new BadBookClubActionException();
+            }
+
+            // Add the reader to the book club
             bookClubMembersipRepo.save(BookClubMembership
                 .builder()
                 .bookClub(membershipRequest.getBookClub())

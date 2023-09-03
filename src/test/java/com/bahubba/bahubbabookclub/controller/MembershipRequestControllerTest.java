@@ -1,6 +1,7 @@
 package com.bahubba.bahubbabookclub.controller;
 
 import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
+import com.bahubba.bahubbabookclub.model.payload.MembershipRequestAction;
 import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
 import com.bahubba.bahubbabookclub.service.MembershipRequestService;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,18 @@ class MembershipRequestControllerTest {
         when(membershipRequestService.hasPendingRequest(anyString())).thenReturn(true);
         ResponseEntity<Boolean> rsp = membershipRequestController.hasPendingRequest("foo");
         verify(membershipRequestService, times(1)).hasPendingRequest(anyString());
+        assertThat(rsp).isNotNull();
+    }
+
+    @Test
+    void testReviewMembershipRequest() {
+        when(membershipRequestService.reviewMembershipRequest(any(MembershipRequestAction.class))).thenReturn(new MembershipRequestDTO());
+
+        ResponseEntity<MembershipRequestDTO> rsp = membershipRequestController.reviewMembershipRequest(
+            MembershipRequestAction.builder().build()
+        );
+
+        verify(membershipRequestService, times(1)).reviewMembershipRequest(any());
         assertThat(rsp).isNotNull();
     }
 }

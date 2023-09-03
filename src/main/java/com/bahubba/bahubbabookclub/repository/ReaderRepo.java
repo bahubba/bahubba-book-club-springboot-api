@@ -14,6 +14,8 @@ import java.util.UUID;
 public interface ReaderRepo extends JpaRepository<Reader, UUID> {
     Optional<Reader> findByUsername(final String username);
 
+    Optional<Reader> findByUsernameAndDepartedIsNull(final String username);
+
     Optional<Reader> findByEmail(final String email);
 
     Optional<Reader> findByUsernameOrEmail(final String username, final String email);
