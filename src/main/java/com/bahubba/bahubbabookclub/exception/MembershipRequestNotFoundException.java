@@ -3,8 +3,6 @@ package com.bahubba.bahubbabookclub.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.UUID;
-
 /**
  * Custom exception for when a membership request that doesn't exist
  */
