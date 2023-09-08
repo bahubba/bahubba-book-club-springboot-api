@@ -54,7 +54,7 @@ public class MembershipRequestController {
      * @param membershipRequestAction approval or rejection of the request
      * @return updated version of the membership request
      */
-    @PutMapping("/review")
+    @PatchMapping("/review")
     public ResponseEntity<MembershipRequestDTO> reviewMembershipRequest(@RequestBody MembershipRequestAction membershipRequestAction) {
         return ResponseEntity.ok(membershipRequestService.reviewMembershipRequest(membershipRequestAction));
     }

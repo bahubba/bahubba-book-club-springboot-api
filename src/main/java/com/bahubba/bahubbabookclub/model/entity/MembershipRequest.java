@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.model.entity;
 
+import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,6 +46,10 @@ public class MembershipRequest implements Serializable {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private RequestStatus status = RequestStatus.OPEN;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private BookClubRole role;
 
     @Column
     @Builder.Default

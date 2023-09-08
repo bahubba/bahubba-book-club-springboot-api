@@ -269,6 +269,7 @@ class MembershipRequestServiceTest {
         when(membershipRequestRepo.findById(any(UUID.class))).thenReturn(Optional.of(
             MembershipRequest
                 .builder()
+                .id(UUID.randomUUID())
                 .reader(
                     Reader
                         .builder()
@@ -348,6 +349,7 @@ class MembershipRequestServiceTest {
         when(membershipRequestRepo.findById(any(UUID.class))).thenReturn(Optional.of(
             MembershipRequest
                 .builder()
+                .id(UUID.randomUUID())
                 .reader(
                     Reader
                         .builder()
@@ -479,6 +481,7 @@ class MembershipRequestServiceTest {
         when(membershipRequestRepo.findById(any(UUID.class))).thenReturn(Optional.of(
             MembershipRequest
                 .builder()
+                .id(UUID.randomUUID())
                 .reader(
                     Reader
                         .builder()
@@ -556,6 +559,7 @@ class MembershipRequestServiceTest {
         when(membershipRequestRepo.findById(any(UUID.class))).thenReturn(Optional.of(
             MembershipRequest
                 .builder()
+                .id(UUID.randomUUID())
                 .reader(
                     Reader
                         .builder()
@@ -633,6 +637,7 @@ class MembershipRequestServiceTest {
         when(membershipRequestRepo.findById(any(UUID.class))).thenReturn(Optional.of(
             MembershipRequest
                 .builder()
+                .id(UUID.randomUUID())
                 .reader(
                     Reader
                         .builder()
@@ -711,6 +716,7 @@ class MembershipRequestServiceTest {
         when(membershipRequestRepo.findById(any(UUID.class))).thenReturn(Optional.of(
             MembershipRequest
                 .builder()
+                .id(UUID.randomUUID())
                 .reader(
                     Reader
                         .builder()

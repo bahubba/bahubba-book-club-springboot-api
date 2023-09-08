@@ -197,11 +197,16 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
                 ? RequestStatus.APPROVED
                 : RequestStatus.REJECTED
         );
+        membershipRequest.setRole(
+            membershipRequestAction.getAction().equals(RequestAction.APPROVE)
+                ? membershipRequestAction.getRole()
+                : BookClubRole.NONE
+        );
         membershipRequest.setReviewer(reviewer);
         membershipRequest.setReviewMessage(membershipRequestAction.getReviewMessage());
         membershipRequest.setReviewed(LocalDateTime.now());
 
-        // Persist the updated membership request
+        // Persist the updated membership request and return it
         return membershipRequestMapper.entityToDTO(membershipRequestRepo.save(membershipRequest));
     }
 }
