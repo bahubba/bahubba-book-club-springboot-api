@@ -21,7 +21,9 @@ public interface BookClubService {
 
     List<BookClubDTO> findAll();
 
-    BookClubDTO disbandBookClub(UUID id);
+    BookClubDTO disbandBookClubByID(UUID id);
+
+    BookClubDTO disbandBookClubByName(String name);
 
     List<BookClubDTO> search(String searchTerm);
 

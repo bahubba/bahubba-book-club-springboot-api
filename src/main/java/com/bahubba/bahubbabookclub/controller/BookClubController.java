@@ -95,9 +95,19 @@ public class BookClubController {
      * @param id book club ID
      * @return persisted version of the new book club
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/disband/{id}")
     public ResponseEntity<BookClubDTO> disbandBookClub(@PathVariable UUID id) {
-        return ResponseEntity.ok(bookClubService.disbandBookClub(id));
+        return ResponseEntity.ok(bookClubService.disbandBookClubByID(id));
+    }
+
+    /**
+     * Disbands (soft deletes) a book club by name
+     * @param name book club name
+     * @return persisted version of the new book club
+     */
+    @DeleteMapping("/disband-by-name/{name}")
+    public ResponseEntity<BookClubDTO> disbandBookClubByName(@PathVariable String name) {
+        return ResponseEntity.ok(bookClubService.disbandBookClubByName(name));
     }
 
     /**

@@ -106,9 +106,18 @@ class BookClubControllerTest {
 
     @Test
     void testDisbandBookClub() {
-        when(bookClubService.disbandBookClub(any(UUID.class))).thenReturn(new BookClubDTO());
+        when(bookClubService.disbandBookClubByID(any(UUID.class))).thenReturn(new BookClubDTO());
         ResponseEntity<BookClubDTO> rsp = bookClubController.disbandBookClub(UUID.randomUUID());
-        verify(bookClubService, times(1)).disbandBookClub(any(UUID.class));
+        verify(bookClubService, times(1)).disbandBookClubByID(any(UUID.class));
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getBody()).isNotNull();
+    }
+
+    @Test
+    void testDisbandBookClubByName() {
+        when(bookClubService.disbandBookClubByName(anyString())).thenReturn(new BookClubDTO());
+        ResponseEntity<BookClubDTO> rsp = bookClubController.disbandBookClubByName("foo");
+        verify(bookClubService, times(1)).disbandBookClubByName(anyString());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }
