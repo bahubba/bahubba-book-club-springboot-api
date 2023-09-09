@@ -1,8 +1,6 @@
 package com.bahubba.bahubbabookclub.service.impl;
 
-import com.bahubba.bahubbabookclub.exception.BookClubNotFoundException;
-import com.bahubba.bahubbabookclub.exception.MembershipNotFoundException;
-import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
+import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
@@ -189,13 +187,44 @@ public class BookClubServiceImpl implements BookClubService {
 
     /**
      * Disband a book club
+     * @param id The ID of the book club to disband
      * @return The disbanded book club's persisted entity
      */
     @Override
-    public BookClubDTO disbandBookClub(UUID id) {
-        BookClub bookClub = bookClubRepo.findById(id).orElseThrow(() -> new BookClubNotFoundException(id));
-        bookClub.setDisbanded(LocalDateTime.now());
-        return bookClubMapper.entityToDTO(bookClubRepo.save(bookClub));
+    public BookClubDTO disbandBookClubByID(UUID id) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException();
+        }
+
+        // Find the reader's membership in the book club
+        BookClubMembership membership = bookClubMembershipRepo
+            .findByBookClubIdAndReaderId(id, reader.getId())
+            .orElseThrow(() -> new MembershipNotFoundException(reader.getId(), id));
+
+        return disbandBookClub(membership);
+    }
+
+    /**
+     * Disband a book club
+     * @param name The name of the book club to disband
+     * @return The disbanded book club's persisted entity
+     */
+    @Override
+    public BookClubDTO disbandBookClubByName(String name) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException();
+        }
+
+        // Find the reader's membership in the book club
+        BookClubMembership membership = bookClubMembershipRepo
+            .findByBookClubNameAndReaderId(name, reader.getId())
+            .orElseThrow(() -> new MembershipNotFoundException(reader.getUsername(), name));
+
+        return disbandBookClub(membership);
     }
 
     /**
@@ -282,5 +311,26 @@ public class BookClubServiceImpl implements BookClubService {
         }
 
         return bookClubMapper.entityToDTO(bookClub);
+    }
+
+    /**
+     * Disband a book club
+     * @param membership The membership of the reader in the book club to disband
+     */
+    private BookClubDTO disbandBookClub(BookClubMembership membership) {
+        // Ensure the reader is the creator of the book club
+        if(!membership.isCreator()) {
+            throw new UnauthorizedBookClubActionException();
+        }
+
+        // Ensure the book club is not already disbanded
+        BookClub bookClub = membership.getBookClub();
+        if(bookClub.getDisbanded() != null) {
+            throw new BadBookClubActionException();
+        }
+
+        // Disband the book club
+        bookClub.setDisbanded(LocalDateTime.now());
+        return bookClubMapper.entityToDTO(bookClubRepo.save(bookClub));
     }
 }

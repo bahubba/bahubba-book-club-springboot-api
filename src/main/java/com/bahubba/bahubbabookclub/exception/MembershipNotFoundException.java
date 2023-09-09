@@ -3,6 +3,8 @@ package com.bahubba.bahubbabookclub.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.util.UUID;
+
 /**
  * Custom exception for when a client searches for a book club that doesn't exist (in an active state)
  */
@@ -10,7 +12,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class MembershipNotFoundException extends RuntimeException {
 
     /**
-     * Generates exception for missing book club membership by reader ID and Book Club name
+     * Generates exception for missing book club membership by reader ID and book club ID
+     * @param readerId reader ID
+     * @param bookClubId book club ID
+     */
+    public MembershipNotFoundException(UUID readerId, UUID bookClubId) {
+        super("Reader with ID '" + readerId + "' does not have a membership in book club with ID '" + bookClubId + "'");
+    }
+
+    /**
+     * Generates exception for missing book club membership by reader username and book club name
      * @param username reader username
      * @param bookClubName book club name
      */
