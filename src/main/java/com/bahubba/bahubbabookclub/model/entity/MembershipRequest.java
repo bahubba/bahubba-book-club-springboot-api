@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.model.entity;
 
+import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,9 +47,20 @@ public class MembershipRequest implements Serializable {
     @Builder.Default
     private RequestStatus status = RequestStatus.OPEN;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private BookClubRole role;
+
+    @Column
+    @Builder.Default
+    private Boolean viewed = false;
+
     @ManyToOne
     @JoinColumn(name = "reviewer_id", referencedColumnName = "id")
     private Reader reviewer;
+
+    @Column(name = "review_message")
+    private String reviewMessage;
 
     @Column(nullable = false)
     @Builder.Default

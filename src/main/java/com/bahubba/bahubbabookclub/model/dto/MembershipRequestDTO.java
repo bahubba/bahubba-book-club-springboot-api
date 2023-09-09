@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.model.dto;
 
+import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +23,10 @@ public class MembershipRequestDTO {
     private BookClubDTO bookClub;
     private String message;
     private RequestStatus status;
+    private BookClubRole role;
+    private Boolean viewed;
     private ReaderDTO reviewer;
+    private String reviewMessage;
     private LocalDateTime requested;
     private LocalDateTime reviewed;
 }

@@ -5,7 +5,6 @@ package com.bahubba.bahubbabookclub.model.enums;
  */
 public enum RequestStatus {
     OPEN,
-    VIEWED,
-    ACCEPTED,
+    APPROVED,
     REJECTED
 }

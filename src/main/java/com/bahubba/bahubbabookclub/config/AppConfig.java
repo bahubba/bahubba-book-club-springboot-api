@@ -30,7 +30,7 @@ public class AppConfig {
      */
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> readerRepo.findByUsername(username)
+        return username -> readerRepo.findByUsernameAndDepartedIsNull(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
