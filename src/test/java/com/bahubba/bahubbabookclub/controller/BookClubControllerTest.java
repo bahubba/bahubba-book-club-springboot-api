@@ -25,6 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link BookClubController} endpoints
+ */
 @SpringBootTest
 @ActiveProfiles("test")
 class BookClubControllerTest {
@@ -130,47 +133,5 @@ class BookClubControllerTest {
         verify(bookClubService, times(1)).search(anyString());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
-    }
-
-    @Test
-    void testGetMembers() {
-        when(bookClubService.getMembers(anyString())).thenReturn(new ArrayList<>());
-        ResponseEntity<List<BookClubMembershipDTO>> rsp = bookClubController.getMembers("foo");
-        verify(bookClubService, times(1)).getMembers(anyString());
-        assertThat(rsp).isNotNull();
-        assertThat(rsp.getBody()).isNotNull();
-    }
-
-    @Test
-    void testGetRole() {
-        when(bookClubService.getRole(anyString())).thenReturn(BookClubRole.READER);
-        ResponseEntity<BookClubRole> rsp = bookClubController.getRole("foo");
-        verify(bookClubService, times(1)).getRole(anyString());
-        assertThat(rsp).isNotNull();
-        assertThat(rsp.getBody()).isNotNull();
-    }
-
-    @Test
-    void testGetMembership() {
-        when(bookClubService.getMembership(anyString())).thenReturn(BookClubMembershipDTO.builder().build());
-        ResponseEntity<BookClubMembershipDTO> rsp = bookClubController.getMembership("foo");
-        verify(bookClubService, times(1)).getMembership(anyString());
-        assertThat(rsp).isNotNull();
-    }
-
-    @Test
-    void testUpdateMembership() {
-        when(bookClubService.updateMembership(any())).thenReturn(BookClubMembershipDTO.builder().build());
-        ResponseEntity<BookClubMembershipDTO> rsp = bookClubController.updateMembership(MembershipUpdate.builder().build());
-        verify(bookClubService, times(1)).updateMembership(any());
-        assertThat(rsp).isNotNull();
-    }
-
-    @Test
-    void testDeleteMembership() {
-        when(bookClubService.deleteMembership(anyString(), any(UUID.class))).thenReturn(BookClubMembershipDTO.builder().build());
-        ResponseEntity<BookClubMembershipDTO> rsp = bookClubController.deleteMembership("foo", UUID.randomUUID());
-        verify(bookClubService, times(1)).deleteMembership(anyString(), any(UUID.class));
-        assertThat(rsp).isNotNull();
     }
 }

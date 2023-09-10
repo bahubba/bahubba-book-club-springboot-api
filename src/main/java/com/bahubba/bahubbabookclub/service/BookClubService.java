@@ -24,17 +24,7 @@ public interface BookClubService {
 
     List<BookClubDTO> search(String searchTerm);
 
-    List<BookClubMembershipDTO> getMembers(String name);
-
     BookClubDTO disbandBookClubByID(UUID id);
 
     BookClubDTO disbandBookClubByName(String name);
-
-    BookClubRole getRole(String bookClubName);
-
-    BookClubMembershipDTO getMembership(String bookClubName);
-
-    BookClubMembershipDTO updateMembership(MembershipUpdate membershipUpdate);
-
-    BookClubMembershipDTO deleteMembership(String bookClubName, UUID readerID);
 }
