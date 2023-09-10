@@ -160,4 +160,14 @@ public class BookClubController {
     public ResponseEntity<BookClubMembershipDTO> updateMembership(@RequestBody MembershipUpdate membershipUpdate) {
         return ResponseEntity.ok(bookClubService.updateMembership(membershipUpdate));
     }
+
+    /**
+     * Delete a reader's membership in a book club
+     * @param bookClubName name of the book club
+     * @return reader's new membership
+     */
+    @DeleteMapping("/membership/{bookClubName}/{readerID}")
+    public ResponseEntity<BookClubMembershipDTO> deleteMembership(@PathVariable String bookClubName, @PathVariable UUID readerID) {
+        return ResponseEntity.ok(bookClubService.deleteMembership(bookClubName, readerID));
+    }
 }

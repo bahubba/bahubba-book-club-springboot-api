@@ -35,4 +35,6 @@ public interface BookClubService {
     BookClubMembershipDTO getMembership(String bookClubName);
 
     BookClubMembershipDTO updateMembership(MembershipUpdate membershipUpdate);
+
+    BookClubMembershipDTO deleteMembership(String bookClubName, UUID readerID);
 }
