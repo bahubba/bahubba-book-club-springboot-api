@@ -186,6 +186,38 @@ public class BookClubServiceImpl implements BookClubService {
     }
 
     /**
+     * Search for book clubs by name
+     * @param searchTerm The name to search for
+     * @return A list of book clubs that match the search term
+     */
+    @Override
+    public List<BookClubDTO> search(String searchTerm) {
+        return bookClubMapper.entityListToDTO(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(Publicity.PRIVATE, searchTerm));
+    }
+
+    /**
+     * Get all members of a book club
+     * @param name The name of the book club
+     * @return A list of all members of the book club
+     */
+    @Override
+    public List<BookClubMembershipDTO> getMembers(String name) {
+        // Get the reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException();
+        }
+
+        // Get the Reader's membership in the book club, ensuring they are an admin
+        bookClubMembershipRepo
+            .findByBookClubNameAndClubRoleAndReaderId(name, BookClubRole.ADMIN, reader.getId())
+            .orElseThrow(UnauthorizedBookClubActionException::new);
+
+        // Get all members of the book club
+        return bookClubMembershipMapper.entityListToDTOList(bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(name));
+    }
+
+    /**
      * Disband a book club
      * @param id The ID of the book club to disband
      * @return The disbanded book club's persisted entity
@@ -225,16 +257,6 @@ public class BookClubServiceImpl implements BookClubService {
             .orElseThrow(() -> new MembershipNotFoundException(reader.getUsername(), name));
 
         return disbandBookClub(membership);
-    }
-
-    /**
-     * Search for book clubs by name
-     * @param searchTerm The name to search for
-     * @return A list of book clubs that match the search term
-     */
-    @Override
-    public List<BookClubDTO> search(String searchTerm) {
-        return bookClubMapper.entityListToDTO(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(Publicity.PRIVATE, searchTerm));
     }
 
     /**
