@@ -324,6 +324,58 @@ class BookClubServiceTest {
     }
 
     @Test
+    void testGetMembers() {
+        UUID testID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(testID).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class))).thenReturn(Optional.of(
+            BookClubMembership
+                .builder()
+                .reader(Reader.builder().id(testID).build())
+                .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
+                .clubRole(BookClubRole.ADMIN)
+                .build()
+        ));
+        when(bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(anyString())).thenReturn(List.of(new BookClubMembership()));
+
+        List<BookClubMembershipDTO> result = bookClubService.getMembers("foo");
+
+        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
+        verify(bookClubMembershipRepo, times(1)).findAllByBookClubNameOrderByJoined(anyString());
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testGetMembers_ReaderNotFound() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
+
+        assertThrows(ReaderNotFoundException.class, () -> bookClubService.getMembers("foo"));
+
+        verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).findAllByBookClubNameOrderByJoined(anyString());
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testGetMembers_ReaderNotMemberOrNotAdmin() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThrows(UnauthorizedBookClubActionException.class, () -> bookClubService.getMembers("foo"));
+        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).findAllByBookClubNameOrderByJoined(anyString());
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
     void testGetRole() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());

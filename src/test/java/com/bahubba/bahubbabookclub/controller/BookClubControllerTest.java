@@ -132,6 +132,15 @@ class BookClubControllerTest {
     }
 
     @Test
+    void testGetMembers() {
+        when(bookClubService.getMembers(anyString())).thenReturn(new ArrayList<>());
+        ResponseEntity<List<BookClubMembershipDTO>> rsp = bookClubController.getMembers("foo");
+        verify(bookClubService, times(1)).getMembers(anyString());
+        assertThat(rsp).isNotNull();
+        assertThat(rsp.getBody()).isNotNull();
+    }
+
+    @Test
     void testGetRole() {
         when(bookClubService.getRole(anyString())).thenReturn(BookClubRole.READER);
         ResponseEntity<BookClubRole> rsp = bookClubController.getRole("foo");

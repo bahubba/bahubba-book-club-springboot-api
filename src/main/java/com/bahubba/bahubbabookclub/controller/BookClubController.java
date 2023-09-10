@@ -121,6 +121,16 @@ public class BookClubController {
     }
 
     /**
+     * Get all users in a book club
+     * @param bookClubName name of the book club
+     * @return list of users in the book club
+     */
+    @GetMapping("/members/{bookClubName}")
+    public ResponseEntity<List<BookClubMembershipDTO>> getMembers(@PathVariable String bookClubName) {
+        return ResponseEntity.ok(bookClubService.getMembers(bookClubName));
+    }
+
+    /**
      * Gets user's role in a book club
      * @param bookClubName name of the book club
      * @return user's role in the book club
