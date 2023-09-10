@@ -165,4 +165,12 @@ class BookClubControllerTest {
         verify(bookClubService, times(1)).updateMembership(any());
         assertThat(rsp).isNotNull();
     }
+
+    @Test
+    void testDeleteMembership() {
+        when(bookClubService.deleteMembership(anyString(), any(UUID.class))).thenReturn(BookClubMembershipDTO.builder().build());
+        ResponseEntity<BookClubMembershipDTO> rsp = bookClubController.deleteMembership("foo", UUID.randomUUID());
+        verify(bookClubService, times(1)).deleteMembership(anyString(), any(UUID.class));
+        assertThat(rsp).isNotNull();
+    }
 }

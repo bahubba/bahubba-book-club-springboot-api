@@ -315,6 +315,83 @@ public class BookClubServiceImpl implements BookClubService {
     }
 
     /**
+     * Update a reader's role in a book club
+     * @param membershipUpdate The book club and reader to update
+     * @return The updated membership
+     */
+    @Override
+    public BookClubMembershipDTO updateMembership(MembershipUpdate membershipUpdate) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Ensure the reader is not trying to update their own role
+        if(reader.getId().equals(membershipUpdate.getReaderID())) {
+            throw new BadBookClubActionException();
+        }
+
+        // Get the requesting reader's membership in the book club to ensure they're an admin
+        bookClubMembershipRepo
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(membershipUpdate.getBookClubName(), reader.getId(), BookClubRole.ADMIN)
+            .orElseThrow(UnauthorizedBookClubActionException::new);
+
+        // Get the target reader's membership in the book club
+        BookClubMembership membership = bookClubMembershipRepo
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(membershipUpdate.getBookClubName(), membershipUpdate.getReaderID())
+            .orElseThrow(() -> new MembershipNotFoundException(membershipUpdate.getReaderID(), membershipUpdate.getBookClubName()));
+
+        // Ensure the target reader is not the creator of the book club, and we're not trying to change to the same role
+        if(membership.isCreator() || membership.getClubRole() == membershipUpdate.getRole()) {
+            throw new BadBookClubActionException();
+        }
+
+        // Update the reader's role
+        membership.setClubRole(membershipUpdate.getRole());
+        return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(membership));
+    }
+
+    /**
+     * Delete a reader's membership in a book club
+     * @param bookClubName The name of the book club
+     * @param readerID The ID of the reader
+     * @return The deleted membership
+     */
+    @Override
+    public BookClubMembershipDTO deleteMembership(String bookClubName, UUID readerID) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Ensure the reader is not trying to delete their own membership
+        if(reader.getId().equals(readerID)) {
+            throw new BadBookClubActionException();
+        }
+
+        // Get the requesting reader's membership in the book club to ensure they're an admin
+        bookClubMembershipRepo
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(bookClubName, reader.getId(), BookClubRole.ADMIN)
+            .orElseThrow(UnauthorizedBookClubActionException::new);
+
+        // Get the target reader's membership in the book club
+        BookClubMembership membership = bookClubMembershipRepo
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(bookClubName, readerID)
+            .orElseThrow(() -> new MembershipNotFoundException(readerID, bookClubName));
+
+        // Ensure the target reader is not the creator of the book club
+        if(membership.isCreator()) {
+            throw new BadBookClubActionException();
+        }
+
+        // Delete the membership
+        membership.setDeparted(LocalDateTime.now());
+        return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(membership));
+    }
+
+    /**
      * Ensure a reader is a member of a book club before returning the book club
      * @param bookClub The book club to check
      * @return The book club if the reader is a member
@@ -355,43 +432,5 @@ public class BookClubServiceImpl implements BookClubService {
         // Disband the book club
         bookClub.setDisbanded(LocalDateTime.now());
         return bookClubMapper.entityToDTO(bookClubRepo.save(bookClub));
-    }
-
-    /**
-     * Update a reader's role in a book club
-     * @param membershipUpdate The book club and reader to update
-     * @return The updated membership
-     */
-    @Override
-    public BookClubMembershipDTO updateMembership(MembershipUpdate membershipUpdate) {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if(reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
-        }
-
-        // Ensure the reader is not trying to update their own role
-        if(reader.getId().equals(membershipUpdate.getReaderID())) {
-            throw new BadBookClubActionException();
-        }
-
-        // Get the requesting reader's membership in the book club to ensure they're an admin
-        bookClubMembershipRepo
-            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(membershipUpdate.getBookClubName(), reader.getId(), BookClubRole.ADMIN)
-            .orElseThrow(UnauthorizedBookClubActionException::new);
-
-        // Get the target reader's membership in the book club
-        BookClubMembership membership = bookClubMembershipRepo
-            .findByBookClubNameAndReaderIdAndDepartedIsNull(membershipUpdate.getBookClubName(), membershipUpdate.getReaderID())
-            .orElseThrow(() -> new MembershipNotFoundException(membershipUpdate.getReaderID(), membershipUpdate.getBookClubName()));
-
-        // Ensure the target reader is not the creator of the book club, and we're not trying to change to the same role
-        if(membership.isCreator() || membership.getClubRole() == membershipUpdate.getRole()) {
-            throw new BadBookClubActionException();
-        }
-
-        // Update the reader's role
-        membership.setClubRole(membershipUpdate.getRole());
-        return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(membership));
     }
 }
