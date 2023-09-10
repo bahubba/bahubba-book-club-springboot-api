@@ -9,6 +9,7 @@ import com.bahubba.bahubbabookclub.model.entity.Notification;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
+import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
@@ -444,6 +445,275 @@ class BookClubServiceTest {
         when(bookClubMembershipRepo.existsByBookClubIdAndReaderId(any(UUID.class), any(UUID.class))).thenReturn(false);
 
         assertThrows(BookClubNotFoundException.class, () -> bookClubService.findByID(UUID.randomUUID()));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testUpdateMembership() {
+        UUID testReaderID = UUID.randomUUID();
+        UUID testUpdateReaderID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
+            .thenReturn(Reader.builder().id(testReaderID).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+            anyString(), any(UUID.class), any(BookClubRole.class))
+        ).thenReturn(Optional.of(BookClubMembership.builder().build()));
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class)))
+            .thenReturn(Optional.of(
+                BookClubMembership
+                    .builder()
+                    .bookClub(
+                        BookClub
+                            .builder()
+                            .id(UUID.randomUUID())
+                            .build()
+                    )
+                    .reader(
+                        Reader
+                            .builder()
+                            .id(testUpdateReaderID)
+                            .build()
+                    )
+                    .isCreator(false)
+                    .build()
+            ));
+        when(bookClubMembershipRepo.save(any(BookClubMembership.class))).thenReturn(new BookClubMembership());
+
+        BookClubMembershipDTO result = bookClubService.updateMembership(
+            MembershipUpdate
+                .builder()
+                .bookClubName("foo")
+                .readerID(testUpdateReaderID)
+                .role(BookClubRole.ADMIN)
+                .build()
+        );
+
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+                anyString(), any(UUID.class), any(BookClubRole.class)
+            );
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(1)).save(any(BookClubMembership.class));
+        assertThat(result).isNotNull();
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testUpdateMembership_NoReader() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
+
+        assertThrows(ReaderNotFoundException.class, () -> bookClubService.updateMembership(MembershipUpdate.builder().build()));
+        verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(anyString(), any(UUID.class), any(BookClubRole.class));
+        verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testUpdateMembership_UpdatingSelf() {
+        UUID testReaderID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
+            .thenReturn(Reader.builder().id(testReaderID).build());
+
+        assertThrows(BadBookClubActionException.class, () -> bookClubService.updateMembership(
+            MembershipUpdate
+                .builder()
+                .bookClubName("foo")
+                .readerID(testReaderID)
+                .role(BookClubRole.ADMIN)
+                .build()
+        ));
+
+        verify(bookClubMembershipRepo, times(0))
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+                anyString(), any(UUID.class), any(BookClubRole.class)
+            );
+        verify(bookClubMembershipRepo, times(0))
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testUpdateMembership_RequestorNotMember() {
+        UUID testReaderID = UUID.randomUUID();
+        UUID testUpdateReaderID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
+            .thenReturn(Reader.builder().id(testReaderID).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+            anyString(), any(UUID.class), any(BookClubRole.class))
+        ).thenReturn(Optional.empty());
+
+        assertThrows(UnauthorizedBookClubActionException.class, () -> bookClubService.updateMembership(
+            MembershipUpdate
+                .builder()
+                .bookClubName("foo")
+                .readerID(testUpdateReaderID)
+                .role(BookClubRole.ADMIN)
+                .build()
+        ));
+
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+                anyString(), any(UUID.class), any(BookClubRole.class)
+            );
+        verify(bookClubMembershipRepo, times(0))
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testUpdateMembership_TargetReaderNotMember() {
+        UUID testReaderID = UUID.randomUUID();
+        UUID testUpdateReaderID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
+            .thenReturn(Reader.builder().id(testReaderID).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+            anyString(), any(UUID.class), any(BookClubRole.class))
+        ).thenReturn(Optional.of(BookClubMembership.builder().build()));
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class)))
+            .thenReturn(Optional.empty());
+
+        assertThrows(MembershipNotFoundException.class, () -> bookClubService.updateMembership(
+            MembershipUpdate
+                .builder()
+                .bookClubName("foo")
+                .readerID(testUpdateReaderID)
+                .role(BookClubRole.ADMIN)
+                .build()
+        ));
+
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+                anyString(), any(UUID.class), any(BookClubRole.class)
+            );
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testUpdateMembership_UpdateCreator() {
+        UUID testReaderID = UUID.randomUUID();
+        UUID testUpdateReaderID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
+            .thenReturn(Reader.builder().id(testReaderID).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+            anyString(), any(UUID.class), any(BookClubRole.class))
+        ).thenReturn(Optional.of(BookClubMembership.builder().build()));
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class)))
+            .thenReturn(Optional.of(
+                BookClubMembership
+                    .builder()
+                    .bookClub(
+                        BookClub
+                            .builder()
+                            .id(UUID.randomUUID())
+                            .build()
+                    )
+                    .reader(
+                        Reader
+                            .builder()
+                            .id(testUpdateReaderID)
+                            .build()
+                    )
+                    .isCreator(true)
+                    .build()
+            ));
+
+        assertThrows(BadBookClubActionException.class, () -> bookClubService.updateMembership(
+            MembershipUpdate
+                .builder()
+                .bookClubName("foo")
+                .readerID(testUpdateReaderID)
+                .role(BookClubRole.ADMIN)
+                .build()
+        ));
+
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+                anyString(), any(UUID.class), any(BookClubRole.class)
+            );
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testUpdateMembership_NoUpdate() {
+        UUID testReaderID = UUID.randomUUID();
+        UUID testUpdateReaderID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
+            .thenReturn(Reader.builder().id(testReaderID).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+            anyString(), any(UUID.class), any(BookClubRole.class))
+        ).thenReturn(Optional.of(BookClubMembership.builder().build()));
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class)))
+            .thenReturn(Optional.of(
+                BookClubMembership
+                    .builder()
+                    .bookClub(
+                        BookClub
+                            .builder()
+                            .id(UUID.randomUUID())
+                            .build()
+                    )
+                    .reader(
+                        Reader
+                            .builder()
+                            .id(testUpdateReaderID)
+                            .build()
+                    )
+                    .clubRole(BookClubRole.ADMIN)
+                    .isCreator(false)
+                    .build()
+            ));
+        when(bookClubMembershipRepo.save(any(BookClubMembership.class))).thenReturn(new BookClubMembership());
+
+        assertThrows(BadBookClubActionException.class, () -> bookClubService.updateMembership(
+            MembershipUpdate
+                .builder()
+                .bookClubName("foo")
+                .readerID(testUpdateReaderID)
+                .role(BookClubRole.ADMIN)
+                .build()
+        ));
+
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
+                anyString(), any(UUID.class), any(BookClubRole.class)
+            );
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
 
         securityUtilMockedStatic.close();
     }

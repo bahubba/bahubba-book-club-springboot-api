@@ -6,6 +6,7 @@ import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
+import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,5 +149,15 @@ public class BookClubController {
     @GetMapping("/membership/{bookClubName}")
     public ResponseEntity<BookClubMembershipDTO> getMembership(@PathVariable String bookClubName) {
         return ResponseEntity.ok(bookClubService.getMembership(bookClubName));
+    }
+
+    /**
+     * Update a reader's role in a book club
+     * @param membershipUpdate book club name, reader ID, and new role
+     * @return reader's new membership
+     */
+    @PatchMapping("/membership")
+    public ResponseEntity<BookClubMembershipDTO> updateMembership(@RequestBody MembershipUpdate membershipUpdate) {
+        return ResponseEntity.ok(bookClubService.updateMembership(membershipUpdate));
     }
 }

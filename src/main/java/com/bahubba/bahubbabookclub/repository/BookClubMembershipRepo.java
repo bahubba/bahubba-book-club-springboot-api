@@ -16,6 +16,10 @@ import java.util.UUID;
 public interface BookClubMembershipRepo extends JpaRepository<BookClubMembership, UUID> {
     Optional<BookClubMembership> findByBookClubNameAndReaderId(String bookClubName, UUID readerId);
 
+    Optional<BookClubMembership> findByBookClubNameAndReaderIdAndDepartedIsNull(String bookClubName, UUID readerId);
+
+    Optional<BookClubMembership> findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(String bookClubName, UUID readerId, BookClubRole clubRole);
+
     Optional<BookClubMembership> findByBookClubIdAndReaderId(UUID bookClubId, UUID readerId);
 
     Boolean existsByBookClubIdAndReaderId(UUID bookClubId, UUID readerId);

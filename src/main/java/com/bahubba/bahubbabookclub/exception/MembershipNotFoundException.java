@@ -28,4 +28,13 @@ public class MembershipNotFoundException extends RuntimeException {
     public MembershipNotFoundException(String username, String bookClubName) {
         super("Reader '" + username + "' does not have a membership in book club '" + bookClubName + "'");
     }
+
+    /**
+     * Generates exception for missing book club membership by reader ID and book club name
+     * @param readerID reader ID
+     * @param bookClubName book club name
+     */
+    public MembershipNotFoundException(UUID readerID, String bookClubName) {
+        super("Reader with ID '" + readerID + "' does not have a membership in '" + bookClubName + "'");
+    }
 }

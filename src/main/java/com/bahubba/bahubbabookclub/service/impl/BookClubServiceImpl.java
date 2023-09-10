@@ -13,6 +13,7 @@ import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
 import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
+import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
@@ -354,5 +355,43 @@ public class BookClubServiceImpl implements BookClubService {
         // Disband the book club
         bookClub.setDisbanded(LocalDateTime.now());
         return bookClubMapper.entityToDTO(bookClubRepo.save(bookClub));
+    }
+
+    /**
+     * Update a reader's role in a book club
+     * @param membershipUpdate The book club and reader to update
+     * @return The updated membership
+     */
+    @Override
+    public BookClubMembershipDTO updateMembership(MembershipUpdate membershipUpdate) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Ensure the reader is not trying to update their own role
+        if(reader.getId().equals(membershipUpdate.getReaderID())) {
+            throw new BadBookClubActionException();
+        }
+
+        // Get the requesting reader's membership in the book club to ensure they're an admin
+        bookClubMembershipRepo
+            .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(membershipUpdate.getBookClubName(), reader.getId(), BookClubRole.ADMIN)
+            .orElseThrow(UnauthorizedBookClubActionException::new);
+
+        // Get the target reader's membership in the book club
+        BookClubMembership membership = bookClubMembershipRepo
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(membershipUpdate.getBookClubName(), membershipUpdate.getReaderID())
+            .orElseThrow(() -> new MembershipNotFoundException(membershipUpdate.getReaderID(), membershipUpdate.getBookClubName()));
+
+        // Ensure the target reader is not the creator of the book club, and we're not trying to change to the same role
+        if(membership.isCreator() || membership.getClubRole() == membershipUpdate.getRole()) {
+            throw new BadBookClubActionException();
+        }
+
+        // Update the reader's role
+        membership.setClubRole(membershipUpdate.getRole());
+        return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(membership));
     }
 }
