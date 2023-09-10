@@ -6,6 +6,7 @@ import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
+import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import org.junit.jupiter.api.Test;
@@ -154,6 +155,14 @@ class BookClubControllerTest {
         when(bookClubService.getMembership(anyString())).thenReturn(BookClubMembershipDTO.builder().build());
         ResponseEntity<BookClubMembershipDTO> rsp = bookClubController.getMembership("foo");
         verify(bookClubService, times(1)).getMembership(anyString());
+        assertThat(rsp).isNotNull();
+    }
+
+    @Test
+    void testUpdateMembership() {
+        when(bookClubService.updateMembership(any())).thenReturn(BookClubMembershipDTO.builder().build());
+        ResponseEntity<BookClubMembershipDTO> rsp = bookClubController.updateMembership(MembershipUpdate.builder().build());
+        verify(bookClubService, times(1)).updateMembership(any());
         assertThat(rsp).isNotNull();
     }
 }
