@@ -3,6 +3,7 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
+import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
 import com.bahubba.bahubbabookclub.service.MembershipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -65,5 +66,17 @@ public class MembershipController {
     @DeleteMapping("{bookClubName}/{readerID}")
     public ResponseEntity<BookClubMembershipDTO> deleteMembership(@PathVariable String bookClubName, @PathVariable UUID readerID) {
         return ResponseEntity.ok(membershipService.deleteMembership(bookClubName, readerID));
+    }
+
+    /**
+     * Change ownership of a book club
+     * TODO - Change "creator" terminology to "owner"
+     * @param ownershipChange book club name and new owner ID
+     * @return true if successful
+     */
+    @PatchMapping("/change-ownership")
+    public ResponseEntity<Boolean> changeOwnership(@RequestBody OwnershipChange ownershipChange) {
+        membershipService.changeOwnership(ownershipChange);
+        return ResponseEntity.ok(true);
     }
 }
