@@ -2,7 +2,6 @@ package com.bahubba.bahubbabookclub.service.impl;
 
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
-import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
@@ -13,7 +12,6 @@ import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
 import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
-import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
