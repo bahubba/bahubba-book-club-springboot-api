@@ -27,4 +27,6 @@ public interface BookClubMembershipRepo extends JpaRepository<BookClubMembership
     Optional<BookClubMembership> findByBookClubNameAndClubRoleAndReaderId(String bookClubName, BookClubRole role, UUID readerId);
 
     List<BookClubMembership> findAllByBookClubNameOrderByJoined(String bookClubName);
+
+    Optional<BookClubMembership> findByBookClubNameAndReaderIdAndIsCreatorTrue(String bookClubName, UUID readerId);
 }

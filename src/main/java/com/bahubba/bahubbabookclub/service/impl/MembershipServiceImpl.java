@@ -10,6 +10,7 @@ import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
 import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
+import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.service.MembershipService;
@@ -127,7 +128,7 @@ public class MembershipServiceImpl implements MembershipService {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+            throw new ReaderNotFoundException();
         }
 
         // Ensure the reader is not trying to update their own role
@@ -192,5 +193,41 @@ public class MembershipServiceImpl implements MembershipService {
         // Delete the membership
         membership.setDeparted(LocalDateTime.now());
         return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(membership));
+    }
+
+    /**
+     * Change ownership of a book club
+     * @param ownershipChange The book club and new owner ID
+     * @return true if successful
+     */
+    @Override
+    public Boolean changeOwnership(OwnershipChange ownershipChange) {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if(reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Ensure the owner isn't trying to change ownership to themselves (the existing owner)
+        if(reader.getId().equals(ownershipChange.getNewOwnerID())) {
+            throw new BadBookClubActionException();
+        }
+
+        // Ensure the reader is not trying to change ownership of a book club they don't own
+        bookClubMembershipRepo
+            .findByBookClubNameAndReaderIdAndIsCreatorTrue(ownershipChange.getBookClubName(), reader.getId())
+            .orElseThrow(UnauthorizedBookClubActionException::new);
+
+        // Get the new owner's membership
+        BookClubMembership newOwnerMembership = bookClubMembershipRepo
+            .findByBookClubNameAndReaderIdAndDepartedIsNull(ownershipChange.getBookClubName(), ownershipChange.getNewOwnerID())
+            .orElseThrow(() -> new MembershipNotFoundException(ownershipChange.getNewOwnerID(), ownershipChange.getBookClubName()));
+
+        // Change ownership (and make the new owner an admin in case they weren't already)
+        newOwnerMembership.setClubRole(BookClubRole.ADMIN);
+        newOwnerMembership.setCreator(true);
+        bookClubMembershipRepo.save(newOwnerMembership);
+
+        return true;
     }
 }

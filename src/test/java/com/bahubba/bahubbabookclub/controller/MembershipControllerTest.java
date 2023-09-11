@@ -3,6 +3,7 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
+import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
 import com.bahubba.bahubbabookclub.service.MembershipService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,16 @@ class MembershipControllerTest {
         ResponseEntity<BookClubMembershipDTO> rsp = membershipController.deleteMembership("foo", UUID.randomUUID());
 
         verify(membershipService, times(1)).deleteMembership(anyString(), any(UUID.class));
+        assertThat(rsp).isNotNull();
+    }
+
+    @Test
+    void testChangeOwnership() {
+        when(membershipService.changeOwnership(any(OwnershipChange.class))).thenReturn(true);
+
+        ResponseEntity<Boolean> rsp = membershipController.changeOwnership(OwnershipChange.builder().build());
+
+        verify(membershipService, times(1)).changeOwnership(any(OwnershipChange.class));
         assertThat(rsp).isNotNull();
     }
 }
