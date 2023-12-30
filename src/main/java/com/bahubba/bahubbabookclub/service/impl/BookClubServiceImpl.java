@@ -18,7 +18,7 @@ import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,24 +32,19 @@ import java.util.UUID;
  */
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class BookClubServiceImpl implements BookClubService {
-    @Autowired
-    private BookClubRepo bookClubRepo;
+    private final BookClubRepo bookClubRepo;
 
-    @Autowired
-    private BookClubMapper bookClubMapper;
+    private final BookClubMapper bookClubMapper;
 
-    @Autowired
-    private ReaderMapper readerMapper;
+    private final ReaderMapper readerMapper;
 
-    @Autowired
-    private BookClubMembershipMapper bookClubMembershipMapper;
+    private final BookClubMembershipMapper bookClubMembershipMapper;
 
-    @Autowired
-    private BookClubMembershipRepo bookClubMembershipRepo;
+    private final BookClubMembershipRepo bookClubMembershipRepo;
 
-    @Autowired
-    private NotificationRepo notificationRepo;
+    private final NotificationRepo notificationRepo;
 
     /**
      * Create a new book club
@@ -198,10 +193,14 @@ public class BookClubServiceImpl implements BookClubService {
     public Page<BookClubDTO> findAll(int pageNum, int pageSize) {
         // Ensure the page size is appropriate
         if(pageSize < 0) {
+            // If the page size is negative, throw an error, but default the page size to 10 and return results
             throw new PageSizeTooSmallException(10, getPageOfAll(pageNum, 10));
         } else if(pageSize > 50) {
+            // If the page size is > 50, throw an error, but default the page size to 50 and return results
             throw new PageSizeTooLargeException(50, 50, getPageOfAll(pageNum, 50));
         }
+
+        // Get results using the appropriate page size
         return getPageOfAll(pageNum, pageSize);
     }
 

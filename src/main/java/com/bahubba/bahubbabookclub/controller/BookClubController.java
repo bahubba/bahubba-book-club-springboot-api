@@ -7,14 +7,12 @@ import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.model.payload.PaginatedPayload;
 import com.bahubba.bahubbabookclub.service.BookClubService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -22,9 +20,9 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/v1/book-clubs")
+@RequiredArgsConstructor
 public class BookClubController {
-    @Autowired
-    private BookClubService bookClubService;
+    private final BookClubService bookClubService;
 
     /**
      * Creates a book club

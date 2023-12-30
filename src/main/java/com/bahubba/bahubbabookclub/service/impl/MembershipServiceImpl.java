@@ -15,39 +15,47 @@ import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.service.MembershipService;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class MembershipServiceImpl implements MembershipService {
-    @Autowired
-    private BookClubMembershipRepo bookClubMembershipRepo;
+    private final BookClubMembershipRepo bookClubMembershipRepo;
 
-    @Autowired
-    private BookClubRepo bookClubRepo;
+    private final BookClubRepo bookClubRepo;
 
-    @Autowired
-    private BookClubMembershipMapper bookClubMembershipMapper;
+    private final BookClubMembershipMapper bookClubMembershipMapper;
 
-    @Autowired
-    private BookClubMapper bookClubMapper;
+    private final BookClubMapper bookClubMapper;
 
-    @Autowired
-    private ReaderMapper readerMapper;
+    private final ReaderMapper readerMapper;
 
     /**
      * Get all members of a book club
      * @param bookClubName The name of a book club
+     * @param pageNum The page number to retrieve
+     * @param pageSize The number of results per page
      * @return A list of all members of the book club
+     * @throws ReaderNotFoundException if the reader is not logged in or doesn't exist
+     * @throws UnauthorizedBookClubActionException if the reader is not an admin of the book club
+     * @throws PageSizeTooSmallException if the page size is too small
+     * @throws PageSizeTooLargeException if the page size is too large
      */
     @Override
-    public List<BookClubMembershipDTO> getAll(String bookClubName) {
+    public Page<BookClubMembershipDTO> getAll(String bookClubName, int pageNum, int pageSize) throws
+        ReaderNotFoundException,
+        UnauthorizedBookClubActionException,
+        PageSizeTooSmallException,
+        PageSizeTooLargeException {
+
         // Get the reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
@@ -59,9 +67,22 @@ public class MembershipServiceImpl implements MembershipService {
             .findByBookClubNameAndClubRoleAndReaderId(bookClubName, BookClubRole.ADMIN, reader.getId())
             .orElseThrow(UnauthorizedBookClubActionException::new);
 
-        // Get all members of the book club
-        return bookClubMembershipMapper
-            .entityListToDTOList(bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(bookClubName));
+        // Ensure the page size is valid
+        if(pageSize < 1) {
+            throw new PageSizeTooSmallException(
+                10,
+                getPageOfMembershipsForBookClub(bookClubName, pageNum, 10)
+            );
+        } else if(pageSize > 50) {
+            throw new PageSizeTooLargeException(
+                50,
+                50,
+                getPageOfMembershipsForBookClub(bookClubName, pageNum, 50)
+            );
+        }
+
+        // Get all members of the book club using the given page size
+        return getPageOfMembershipsForBookClub(bookClubName, pageNum, pageSize);
     }
 
     /**
@@ -229,5 +250,18 @@ public class MembershipServiceImpl implements MembershipService {
         bookClubMembershipRepo.save(newOwnerMembership);
 
         return true;
+    }
+
+    /**
+     * Get a page of memberships for a book club
+     * @param bookClubName The name of the book club
+     * @param pageNum The page number to retrieve
+     * @param pageSize The number of results per page
+     * @return A page of memberships for the book club
+     */
+    private Page<BookClubMembershipDTO> getPageOfMembershipsForBookClub(String bookClubName, int pageNum, int pageSize) {
+        return bookClubMembershipMapper.entityPageToDTOPage(
+            bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(bookClubName, PageRequest.of(pageNum, pageSize))
+        );
     }
 }

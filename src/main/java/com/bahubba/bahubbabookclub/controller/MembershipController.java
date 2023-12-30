@@ -5,7 +5,7 @@ import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
 import com.bahubba.bahubbabookclub.service.MembershipService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +14,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/memberships")
+@RequiredArgsConstructor
 public class MembershipController {
-    @Autowired
-    private MembershipService membershipService;
+    private final MembershipService membershipService;
 
     /**
      * Get all users in a book club
@@ -64,7 +64,10 @@ public class MembershipController {
      * @return reader's new membership
      */
     @DeleteMapping("{bookClubName}/{readerID}")
-    public ResponseEntity<BookClubMembershipDTO> deleteMembership(@PathVariable String bookClubName, @PathVariable UUID readerID) {
+    public ResponseEntity<BookClubMembershipDTO> deleteMembership(
+        @PathVariable String bookClubName,
+        @PathVariable UUID readerID
+    ) {
         return ResponseEntity.ok(membershipService.deleteMembership(bookClubName, readerID));
     }
 
