@@ -2,6 +2,8 @@ package com.bahubba.bahubbabookclub.repository;
 
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,6 +17,8 @@ import java.util.UUID;
  */
 @Repository
 public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
+    Page<BookClub> findPageOfAll(Pageable pageable);
+
     Optional<BookClub> findByName(final String name);
 
     @Query(
@@ -28,7 +32,7 @@ public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
             "AND bcr.departed IS NULL " +
             "AND r.id = :readerId"
     )
-    List<BookClub> findAllForReader(final UUID readerId);
+    Page<BookClub> findAllForReader(final UUID readerId, Pageable pageable);
 
-    List<BookClub> findAllByPublicityNotAndNameContainsIgnoreCase(final Publicity publicity, final String searchTerm);
+    Page<BookClub> findAllByPublicityNotAndNameContainsIgnoreCase(final Publicity publicity, final String searchTerm, Pageable pageable);
 }

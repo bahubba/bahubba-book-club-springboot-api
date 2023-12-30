@@ -2,6 +2,8 @@ package com.bahubba.bahubbabookclub.repository;
 
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -26,7 +28,7 @@ public interface BookClubMembershipRepo extends JpaRepository<BookClubMembership
 
     Optional<BookClubMembership> findByBookClubNameAndClubRoleAndReaderId(String bookClubName, BookClubRole role, UUID readerId);
 
-    List<BookClubMembership> findAllByBookClubNameOrderByJoined(String bookClubName);
+    Page<BookClubMembership> findAllByBookClubNameOrderByJoined(String bookClubName, Pageable pageable);
 
     Optional<BookClubMembership> findByBookClubNameAndReaderIdAndIsCreatorTrue(String bookClubName, UUID readerId);
 }

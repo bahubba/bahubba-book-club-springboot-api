@@ -19,11 +19,12 @@ import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -145,7 +146,7 @@ public class BookClubServiceImpl implements BookClubService {
 
     /**
      * Find a book club by its name
-     * @param name - The name of the book club to find
+     * @param name The name of the book club to find
      * @return The found book club
      * @throws BookClubNotFoundException if the book club is not found, or if it is private and the reader is not a member
      * @throws ReaderNotFoundException if the book club is private and reader is not logged in
@@ -163,25 +164,45 @@ public class BookClubServiceImpl implements BookClubService {
         // Otherwise, check if the current reader is a member of the book club
         return checkBookClubMembership(bookClub);
     }
-    
+
+    /**
+     * Finds book clubs that the reader has some role in
+     * @param pageNum Page number for results
+     * @param pageSize Number of results per page
+     * @return A page of book clubs that the reader has some role in
+     * @throws ReaderNotFoundException If the reader isn't found in the DB
+     */
     @Override
-    public List<BookClubDTO> findAllForReader() {
+    public Page<BookClubDTO> findAllForReader(int pageNum, int pageSize) throws ReaderNotFoundException {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
             throw new ReaderNotFoundException();
         }
 
-        return bookClubMapper.entityListToDTO(bookClubRepo.findAllForReader(reader.getId()));
+        // Ensure the page size is appropriate
+        if(pageSize < 0) {
+            throw new PageSizeTooSmallException(10, getPageOfAllForReader(reader.getId(), pageNum, 10));
+        } else if(pageSize > 50) {
+            throw new PageSizeTooLargeException(50, 50, getPageOfAllForReader(reader.getId(), pageNum, 50));
+        }
+
+        return getPageOfAllForReader(reader.getId(), pageNum, pageSize);
     }
 
     /**
      * Find all book clubs
-     * @return A list of all book clubs
+     * @return A page of results of all book clubs
      */
     @Override
-    public List<BookClubDTO> findAll() {
-        return bookClubMapper.entityListToDTO(bookClubRepo.findAll());
+    public Page<BookClubDTO> findAll(int pageNum, int pageSize) {
+        // Ensure the page size is appropriate
+        if(pageSize < 0) {
+            throw new PageSizeTooSmallException(10, getPageOfAll(pageNum, 10));
+        } else if(pageSize > 50) {
+            throw new PageSizeTooLargeException(50, 50, getPageOfAll(pageNum, 50));
+        }
+        return getPageOfAll(pageNum, pageSize);
     }
 
     /**
@@ -190,8 +211,25 @@ public class BookClubServiceImpl implements BookClubService {
      * @return A list of book clubs that match the search term
      */
     @Override
-    public List<BookClubDTO> search(String searchTerm) {
-        return bookClubMapper.entityListToDTO(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(Publicity.PRIVATE, searchTerm));
+    public Page<BookClubDTO> search(String searchTerm, int pageNum, int pageSize) {
+        // Ensure the page size is appropriate
+        if(pageSize < 1) {
+            // If the page size is negative, throw an error, but default the page size to 10 and return results
+            throw new PageSizeTooSmallException(
+                10,
+                getPageOfSearchResults(searchTerm, pageNum, 10)
+            );
+        } else if(pageSize > 50) {
+            // If the page size is > 50, throw an error, but default the page size to 50 and return results
+            throw new PageSizeTooLargeException(
+                50,
+                50,
+                getPageOfSearchResults(searchTerm, pageNum, 50)
+            );
+        }
+
+        // Get results using the appropriate page size
+        return getPageOfSearchResults(searchTerm, pageNum, pageSize);
     }
 
     /**
@@ -277,5 +315,42 @@ public class BookClubServiceImpl implements BookClubService {
         // Disband the book club
         bookClub.setDisbanded(LocalDateTime.now());
         return bookClubMapper.entityToDTO(bookClubRepo.save(bookClub));
+    }
+
+    /**
+     * Retrieves a page of book clubs that the reader has some role in
+     * @param readerID The UUID of the reader
+     * @param pageNum The page number
+     * @param pageSize The number of results per page
+     */
+    private Page<BookClubDTO> getPageOfAllForReader(UUID readerID, int pageNum, int pageSize) {
+        return bookClubMapper.entityPageToDTOPage(
+            bookClubRepo.findAllForReader(readerID, PageRequest.of(pageNum, pageSize))
+        );
+    }
+
+    /**
+     * Retrieves a page of all book clubs
+     * @param pageNum The page number
+     * @param pageSize The number of results per page
+     */
+    private Page<BookClubDTO> getPageOfAll(int pageNum, int pageSize) {
+        return bookClubMapper.entityPageToDTOPage(bookClubRepo.findPageOfAll(PageRequest.of(pageNum, pageSize)));
+    }
+
+    /**
+     * Searches for book clubs by name, returning a paged subset
+     * @param searchTerm the substring of the name to search for
+     * @param pageNum the page number
+     * @param pageSize the size of the page
+     */
+    private Page<BookClubDTO> getPageOfSearchResults(String searchTerm, int pageNum, int pageSize) {
+        return bookClubMapper.entityPageToDTOPage(
+            bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(
+                Publicity.PRIVATE,
+                searchTerm,
+                PageRequest.of(pageNum, pageSize)
+            )
+        );
     }
 }

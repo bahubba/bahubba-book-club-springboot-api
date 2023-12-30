@@ -5,8 +5,11 @@ import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.model.payload.PaginatedPayload;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,8 +77,8 @@ public class BookClubController {
      * @return all book clubs that the requesting reader has a role in
      */
     @GetMapping("/all-for-reader")
-    public ResponseEntity<List<BookClubDTO>> getAllForReader() {
-        return ResponseEntity.ok(bookClubService.findAllForReader());
+    public ResponseEntity<Page<BookClubDTO>> getAllForReader(@RequestBody PaginatedPayload pagination) {
+        return ResponseEntity.ok(bookClubService.findAllForReader(pagination.getPageNum(), pagination.getPageSize()));
     }
 
     /**
@@ -84,8 +87,8 @@ public class BookClubController {
      */
     // TODO - pre-authorize this endpoint to only allow admins to access it
     @GetMapping("/all")
-    public ResponseEntity<List<BookClubDTO>> getAll() {
-        return ResponseEntity.ok(bookClubService.findAll());
+    public ResponseEntity<Page<BookClubDTO>> getAll(@RequestBody PaginatedPayload pagination) {
+        return ResponseEntity.ok(bookClubService.findAll(pagination.getPageNum(), pagination.getPageSize()));
     }
 
     /**
@@ -114,7 +117,13 @@ public class BookClubController {
      * @return list of book clubs
      */
     @PostMapping(value = "/search")
-    public ResponseEntity<List<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch) {
-        return ResponseEntity.ok(bookClubService.search(bookClubSearch.getSearchTerm()));
+    public ResponseEntity<Page<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch) {
+        return ResponseEntity.ok(
+            bookClubService.search(
+                bookClubSearch.getSearchTerm(),
+                bookClubSearch.getPageNum(),
+                bookClubSearch.getPageSize()
+            )
+        );
     }
 }

@@ -6,6 +6,7 @@ import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import lombok.Generated;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -26,4 +27,7 @@ public interface BookClubMapper {
 
     @Generated
     List<BookClubDTO> entityListToDTO(List<BookClub> bookClubs);
+
+    @Generated
+    Page<BookClubDTO> entityPageToDTOPage(Page<BookClub> bookClubs);
 }

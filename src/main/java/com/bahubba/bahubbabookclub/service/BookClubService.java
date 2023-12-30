@@ -2,6 +2,7 @@ package com.bahubba.bahubbabookclub.service;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,11 +16,11 @@ public interface BookClubService {
 
     BookClubDTO findByName(String name);
 
-    List<BookClubDTO> findAllForReader();
+    Page<BookClubDTO> findAllForReader(int pageNum, int pageSize);
 
-    List<BookClubDTO> findAll();
+    Page<BookClubDTO> findAll(int pageNum, int pageSize);
 
-    List<BookClubDTO> search(String searchTerm);
+    Page<BookClubDTO> search(String searchTerm, int pageNum, int pageSize);
 
     BookClubDTO disbandBookClubByID(UUID id);
 
