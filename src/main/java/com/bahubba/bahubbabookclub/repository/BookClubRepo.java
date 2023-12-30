@@ -2,6 +2,7 @@ package com.bahubba.bahubbabookclub.repository;
 
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,7 +17,7 @@ import java.util.UUID;
  */
 @Repository
 public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
-    Page<BookClub> findPageOfAll(Pageable pageable);
+    @NotNull Page<BookClub> findAll(@NotNull Pageable pageable);
 
     Optional<BookClub> findByName(final String name);
 

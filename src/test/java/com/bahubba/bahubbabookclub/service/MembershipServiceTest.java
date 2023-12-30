@@ -1,9 +1,6 @@
 package com.bahubba.bahubbabookclub.service;
 
-import com.bahubba.bahubbabookclub.exception.BadBookClubActionException;
-import com.bahubba.bahubbabookclub.exception.MembershipNotFoundException;
-import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
-import com.bahubba.bahubbabookclub.exception.UnauthorizedBookClubActionException;
+import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
@@ -19,6 +16,8 @@ import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -61,12 +60,15 @@ class MembershipServiceTest {
                 .clubRole(BookClubRole.ADMIN)
                 .build()
         ));
-        when(bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(anyString())).thenReturn(List.of(new BookClubMembership()));
+        when(bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(anyString(), any(Pageable.class)))
+            .thenReturn(Page.empty());
 
-        List<BookClubMembershipDTO> result = membershipService.getAll("foo");
+        Page<BookClubMembershipDTO> result = membershipService.getAll("foo", 1, 1);
 
-        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
-        verify(bookClubMembershipRepo, times(1)).findAllByBookClubNameOrderByJoined(anyString());
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
+        verify(bookClubMembershipRepo, times(1))
+            .findAllByBookClubNameOrderByJoined(anyString(), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }
@@ -76,10 +78,12 @@ class MembershipServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
 
-        assertThrows(ReaderNotFoundException.class, () -> membershipService.getAll("foo"));
+        assertThrows(ReaderNotFoundException.class, () -> membershipService.getAll("foo", 1, 1));
 
-        verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
-        verify(bookClubMembershipRepo, times(0)).findAllByBookClubNameOrderByJoined(anyString());
+        verify(bookClubMembershipRepo, times(0))
+            .findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0))
+            .findAllByBookClubNameOrderByJoined(anyString(), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }
@@ -87,13 +91,72 @@ class MembershipServiceTest {
     @Test
     void testGetAll_ReaderNotMemberOrNotAdmin() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
-        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
+            .thenReturn(Reader.builder().id(UUID.randomUUID()).build());
 
-        when(bookClubMembershipRepo.findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class))).thenReturn(Optional.empty());
+        when(bookClubMembershipRepo.findByBookClubNameAndClubRoleAndReaderId(
+            anyString(), any(BookClubRole.class), any(UUID.class))
+        ).thenReturn(Optional.empty());
 
-        assertThrows(UnauthorizedBookClubActionException.class, () -> membershipService.getAll("foo"));
-        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
-        verify(bookClubMembershipRepo, times(0)).findAllByBookClubNameOrderByJoined(anyString());
+        assertThrows(UnauthorizedBookClubActionException.class, () -> membershipService.getAll("foo", 1, 1));
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0))
+            .findAllByBookClubNameOrderByJoined(anyString(), any(Pageable.class));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testGetAll_NegativePageSize() {
+        UUID testID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(testID).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class))).thenReturn(Optional.of(
+            BookClubMembership
+                .builder()
+                .reader(Reader.builder().id(testID).build())
+                .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
+                .clubRole(BookClubRole.ADMIN)
+                .build()
+        ));
+        when(bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(anyString(), any(Pageable.class)))
+            .thenReturn(Page.empty());
+
+        assertThrows(PageSizeTooSmallException.class, () -> membershipService.getAll("foo", 1, -1));
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
+        verify(bookClubMembershipRepo, times(1))
+            .findAllByBookClubNameOrderByJoined(anyString(), any(Pageable.class));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testGetAll_TooLargePageSize() {
+        UUID testID = UUID.randomUUID();
+
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(testID).build());
+
+        when(bookClubMembershipRepo.findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class))).thenReturn(Optional.of(
+            BookClubMembership
+                .builder()
+                .reader(Reader.builder().id(testID).build())
+                .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
+                .clubRole(BookClubRole.ADMIN)
+                .build()
+        ));
+        when(bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(anyString(), any(Pageable.class)))
+            .thenReturn(Page.empty());
+
+        assertThrows(PageSizeTooLargeException.class, () -> membershipService.getAll("foo", 1, 51));
+        verify(bookClubMembershipRepo, times(1))
+            .findByBookClubNameAndClubRoleAndReaderId(anyString(), any(BookClubRole.class), any(UUID.class));
+        verify(bookClubMembershipRepo, times(1))
+            .findAllByBookClubNameOrderByJoined(anyString(), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }

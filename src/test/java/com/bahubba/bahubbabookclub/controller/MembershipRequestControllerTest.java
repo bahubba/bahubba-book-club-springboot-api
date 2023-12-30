@@ -3,11 +3,13 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.payload.MembershipRequestAction;
 import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
+import com.bahubba.bahubbabookclub.model.payload.PaginatedPayload;
 import com.bahubba.bahubbabookclub.service.MembershipRequestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -44,11 +46,19 @@ class MembershipRequestControllerTest {
 
     @Test
     void testGetMembershipRequestsForBookClub() {
-        when(membershipRequestService.getMembershipRequestsForBookClub(anyString())).thenReturn(List.of(new MembershipRequestDTO()));
+        when(membershipRequestService.getMembershipRequestsForBookClub(anyString(), anyInt(), anyInt()))
+            .thenReturn(Page.empty());
 
-        ResponseEntity<List<MembershipRequestDTO>> rsp = membershipRequestController.getMembershipRequestsForBookClub("foo");
+        ResponseEntity<Page<MembershipRequestDTO>> rsp = membershipRequestController.getMembershipRequestsForBookClub(
+            "foo",
+            PaginatedPayload.builder().pageNum(1).pageSize(1).build()
+        );
 
-        verify(membershipRequestService, times(1)).getMembershipRequestsForBookClub(anyString());
+        verify(membershipRequestService, times(1)).getMembershipRequestsForBookClub(
+            anyString(),
+            anyInt(),
+            anyInt()
+        );
         assertThat(rsp).isNotNull();
     }
 

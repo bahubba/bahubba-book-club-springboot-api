@@ -5,17 +5,17 @@ import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.model.payload.PaginatedPayload;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,18 +89,22 @@ class BookClubControllerTest {
 
     @Test
     void testGetAllForReader() {
-        when(bookClubService.findAllForReader()).thenReturn(new ArrayList<>());
-        ResponseEntity<List<BookClubDTO>> rsp = bookClubController.getAllForReader();
-        verify(bookClubService, times(1)).findAllForReader();
+        when(bookClubService.findAllForReader(anyInt(), anyInt())).thenReturn(Page.empty());
+        ResponseEntity<Page<BookClubDTO>> rsp = bookClubController.getAllForReader(
+            PaginatedPayload.builder().pageNum(1).pageSize(1).build()
+        );
+        verify(bookClubService, times(1)).findAllForReader(anyInt(), anyInt());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }
 
     @Test
     void testGetAll() {
-        when(bookClubService.findAll()).thenReturn(new ArrayList<>());
-        ResponseEntity<List<BookClubDTO>> rsp = bookClubController.getAll();
-        verify(bookClubService, times(1)).findAll();
+        when(bookClubService.findAll(anyInt(), anyInt())).thenReturn(Page.empty());
+        ResponseEntity<Page<BookClubDTO>> rsp = bookClubController.getAll(
+            PaginatedPayload.builder().pageNum(1).pageSize(1).build()
+        );
+        verify(bookClubService, times(1)).findAll(anyInt(), anyInt());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }
@@ -125,9 +129,11 @@ class BookClubControllerTest {
 
     @Test
     void testSearch() {
-        when(bookClubService.search(anyString())).thenReturn(new ArrayList<>());
-        ResponseEntity<List<BookClubDTO>> rsp = bookClubController.search(BookClubSearch.builder().searchTerm("foo").build());
-        verify(bookClubService, times(1)).search(anyString());
+        when(bookClubService.search(anyString(), anyInt(), anyInt())).thenReturn(Page.empty());
+        ResponseEntity<Page<BookClubDTO>> rsp = bookClubController.search(
+            BookClubSearch.builder().searchTerm("foo").pageNum(1).pageSize(1).build()
+        );
+        verify(bookClubService, times(1)).search(anyString(), anyInt(), anyInt());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }

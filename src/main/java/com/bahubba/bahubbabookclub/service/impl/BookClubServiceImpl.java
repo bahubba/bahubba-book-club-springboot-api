@@ -337,7 +337,7 @@ public class BookClubServiceImpl implements BookClubService {
      */
     private Page<BookClubDTO> getPageOfAll(int pageNum, int pageSize) {
         // Get results
-        Page<BookClub> entityPage = bookClubRepo.findPageOfAll(PageRequest.of(pageNum, pageSize));
+        Page<BookClub> entityPage = bookClubRepo.findAll(PageRequest.of(pageNum, pageSize));
 
         // Convert results to DTOs and return
         return entityPage.map(bookClubMapper::entityToDTO);
