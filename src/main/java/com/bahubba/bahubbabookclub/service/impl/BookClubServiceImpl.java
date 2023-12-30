@@ -323,9 +323,11 @@ public class BookClubServiceImpl implements BookClubService {
      * @param pageSize The number of results per page
      */
     private Page<BookClubDTO> getPageOfAllForReader(UUID readerID, int pageNum, int pageSize) {
-        return bookClubMapper.entityPageToDTOPage(
-            bookClubRepo.findAllForReader(readerID, PageRequest.of(pageNum, pageSize))
-        );
+        // Get results
+        Page<BookClub> entityPage = bookClubRepo.findAllForReader(readerID, PageRequest.of(pageNum, pageSize));
+
+        // Convert results to DTOs and return
+        return entityPage.map(bookClubMapper::entityToDTO);
     }
 
     /**
@@ -334,7 +336,11 @@ public class BookClubServiceImpl implements BookClubService {
      * @param pageSize The number of results per page
      */
     private Page<BookClubDTO> getPageOfAll(int pageNum, int pageSize) {
-        return bookClubMapper.entityPageToDTOPage(bookClubRepo.findPageOfAll(PageRequest.of(pageNum, pageSize)));
+        // Get results
+        Page<BookClub> entityPage = bookClubRepo.findPageOfAll(PageRequest.of(pageNum, pageSize));
+
+        // Convert results to DTOs and return
+        return entityPage.map(bookClubMapper::entityToDTO);
     }
 
     /**
@@ -344,12 +350,14 @@ public class BookClubServiceImpl implements BookClubService {
      * @param pageSize the size of the page
      */
     private Page<BookClubDTO> getPageOfSearchResults(String searchTerm, int pageNum, int pageSize) {
-        return bookClubMapper.entityPageToDTOPage(
-            bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(
-                Publicity.PRIVATE,
-                searchTerm,
-                PageRequest.of(pageNum, pageSize)
-            )
+        // Get results
+        Page<BookClub> entityPage = bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(
+            Publicity.PRIVATE,
+            searchTerm,
+            PageRequest.of(pageNum, pageSize)
         );
+
+        // Convert results to DTOs and return
+        return entityPage.map(bookClubMapper::entityToDTO);
     }
 }

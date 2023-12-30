@@ -260,8 +260,12 @@ public class MembershipServiceImpl implements MembershipService {
      * @return A page of memberships for the book club
      */
     private Page<BookClubMembershipDTO> getPageOfMembershipsForBookClub(String bookClubName, int pageNum, int pageSize) {
-        return bookClubMembershipMapper.entityPageToDTOPage(
-            bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(bookClubName, PageRequest.of(pageNum, pageSize))
+        // Get results
+        Page<BookClubMembership> entityPage = bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(
+            bookClubName, PageRequest.of(pageNum, pageSize)
         );
+
+        // Convert results to DTOs and return
+        return entityPage.map(bookClubMembershipMapper::entityToDTO);
     }
 }

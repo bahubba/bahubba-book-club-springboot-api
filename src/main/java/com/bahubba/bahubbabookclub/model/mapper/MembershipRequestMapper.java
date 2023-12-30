@@ -18,7 +18,4 @@ public interface MembershipRequestMapper {
 
     @Generated
     List<MembershipRequestDTO> entityListToDTO(List<MembershipRequest> membershipRequests);
-
-    @Generated
-    Page<MembershipRequestDTO> entityPageToDTOPage(Page<MembershipRequest> membershipRequests);
 }

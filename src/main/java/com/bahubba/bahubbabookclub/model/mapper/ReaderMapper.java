@@ -31,7 +31,4 @@ public interface ReaderMapper {
 
     @Generated
     List<ReaderDTO> entityListToDTO(List<Reader> readers);
-
-    @Generated
-    Page<ReaderDTO> entityPageToDTOPage(Page<Reader> readers);
 }

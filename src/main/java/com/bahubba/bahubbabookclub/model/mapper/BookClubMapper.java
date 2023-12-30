@@ -27,7 +27,4 @@ public interface BookClubMapper {
 
     @Generated
     List<BookClubDTO> entityListToDTO(List<BookClub> bookClubs);
-
-    @Generated
-    Page<BookClubDTO> entityPageToDTOPage(Page<BookClub> bookClubs);
 }

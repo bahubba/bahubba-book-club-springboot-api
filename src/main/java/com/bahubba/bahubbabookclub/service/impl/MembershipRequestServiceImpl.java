@@ -237,8 +237,12 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
      * @param pageSize The number of results per page
      */
     private Page<MembershipRequestDTO> getPageOfMembershipRequestsForBookClub(UUID bookClubID, int pageNum, int pageSize) {
-        return membershipRequestMapper.entityPageToDTOPage(
-            membershipRequestRepo.findALlByBookClubIdOrderByRequestedDesc(bookClubID, PageRequest.of(pageNum, pageSize))
+        // Get results
+        Page<MembershipRequest> entityPage = membershipRequestRepo.findALlByBookClubIdOrderByRequestedDesc(
+            bookClubID, PageRequest.of(pageNum, pageSize)
         );
+
+        // Convert results to DTOs and return
+        return entityPage.map(membershipRequestMapper::entityToDTO);
     }
 }

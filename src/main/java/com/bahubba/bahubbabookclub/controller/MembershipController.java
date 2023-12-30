@@ -4,8 +4,10 @@ import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
+import com.bahubba.bahubbabookclub.model.payload.PaginatedPayload;
 import com.bahubba.bahubbabookclub.service.MembershipService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +26,13 @@ public class MembershipController {
      * @return list of users in the book club
      */
     @GetMapping("/all/{bookClubName}")
-    public ResponseEntity<List<BookClubMembershipDTO>> getAll(@PathVariable String bookClubName) {
-        return ResponseEntity.ok(membershipService.getAll(bookClubName));
+    public ResponseEntity<Page<BookClubMembershipDTO>> getAll(
+        @PathVariable String bookClubName,
+        @RequestBody PaginatedPayload paginatedPayload
+    ) {
+        return ResponseEntity.ok(
+            membershipService.getAll(bookClubName, paginatedPayload.getPageNum(), paginatedPayload.getPageSize())
+        );
     }
 
     /**
