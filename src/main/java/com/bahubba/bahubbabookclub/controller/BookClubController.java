@@ -75,8 +75,8 @@ public class BookClubController {
      * @return all book clubs that the requesting reader has a role in
      */
     @GetMapping("/all-for-reader")
-    public ResponseEntity<Page<BookClubDTO>> getAllForReader(@RequestBody PaginatedPayload pagination) {
-        return ResponseEntity.ok(bookClubService.findAllForReader(pagination.getPageNum(), pagination.getPageSize()));
+    public ResponseEntity<Page<BookClubDTO>> getAllForReader(@RequestParam int pageNum, @RequestParam int pageSize) {
+        return ResponseEntity.ok(bookClubService.findAllForReader(pageNum, pageSize));
     }
 
     /**
@@ -85,8 +85,8 @@ public class BookClubController {
      */
     // TODO - pre-authorize this endpoint to only allow admins to access it
     @GetMapping("/all")
-    public ResponseEntity<Page<BookClubDTO>> getAll(@RequestBody PaginatedPayload pagination) {
-        return ResponseEntity.ok(bookClubService.findAll(pagination.getPageNum(), pagination.getPageSize()));
+    public ResponseEntity<Page<BookClubDTO>> getAll(@RequestParam int pageNum, @RequestParam int pageSize) {
+        return ResponseEntity.ok(bookClubService.findAll(pageNum, pageSize));
     }
 
     /**

@@ -49,10 +49,8 @@ class MembershipRequestControllerTest {
         when(membershipRequestService.getMembershipRequestsForBookClub(anyString(), anyInt(), anyInt()))
             .thenReturn(Page.empty());
 
-        ResponseEntity<Page<MembershipRequestDTO>> rsp = membershipRequestController.getMembershipRequestsForBookClub(
-            "foo",
-            PaginatedPayload.builder().pageNum(1).pageSize(1).build()
-        );
+        ResponseEntity<Page<MembershipRequestDTO>> rsp = membershipRequestController
+            .getMembershipRequestsForBookClub("foo", 1, 1);
 
         verify(membershipRequestService, times(1)).getMembershipRequestsForBookClub(
             anyString(),

@@ -38,10 +38,7 @@ class MembershipControllerTest {
     void testGetAll() {
         when(membershipService.getAll(anyString(), anyInt(), anyInt())).thenReturn(Page.empty());
 
-        ResponseEntity<Page<BookClubMembershipDTO>> rsp = membershipController.getAll(
-            "foo",
-            PaginatedPayload.builder().pageNum(1).pageSize(1).build()
-        );
+        ResponseEntity<Page<BookClubMembershipDTO>> rsp = membershipController.getAll("foo", 1, 1);
 
         verify(membershipService, times(1)).getAll(anyString(), anyInt(), anyInt());
         assertThat(rsp).isNotNull();

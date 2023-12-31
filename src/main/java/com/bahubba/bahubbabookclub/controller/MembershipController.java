@@ -27,10 +27,11 @@ public class MembershipController {
     @GetMapping("/all/{bookClubName}")
     public ResponseEntity<Page<BookClubMembershipDTO>> getAll(
         @PathVariable String bookClubName,
-        @RequestBody PaginatedPayload paginatedPayload
+        @RequestParam int pageNum,
+        @RequestParam int pageSize
     ) {
         return ResponseEntity.ok(
-            membershipService.getAll(bookClubName, paginatedPayload.getPageNum(), paginatedPayload.getPageSize())
+            membershipService.getAll(bookClubName, pageNum, pageSize)
         );
     }
 

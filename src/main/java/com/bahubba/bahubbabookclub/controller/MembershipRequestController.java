@@ -47,11 +47,11 @@ public class MembershipRequestController {
     @GetMapping("/all-for-club/{bookClubName}")
     public ResponseEntity<Page<MembershipRequestDTO>> getMembershipRequestsForBookClub(
         @PathVariable String bookClubName,
-        @RequestBody PaginatedPayload paginatedPayload
+        @RequestParam int pageNum,
+        @RequestParam int pageSize
     ) {
-        return ResponseEntity.ok(membershipRequestService.getMembershipRequestsForBookClub(
-            bookClubName, paginatedPayload.getPageNum(), paginatedPayload.getPageSize()
-        ));
+        return ResponseEntity
+            .ok(membershipRequestService.getMembershipRequestsForBookClub(bookClubName, pageNum, pageSize));
     }
 
     /**
