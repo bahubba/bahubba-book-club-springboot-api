@@ -135,7 +135,7 @@ class MembershipRequestServiceTest {
                 ))
                 .build()
         ));
-        when(membershipRequestRepo.findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
+        when(membershipRequestRepo.findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
             .thenReturn(Page.empty());
 
         Page<MembershipRequestDTO> result = membershipRequestService.getMembershipRequestsForBookClub(
@@ -146,7 +146,7 @@ class MembershipRequestServiceTest {
 
         verify(bookClubRepo, times(1)).findByName(anyString());
         verify(membershipRequestRepo, times(1))
-            .findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
+            .findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
         assertThat(result).isNotNull();
 
         securityUtilMockedStatic.close();
@@ -163,7 +163,7 @@ class MembershipRequestServiceTest {
 
         verify(bookClubRepo, times(0)).findByName(anyString());
         verify(membershipRequestRepo, times(0))
-            .findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
+            .findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }
@@ -185,7 +185,7 @@ class MembershipRequestServiceTest {
 
         verify(bookClubRepo, times(1)).findByName(anyString());
         verify(membershipRequestRepo, times(0))
-            .findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
+            .findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }
@@ -223,7 +223,7 @@ class MembershipRequestServiceTest {
 
         verify(bookClubRepo, times(1)).findByName(anyString());
         verify(membershipRequestRepo, times(0))
-            .findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
+            .findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }
@@ -261,7 +261,7 @@ class MembershipRequestServiceTest {
 
         verify(bookClubRepo, times(1)).findByName(anyString());
         verify(membershipRequestRepo, times(0))
-            .findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
+            .findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }
@@ -291,7 +291,7 @@ class MembershipRequestServiceTest {
                 ))
                 .build()
         ));
-        when(membershipRequestRepo.findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
+        when(membershipRequestRepo.findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
             .thenReturn(Page.empty());
 
         assertThrows(
@@ -301,7 +301,7 @@ class MembershipRequestServiceTest {
 
         verify(bookClubRepo, times(1)).findByName(anyString());
         verify(membershipRequestRepo, times(1))
-            .findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
+            .findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }
@@ -331,7 +331,7 @@ class MembershipRequestServiceTest {
                 ))
                 .build()
         ));
-        when(membershipRequestRepo.findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
+        when(membershipRequestRepo.findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
             .thenReturn(Page.empty());
 
         assertThrows(
@@ -341,7 +341,7 @@ class MembershipRequestServiceTest {
 
         verify(bookClubRepo, times(1)).findByName(anyString());
         verify(membershipRequestRepo, times(1))
-            .findALlByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
+            .findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class));
 
         securityUtilMockedStatic.close();
     }

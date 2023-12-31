@@ -238,7 +238,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
      */
     private Page<MembershipRequestDTO> getPageOfMembershipRequestsForBookClub(UUID bookClubID, int pageNum, int pageSize) {
         // Get results
-        Page<MembershipRequest> entityPage = membershipRequestRepo.findALlByBookClubIdOrderByRequestedDesc(
+        Page<MembershipRequest> entityPage = membershipRequestRepo.findAllByBookClubIdOrderByRequestedDesc(
             bookClubID, PageRequest.of(pageNum, pageSize)
         );
 
