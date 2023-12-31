@@ -5,7 +5,6 @@ import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
-import com.bahubba.bahubbabookclub.model.payload.PaginatedPayload;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -10,8 +10,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface BookClubMembershipMapper {
+    @Mapping(target = "isOwner", source = "owner")
     @Generated
-    @Mapping(target = "isCreator", source = "creator")
     BookClubMembershipDTO entityToDTO(BookClubMembership bookClubMembership);
 
     @Generated

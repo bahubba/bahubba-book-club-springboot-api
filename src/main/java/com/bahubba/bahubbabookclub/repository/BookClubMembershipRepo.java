@@ -29,5 +29,5 @@ public interface BookClubMembershipRepo extends JpaRepository<BookClubMembership
 
     Page<BookClubMembership> findAllByBookClubNameOrderByJoined(String bookClubName, Pageable pageable);
 
-    Optional<BookClubMembership> findByBookClubNameAndReaderIdAndIsCreatorTrue(String bookClubName, UUID readerId);
+    Optional<BookClubMembership> findByBookClubNameAndReaderIdAndIsOwnerTrue(String bookClubName, UUID readerId);
 }

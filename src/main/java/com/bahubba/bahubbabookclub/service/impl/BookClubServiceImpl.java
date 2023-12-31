@@ -59,17 +59,17 @@ public class BookClubServiceImpl implements BookClubService {
             throw new ReaderNotFoundException();
         }
 
-        // Convert the book club to an entity, add the reader as a member/creator, and persist it
+        // Convert the book club to an entity, add the reader as a member/owner, and persist it
         BookClub newBookClubEntity = bookClubMapper.modelToEntity(newBookClub);
         newBookClubEntity = bookClubRepo.save(newBookClubEntity);
 
-        // Add the reader as a member/creator
+        // Add the reader as a member/owner
         bookClubMembershipRepo.save(BookClubMembership
             .builder()
             .bookClub(newBookClubEntity)
             .reader(reader)
             .clubRole(BookClubRole.ADMIN)
-            .isCreator(true)
+            .isOwner(true)
             .build()
         );
 
@@ -300,8 +300,8 @@ public class BookClubServiceImpl implements BookClubService {
      * @param membership The membership of the reader in the book club to disband
      */
     private BookClubDTO disbandBookClub(BookClubMembership membership) {
-        // Ensure the reader is the creator of the book club
-        if(!membership.isCreator()) {
+        // Ensure the reader is the owner of the book club
+        if(!membership.isOwner()) {
             throw new UnauthorizedBookClubActionException();
         }
 

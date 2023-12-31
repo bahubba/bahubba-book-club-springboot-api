@@ -20,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -241,7 +240,7 @@ class MembershipServiceTest {
                             .id(testUpdateReaderID)
                             .build()
                     )
-                    .isCreator(false)
+                    .isOwner(false)
                     .build()
             ));
         when(bookClubMembershipRepo.save(any(BookClubMembership.class))).thenReturn(new BookClubMembership());
@@ -377,7 +376,7 @@ class MembershipServiceTest {
     }
 
     @Test
-    void testUpdateMembership_UpdateCreator() {
+    void testUpdateMembership_UpdateOwner() {
         UUID testReaderID = UUID.randomUUID();
         UUID testUpdateReaderID = UUID.randomUUID();
 
@@ -404,7 +403,7 @@ class MembershipServiceTest {
                             .id(testUpdateReaderID)
                             .build()
                     )
-                    .isCreator(true)
+                    .isOwner(true)
                     .build()
             ));
 
@@ -457,7 +456,7 @@ class MembershipServiceTest {
                             .build()
                     )
                     .clubRole(BookClubRole.ADMIN)
-                    .isCreator(false)
+                    .isOwner(false)
                     .build()
             ));
         when(bookClubMembershipRepo.save(any(BookClubMembership.class))).thenReturn(new BookClubMembership());
@@ -510,7 +509,7 @@ class MembershipServiceTest {
                             .id(testDeleteReaderID)
                             .build()
                     )
-                    .isCreator(false)
+                    .isOwner(false)
                     .build()
             ));
         when(bookClubMembershipRepo.save(any(BookClubMembership.class))).thenReturn(new BookClubMembership());
@@ -624,7 +623,7 @@ class MembershipServiceTest {
     }
 
     @Test
-    void testDeleteMembership_targetReaderCreator() {
+    void testDeleteMembership_targetReaderOwner() {
         UUID testReaderID = UUID.randomUUID();
         UUID testDeleteReaderID = UUID.randomUUID();
 
@@ -651,7 +650,7 @@ class MembershipServiceTest {
                             .id(testDeleteReaderID)
                             .build()
                     )
-                    .isCreator(true)
+                    .isOwner(true)
                     .build()
             ));
 
@@ -677,7 +676,7 @@ class MembershipServiceTest {
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
             .thenReturn(Reader.builder().id(testReaderID).build());
 
-        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndIsCreatorTrue(anyString(), any(UUID.class)))
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndIsOwnerTrue(anyString(), any(UUID.class)))
             .thenReturn(Optional.of(BookClubMembership.builder().build()));
         when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class)))
             .thenReturn(Optional.of(
@@ -690,7 +689,7 @@ class MembershipServiceTest {
                             .id(testNewOwnerID)
                             .build()
                     )
-                    .isCreator(false)
+                    .isOwner(false)
                     .build()
             ));
         when(bookClubMembershipRepo.save(any(BookClubMembership.class))).thenReturn(new BookClubMembership());
@@ -703,7 +702,7 @@ class MembershipServiceTest {
                 .build()
         );
 
-        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderIdAndIsCreatorTrue(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderIdAndIsOwnerTrue(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(1)).save(any(BookClubMembership.class));
         assertThat(result).isTrue();
@@ -725,7 +724,7 @@ class MembershipServiceTest {
                 .build()
         ));
 
-        verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndIsCreatorTrue(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndIsOwnerTrue(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
 
@@ -748,7 +747,7 @@ class MembershipServiceTest {
                 .build()
         ));
 
-        verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndIsCreatorTrue(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndIsOwnerTrue(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
 
@@ -764,7 +763,7 @@ class MembershipServiceTest {
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
             .thenReturn(Reader.builder().id(testReaderID).build());
 
-        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndIsCreatorTrue(anyString(), any(UUID.class)))
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndIsOwnerTrue(anyString(), any(UUID.class)))
             .thenReturn(Optional.empty());
 
         assertThrows(UnauthorizedBookClubActionException.class, () -> membershipService.changeOwnership(
@@ -775,7 +774,7 @@ class MembershipServiceTest {
                 .build()
         ));
 
-        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderIdAndIsCreatorTrue(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderIdAndIsOwnerTrue(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(0)).findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
 
@@ -791,7 +790,7 @@ class MembershipServiceTest {
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails)
             .thenReturn(Reader.builder().id(testReaderID).build());
 
-        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndIsCreatorTrue(anyString(), any(UUID.class)))
+        when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndIsOwnerTrue(anyString(), any(UUID.class)))
             .thenReturn(Optional.of(BookClubMembership.builder().build()));
         when(bookClubMembershipRepo.findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class)))
             .thenReturn(Optional.empty());
@@ -804,7 +803,7 @@ class MembershipServiceTest {
                 .build()
         ));
 
-        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderIdAndIsCreatorTrue(anyString(), any(UUID.class));
+        verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderIdAndIsOwnerTrue(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(1)).findByBookClubNameAndReaderIdAndDepartedIsNull(anyString(), any(UUID.class));
         verify(bookClubMembershipRepo, times(0)).save(any(BookClubMembership.class));
 

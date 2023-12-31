@@ -4,7 +4,6 @@ import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
-import com.bahubba.bahubbabookclub.model.payload.PaginatedPayload;
 import com.bahubba.bahubbabookclub.service.MembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -80,7 +79,6 @@ public class MembershipController {
 
     /**
      * Change ownership of a book club
-     * TODO - Change "creator" terminology to "owner"
      * @param ownershipChange book club name and new owner ID
      * @return true if successful
      */

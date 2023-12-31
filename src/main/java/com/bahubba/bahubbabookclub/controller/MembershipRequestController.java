@@ -3,7 +3,6 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.payload.MembershipRequestAction;
 import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
-import com.bahubba.bahubbabookclub.model.payload.PaginatedPayload;
 import com.bahubba.bahubbabookclub.service.MembershipRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

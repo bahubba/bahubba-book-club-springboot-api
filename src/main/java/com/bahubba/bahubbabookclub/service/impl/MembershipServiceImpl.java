@@ -131,7 +131,7 @@ public class MembershipServiceImpl implements MembershipService {
                 .bookClub(bookClubMapper.entityToDTO(bookClub))
                 .reader(readerMapper.entityToDTO(reader))
                 .clubRole(BookClubRole.NONE)
-                .isCreator(false)
+                .isOwner(false)
                 .build();
         }
 
@@ -167,8 +167,8 @@ public class MembershipServiceImpl implements MembershipService {
             .findByBookClubNameAndReaderIdAndDepartedIsNull(membershipUpdate.getBookClubName(), membershipUpdate.getReaderID())
             .orElseThrow(() -> new MembershipNotFoundException(membershipUpdate.getReaderID(), membershipUpdate.getBookClubName()));
 
-        // Ensure the target reader is not the creator of the book club, and we're not trying to change to the same role
-        if(membership.isCreator() || membership.getClubRole() == membershipUpdate.getRole()) {
+        // Ensure the target reader is not the owner of the book club, and we're not trying to change to the same role
+        if(membership.isOwner() || membership.getClubRole() == membershipUpdate.getRole()) {
             throw new BadBookClubActionException();
         }
 
@@ -206,8 +206,8 @@ public class MembershipServiceImpl implements MembershipService {
             .findByBookClubNameAndReaderIdAndDepartedIsNull(bookClubName, readerID)
             .orElseThrow(() -> new MembershipNotFoundException(readerID, bookClubName));
 
-        // Ensure the target reader is not the creator of the book club
-        if(membership.isCreator()) {
+        // Ensure the target reader is not the owner of the book club
+        if(membership.isOwner()) {
             throw new BadBookClubActionException();
         }
 
@@ -236,7 +236,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         // Ensure the reader is not trying to change ownership of a book club they don't own
         bookClubMembershipRepo
-            .findByBookClubNameAndReaderIdAndIsCreatorTrue(ownershipChange.getBookClubName(), reader.getId())
+            .findByBookClubNameAndReaderIdAndIsOwnerTrue(ownershipChange.getBookClubName(), reader.getId())
             .orElseThrow(UnauthorizedBookClubActionException::new);
 
         // Get the new owner's membership
@@ -246,7 +246,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         // Change ownership (and make the new owner an admin in case they weren't already)
         newOwnerMembership.setClubRole(BookClubRole.ADMIN);
-        newOwnerMembership.setCreator(true);
+        newOwnerMembership.setOwner(true);
         bookClubMembershipRepo.save(newOwnerMembership);
 
         return true;

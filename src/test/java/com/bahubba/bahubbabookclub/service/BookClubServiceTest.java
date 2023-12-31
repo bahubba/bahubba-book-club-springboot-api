@@ -22,8 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -224,7 +222,7 @@ class BookClubServiceTest {
                 .builder()
                 .reader(Reader.builder().id(testID).build())
                 .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
-                .isCreator(true)
+                .isOwner(true)
                 .build()
         ));
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
@@ -264,7 +262,7 @@ class BookClubServiceTest {
     }
 
     @Test
-    void testDisbandBookClub_ReaderNotCreator() {
+    void testDisbandBookClub_ReaderNotOwner() {
         UUID testID = UUID.randomUUID();
 
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
@@ -275,7 +273,7 @@ class BookClubServiceTest {
                 .builder()
                 .reader(Reader.builder().id(testID).build())
                 .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
-                .isCreator(false)
+                .isOwner(false)
                 .build()
         ));
 
@@ -297,7 +295,7 @@ class BookClubServiceTest {
                 .builder()
                 .reader(Reader.builder().id(testID).build())
                 .bookClub(BookClub.builder().id(UUID.randomUUID()).disbanded(LocalDateTime.now()).build())
-                .isCreator(true)
+                .isOwner(true)
                 .build()
         ));
 
@@ -319,7 +317,7 @@ class BookClubServiceTest {
                 .builder()
                 .reader(Reader.builder().id(testID).build())
                 .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
-                .isCreator(true)
+                .isOwner(true)
                 .build()
         ));
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
