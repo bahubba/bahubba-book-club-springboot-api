@@ -1,6 +1,5 @@
 package com.bahubba.bahubbabookclub.model.payload;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
