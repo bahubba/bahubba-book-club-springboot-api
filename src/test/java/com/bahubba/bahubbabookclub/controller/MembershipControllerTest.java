@@ -9,11 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,11 +33,11 @@ class MembershipControllerTest {
 
     @Test
     void testGetAll() {
-        when(membershipService.getAll(anyString())).thenReturn(new ArrayList<>());
+        when(membershipService.getAll(anyString(), anyInt(), anyInt())).thenReturn(Page.empty());
 
-        ResponseEntity<List<BookClubMembershipDTO>> rsp = membershipController.getAll("foo");
+        ResponseEntity<Page<BookClubMembershipDTO>> rsp = membershipController.getAll("foo", 1, 1);
 
-        verify(membershipService, times(1)).getAll(anyString());
+        verify(membershipService, times(1)).getAll(anyString(), anyInt(), anyInt());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }

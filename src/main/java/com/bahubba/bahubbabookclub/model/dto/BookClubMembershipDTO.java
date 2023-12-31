@@ -16,7 +16,7 @@ public class BookClubMembershipDTO {
     private BookClubDTO bookClub;
     private ReaderDTO reader;
     private BookClubRole clubRole;
-    private boolean isCreator;
+    private boolean isOwner;
     private LocalDateTime joined;
     private LocalDateTime departed;
 }

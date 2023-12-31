@@ -17,11 +17,11 @@ import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -151,24 +151,64 @@ class BookClubServiceTest {
     void testFindAllForReader() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
-        when(bookClubRepo.findAllForReader(any(UUID.class))).thenReturn(new ArrayList<>(List.of(new BookClub())));
-        List<BookClubDTO> result = bookClubService.findAllForReader();
-        verify(bookClubRepo, times(1)).findAllForReader(any(UUID.class));
-        assertThat(result).isNotNull().isNotEmpty();
+        when(bookClubRepo.findAllForReader(any(UUID.class), any(Pageable.class))).thenReturn(Page.empty());
+        Page<BookClubDTO> result = bookClubService.findAllForReader(1, 1);
+        verify(bookClubRepo, times(1)).findAllForReader(any(UUID.class), any(Pageable.class));
+        assertThat(result).isNotNull();
         securityUtilMockedStatic.close();
     }
 
     @Test
     void testFindAllForReader_NoReader() {
-        assertThrows(ReaderNotFoundException.class, () -> bookClubService.findAllForReader());
+        assertThrows(ReaderNotFoundException.class, () -> bookClubService.findAllForReader(1, 1));
+    }
+
+    @Test
+    void testFindAllForReader_NegativePageSize() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
+        when(bookClubRepo.findAllForReader(any(UUID.class), any(Pageable.class))).thenReturn(Page.empty());
+
+        assertThrows(PageSizeTooSmallException.class, () -> bookClubService.findAllForReader(1, -1));
+        verify(bookClubRepo, times(1)).findAllForReader(any(UUID.class), any(Pageable.class));
+
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testFindAllForReader_TooLargePageSize() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(Reader.builder().id(UUID.randomUUID()).build());
+        when(bookClubRepo.findAllForReader(any(UUID.class), any(Pageable.class))).thenReturn(Page.empty());
+
+        assertThrows(PageSizeTooLargeException.class, () -> bookClubService.findAllForReader(1, 51));
+        verify(bookClubRepo, times(1)).findAllForReader(any(UUID.class), any(Pageable.class));
+
+        securityUtilMockedStatic.close();
     }
 
     @Test
     void testFindAll() {
-        when(bookClubRepo.findAll()).thenReturn(new ArrayList<>(List.of(new BookClub())));
-        List<BookClubDTO> result = bookClubService.findAll();
-        verify(bookClubRepo, times(1)).findAll();
-        assertThat(result).isNotNull().isNotEmpty();
+        when(bookClubRepo.findAll(any(Pageable.class))).thenReturn(Page.empty());
+        Page<BookClubDTO> result = bookClubService.findAll(1, 1);
+        verify(bookClubRepo, times(1)).findAll(any(Pageable.class));
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void testFindAll_NegativePageSize() {
+        when(bookClubRepo.findAll(any(Pageable.class))).thenReturn(Page.empty());
+
+        assertThrows(PageSizeTooSmallException.class, () -> bookClubService.findAll(1, -1));
+        verify(bookClubRepo, times(1)).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void testFindAll_TooLargePageSize() {
+        when(bookClubRepo.findAll(any(Pageable.class))).thenReturn(Page.empty());
+
+        assertThrows(PageSizeTooLargeException.class, () -> bookClubService.findAll(1, 51));
+        verify(bookClubRepo, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
@@ -182,7 +222,7 @@ class BookClubServiceTest {
                 .builder()
                 .reader(Reader.builder().id(testID).build())
                 .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
-                .isCreator(true)
+                .isOwner(true)
                 .build()
         ));
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
@@ -222,7 +262,7 @@ class BookClubServiceTest {
     }
 
     @Test
-    void testDisbandBookClub_ReaderNotCreator() {
+    void testDisbandBookClub_ReaderNotOwner() {
         UUID testID = UUID.randomUUID();
 
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
@@ -233,7 +273,7 @@ class BookClubServiceTest {
                 .builder()
                 .reader(Reader.builder().id(testID).build())
                 .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
-                .isCreator(false)
+                .isOwner(false)
                 .build()
         ));
 
@@ -255,7 +295,7 @@ class BookClubServiceTest {
                 .builder()
                 .reader(Reader.builder().id(testID).build())
                 .bookClub(BookClub.builder().id(UUID.randomUUID()).disbanded(LocalDateTime.now()).build())
-                .isCreator(true)
+                .isOwner(true)
                 .build()
         ));
 
@@ -277,7 +317,7 @@ class BookClubServiceTest {
                 .builder()
                 .reader(Reader.builder().id(testID).build())
                 .bookClub(BookClub.builder().id(UUID.randomUUID()).build())
-                .isCreator(true)
+                .isOwner(true)
                 .build()
         ));
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
@@ -318,10 +358,52 @@ class BookClubServiceTest {
 
     @Test
     void testSearch() {
-        when(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(any(Publicity.class), anyString())).thenReturn(new ArrayList<>(List.of(new BookClub())));
-        List<BookClubDTO> result = bookClubService.search("foo");
-        verify(bookClubRepo, times(1)).findAllByPublicityNotAndNameContainsIgnoreCase(any(Publicity.class), anyString());
-        assertThat(result).isNotNull().isNotEmpty();
+        when(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(
+            any(Publicity.class),
+            anyString(),
+            any(Pageable.class)
+        )).thenReturn(Page.empty());
+
+        Page<BookClubDTO> result = bookClubService.search("foo", 1, 1);
+
+        verify(bookClubRepo, times(1)).findAllByPublicityNotAndNameContainsIgnoreCase(
+            any(Publicity.class),
+            anyString(),
+            any(Pageable.class)
+        );
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void testSearch_NegativePageSize() {
+        when(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(
+            any(Publicity.class),
+            anyString(),
+            any(Pageable.class)
+        )).thenReturn(Page.empty());
+
+        assertThrows(PageSizeTooSmallException.class, () -> bookClubService.search("foo", 1, -1));
+        verify(bookClubRepo, times(1)).findAllByPublicityNotAndNameContainsIgnoreCase(
+            any(Publicity.class),
+            anyString(),
+            any(Pageable.class)
+        );
+    }
+
+    @Test
+    void testSearch_TooLargePageSize() {
+        when(bookClubRepo.findAllByPublicityNotAndNameContainsIgnoreCase(
+            any(Publicity.class),
+            anyString(),
+            any(Pageable.class)
+        )).thenReturn(Page.empty());
+
+        assertThrows(PageSizeTooLargeException.class, () -> bookClubService.search("foo", 1, 51));
+        verify(bookClubRepo, times(1)).findAllByPublicityNotAndNameContainsIgnoreCase(
+            any(Publicity.class),
+            anyString(),
+            any(Pageable.class)
+        );
     }
 
     @Test

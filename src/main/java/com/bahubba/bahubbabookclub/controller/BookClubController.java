@@ -6,12 +6,12 @@ import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -19,9 +19,9 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/v1/book-clubs")
+@RequiredArgsConstructor
 public class BookClubController {
-    @Autowired
-    private BookClubService bookClubService;
+    private final BookClubService bookClubService;
 
     /**
      * Creates a book club
@@ -74,8 +74,8 @@ public class BookClubController {
      * @return all book clubs that the requesting reader has a role in
      */
     @GetMapping("/all-for-reader")
-    public ResponseEntity<List<BookClubDTO>> getAllForReader() {
-        return ResponseEntity.ok(bookClubService.findAllForReader());
+    public ResponseEntity<Page<BookClubDTO>> getAllForReader(@RequestParam int pageNum, @RequestParam int pageSize) {
+        return ResponseEntity.ok(bookClubService.findAllForReader(pageNum, pageSize));
     }
 
     /**
@@ -84,8 +84,8 @@ public class BookClubController {
      */
     // TODO - pre-authorize this endpoint to only allow admins to access it
     @GetMapping("/all")
-    public ResponseEntity<List<BookClubDTO>> getAll() {
-        return ResponseEntity.ok(bookClubService.findAll());
+    public ResponseEntity<Page<BookClubDTO>> getAll(@RequestParam int pageNum, @RequestParam int pageSize) {
+        return ResponseEntity.ok(bookClubService.findAll(pageNum, pageSize));
     }
 
     /**
@@ -114,7 +114,13 @@ public class BookClubController {
      * @return list of book clubs
      */
     @PostMapping(value = "/search")
-    public ResponseEntity<List<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch) {
-        return ResponseEntity.ok(bookClubService.search(bookClubSearch.getSearchTerm()));
+    public ResponseEntity<Page<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch) {
+        return ResponseEntity.ok(
+            bookClubService.search(
+                bookClubSearch.getSearchTerm(),
+                bookClubSearch.getPageNum(),
+                bookClubSearch.getPageSize()
+            )
+        );
     }
 }

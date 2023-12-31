@@ -7,7 +7,7 @@ import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.service.ReaderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +17,11 @@ import java.util.UUID;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ReaderServiceImpl implements ReaderService {
-    @Autowired
-    private ReaderRepo readerRepo;
+    private final ReaderRepo readerRepo;
 
-    @Autowired
-    private ReaderMapper readerMapper;
+    private final ReaderMapper readerMapper;
 
     @Override
     public ReaderDTO create(NewReader newReader) {

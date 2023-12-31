@@ -44,9 +44,9 @@ public class BookClubMembership implements Serializable {
     @Builder.Default
     private BookClubRole clubRole = BookClubRole.READER;
 
-    @Column(name = "is_creator", nullable = false)
+    @Column(name = "is_owner", nullable = false)
     @Builder.Default
-    private boolean isCreator = false;
+    private boolean isOwner = false;
 
     @Column(nullable = false)
     @Builder.Default

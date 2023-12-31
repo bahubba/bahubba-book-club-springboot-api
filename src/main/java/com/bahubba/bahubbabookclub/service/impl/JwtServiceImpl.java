@@ -16,7 +16,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +31,7 @@ import java.util.function.Function;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
     @Value("${app.properties.secret_key}")
     private String secretKey;
@@ -41,14 +42,11 @@ public class JwtServiceImpl implements JwtService {
     @Value("${app.properties.refresh_cookie_name}")
     private String refreshCookieName;
 
-    @Autowired
-    private RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepo refreshTokenRepo;
 
-    @Autowired
-    private ReaderRepo readerRepo;
+    private final ReaderRepo readerRepo;
 
-    @Autowired
-    private ReaderMapper readerMapper;
+    private final ReaderMapper readerMapper;
 
     @Override
     public ResponseCookie generateJwtCookie(UserDetails userDetails) {
@@ -163,7 +161,7 @@ public class JwtServiceImpl implements JwtService {
         String refreshToken = getJwtRefreshFromCookies(req);
         if(refreshToken != null && !refreshToken.isEmpty()) {
             Optional<RefreshToken> refreshTokenEntity = refreshTokenRepo.findByToken(refreshToken);
-            refreshTokenEntity.ifPresent(token -> refreshTokenRepo.delete(token));
+            refreshTokenEntity.ifPresent(refreshTokenRepo::delete);
         }
     }
 

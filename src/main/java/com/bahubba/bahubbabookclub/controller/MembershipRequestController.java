@@ -4,20 +4,19 @@ import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.payload.MembershipRequestAction;
 import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
 import com.bahubba.bahubbabookclub.service.MembershipRequestService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Membership Request endpoints
  */
 @RestController
 @RequestMapping("/api/v1/membership-requests")
+@RequiredArgsConstructor
 public class MembershipRequestController {
-    @Autowired
-    private MembershipRequestService membershipRequestService;
+    private final MembershipRequestService membershipRequestService;
 
     /**
      * Creates a membership request
@@ -45,8 +44,13 @@ public class MembershipRequestController {
      * @return list of membership requests for the book club
      */
     @GetMapping("/all-for-club/{bookClubName}")
-    public ResponseEntity<List<MembershipRequestDTO>> getMembershipRequestsForBookClub(@PathVariable String bookClubName) {
-        return ResponseEntity.ok(membershipRequestService.getMembershipRequestsForBookClub(bookClubName));
+    public ResponseEntity<Page<MembershipRequestDTO>> getMembershipRequestsForBookClub(
+        @PathVariable String bookClubName,
+        @RequestParam int pageNum,
+        @RequestParam int pageSize
+    ) {
+        return ResponseEntity
+            .ok(membershipRequestService.getMembershipRequestsForBookClub(bookClubName, pageNum, pageSize));
     }
 
     /**
@@ -55,7 +59,9 @@ public class MembershipRequestController {
      * @return updated version of the membership request
      */
     @PatchMapping("/review")
-    public ResponseEntity<MembershipRequestDTO> reviewMembershipRequest(@RequestBody MembershipRequestAction membershipRequestAction) {
+    public ResponseEntity<MembershipRequestDTO> reviewMembershipRequest(
+        @RequestBody MembershipRequestAction membershipRequestAction
+    ) {
         return ResponseEntity.ok(membershipRequestService.reviewMembershipRequest(membershipRequestAction));
     }
 }

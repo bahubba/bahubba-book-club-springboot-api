@@ -5,18 +5,18 @@ import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
 import com.bahubba.bahubbabookclub.service.MembershipService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/memberships")
+@RequiredArgsConstructor
 public class MembershipController {
-    @Autowired
-    private MembershipService membershipService;
+    private final MembershipService membershipService;
 
     /**
      * Get all users in a book club
@@ -24,8 +24,14 @@ public class MembershipController {
      * @return list of users in the book club
      */
     @GetMapping("/all/{bookClubName}")
-    public ResponseEntity<List<BookClubMembershipDTO>> getAll(@PathVariable String bookClubName) {
-        return ResponseEntity.ok(membershipService.getAll(bookClubName));
+    public ResponseEntity<Page<BookClubMembershipDTO>> getAll(
+        @PathVariable String bookClubName,
+        @RequestParam int pageNum,
+        @RequestParam int pageSize
+    ) {
+        return ResponseEntity.ok(
+            membershipService.getAll(bookClubName, pageNum, pageSize)
+        );
     }
 
     /**
@@ -64,13 +70,15 @@ public class MembershipController {
      * @return reader's new membership
      */
     @DeleteMapping("{bookClubName}/{readerID}")
-    public ResponseEntity<BookClubMembershipDTO> deleteMembership(@PathVariable String bookClubName, @PathVariable UUID readerID) {
+    public ResponseEntity<BookClubMembershipDTO> deleteMembership(
+        @PathVariable String bookClubName,
+        @PathVariable UUID readerID
+    ) {
         return ResponseEntity.ok(membershipService.deleteMembership(bookClubName, readerID));
     }
 
     /**
      * Change ownership of a book club
-     * TODO - Change "creator" terminology to "owner"
      * @param ownershipChange book club name and new owner ID
      * @return true if successful
      */

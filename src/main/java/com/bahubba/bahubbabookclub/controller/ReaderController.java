@@ -3,7 +3,7 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.service.ReaderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +15,9 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/v1/readers")
+@RequiredArgsConstructor
 public class ReaderController {
-    @Autowired
-    private ReaderService readerService;
+    private final ReaderService readerService;
 
     /**
      * Creates a new reader (user)
@@ -25,7 +25,7 @@ public class ReaderController {
      * @return persisted reader (user) info
      * @deprecated (use {@link com.bahubba.bahubbabookclub.controller.AuthController#register()} instead
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @PostMapping("/create")
     public ResponseEntity<ReaderDTO> create(@RequestBody NewReader newReader) {
         return ResponseEntity.ok(readerService.create(newReader));

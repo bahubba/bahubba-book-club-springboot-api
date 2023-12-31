@@ -17,30 +17,30 @@ import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.MembershipRequestRepo;
 import com.bahubba.bahubbabookclub.service.MembershipRequestService;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.UUID;
 
 /**
  * {@link MembershipRequest} business logic implementation
  */
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class MembershipRequestServiceImpl implements MembershipRequestService {
-    @Autowired
-    private MembershipRequestRepo membershipRequestRepo;
 
-    @Autowired
-    private MembershipRequestMapper membershipRequestMapper;
+    private final MembershipRequestRepo membershipRequestRepo;
 
-    @Autowired
-    private BookClubRepo bookClubRepo;
+    private final MembershipRequestMapper membershipRequestMapper;
 
-    @Autowired
-    private BookClubMembershipRepo bookClubMembersipRepo;
+    private final BookClubRepo bookClubRepo;
+
+    private final BookClubMembershipRepo bookClubMembershipRepo;
 
     /**
      * Create a new membership request
@@ -84,7 +84,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+            throw new ReaderNotFoundException();
         }
 
         // Check if the reader has a pending membership request for the book club
@@ -98,18 +98,22 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
     /**
      * Get all membership requests for a given book club
      * @param bookClubName The name of the book club
+     * @param pageNum The page number to retrieve
+     * @param pageSize The number of results per page
      * @return A list of membership requests for the book club
      * @throws BookClubNotFoundException If the book club doesn't exist
      * @throws ReaderNotFoundException If the reader isn't a member of the book club
      * @throws UnauthorizedBookClubActionException If the reader isn't an admin of the book club
-     * TODO - Pagination, custom sorting, filters?
+     * @throws PageSizeTooSmallException If the page size is less than 1
+     * @throws PageSizeTooLargeException If the page size is greater than 50
      */
+     // TODO - custom sorting, filters?
     @Override
-    public List<MembershipRequestDTO> getMembershipRequestsForBookClub(String bookClubName) {
+    public Page<MembershipRequestDTO> getMembershipRequestsForBookClub(String bookClubName, int pageNum, int pageSize) {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+            throw new ReaderNotFoundException();
         }
 
         // Get the book club
@@ -128,8 +132,24 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
             throw new UnauthorizedBookClubActionException();
         }
 
+        // Ensure the page size is valid
+        if(pageSize < 1) {
+            // If the page size is negative, throw an error, but default the page size to 10 and return results
+            throw new PageSizeTooSmallException(
+                10,
+                getPageOfMembershipRequestsForBookClub(bookClub.getId(), pageNum, 10)
+            );
+        } else if(pageSize > 50) {
+            // If the page size is > 50, throw an error, but default the page size to 50 and return results
+            throw new PageSizeTooLargeException(
+                50,
+                50,
+                getPageOfMembershipRequestsForBookClub(bookClub.getId(), pageNum, 50)
+            );
+        }
+
         // Return the membership requests for the book club
-        return membershipRequestMapper.entityListToDTO(membershipRequestRepo.findALlByBookClubIdOrderByRequestedDesc(bookClub.getId()));
+        return getPageOfMembershipRequestsForBookClub(bookClub.getId(), pageNum, pageSize);
     }
 
     /**
@@ -142,7 +162,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
         // Get the current reader from the security context
         Reader reviewer = SecurityUtil.getCurrentUserDetails();
         if(reviewer == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+            throw new ReaderNotFoundException();
         }
 
         // Get the membership request to review
@@ -182,7 +202,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
             }
 
             // Add the reader to the book club
-            bookClubMembersipRepo.save(BookClubMembership
+            bookClubMembershipRepo.save(BookClubMembership
                 .builder()
                 .bookClub(membershipRequest.getBookClub())
                 .reader(membershipRequest.getReader())
@@ -208,5 +228,21 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
 
         // Persist the updated membership request and return it
         return membershipRequestMapper.entityToDTO(membershipRequestRepo.save(membershipRequest));
+    }
+
+    /**
+     * Get a page of results for all membership requests for a given book club
+     * @param bookClubID The ID of the book club
+     * @param pageNum The page number to retrieve
+     * @param pageSize The number of results per page
+     */
+    private Page<MembershipRequestDTO> getPageOfMembershipRequestsForBookClub(UUID bookClubID, int pageNum, int pageSize) {
+        // Get results
+        Page<MembershipRequest> entityPage = membershipRequestRepo.findAllByBookClubIdOrderByRequestedDesc(
+            bookClubID, PageRequest.of(pageNum, pageSize)
+        );
+
+        // Convert results to DTOs and return
+        return entityPage.map(membershipRequestMapper::entityToDTO);
     }
 }

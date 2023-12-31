@@ -3,6 +3,8 @@ package com.bahubba.bahubbabookclub.repository;
 import com.bahubba.bahubbabookclub.model.entity.MembershipRequest;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +21,7 @@ public interface MembershipRequestRepo extends JpaRepository<MembershipRequest, 
 
     Boolean existsByBookClubNameAndReaderIdAndStatusIn(final String bookClubName, final UUID readerId, final List<RequestStatus> statuses);
 
-    List<MembershipRequest> findALlByBookClubIdOrderByRequestedDesc(final UUID bookClubId);
+    Page<MembershipRequest> findAllByBookClubIdOrderByRequestedDesc(final UUID bookClubId, Pageable pageable);
 
     @Modifying
     @Query("UPDATE MembershipRequest mr SET mr.status = :status, mr.role = :role, mr.reviewMessage = :reviewMessage, mr.reviewed = :reviewed WHERE mr.id = :id")

@@ -4,12 +4,12 @@ import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface MembershipService {
-    List<BookClubMembershipDTO> getAll(String bookClubName);
+    Page<BookClubMembershipDTO> getAll(String bookClubName, int pageNum, int pageSize);
 
     BookClubRole getRole(String bookClubName);
 
