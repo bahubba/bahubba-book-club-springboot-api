@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Custom exception for when page size is < 1
  */
-@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Page size must be positive")
 @Getter
 public class PageSizeTooSmallException extends RuntimeException {
     private final transient Page<?> payload;

@@ -1,12 +1,8 @@
 package com.bahubba.bahubbabookclub.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 /**
  * Custom exception for when a membership request that doesn't exist
  */
-@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Membership request not found")
 public class MembershipRequestNotFoundException extends RuntimeException {
     /**
      * Generates exception for missing membership request by Reader and Book Club IDs

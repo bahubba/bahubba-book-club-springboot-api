@@ -2,13 +2,10 @@ package com.bahubba.bahubbabookclub.exception;
 
 import lombok.Getter;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Custom exception for when page size is some (arbitrary?) amount that is too large
  */
-@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Page size too large")
 @Getter
 public class PageSizeTooLargeException extends RuntimeException {
     private final transient Page<?> payload;
