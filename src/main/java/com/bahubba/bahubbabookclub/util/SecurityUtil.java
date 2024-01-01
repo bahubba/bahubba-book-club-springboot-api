@@ -10,6 +10,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 @UtilityClass
 public class SecurityUtil {
+
+    /**
+     * Gets the current user's details
+     * @return The current user
+     */
     public static Reader getCurrentUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {

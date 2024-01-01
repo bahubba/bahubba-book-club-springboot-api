@@ -28,15 +28,6 @@ class ReaderControllerTest {
     ReaderService readerService;
 
     @Test
-    void testCreate() {
-        when(readerService.create(any(NewReader.class))).thenReturn(new ReaderDTO());
-        ResponseEntity<ReaderDTO> rsp = readerController.create(new NewReader());
-        verify(readerService, times(1)).create(any(NewReader.class));
-        assertThat(rsp).isNotNull();
-        assertThat(rsp.getBody()).isNotNull();
-    }
-
-    @Test
     void testGetByID() {
         when(readerService.findByID(any(UUID.class))).thenReturn(new ReaderDTO());
         ResponseEntity<ReaderDTO> rsp = readerController.getByID(UUID.randomUUID());

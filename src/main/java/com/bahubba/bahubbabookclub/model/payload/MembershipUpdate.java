@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+/**
+ * Data sent with HTTP request for updating a reader's membership in a book club
+ */
 @Data
 @Builder
 @AllArgsConstructor

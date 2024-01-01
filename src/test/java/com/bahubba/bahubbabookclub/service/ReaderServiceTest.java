@@ -31,14 +31,6 @@ class ReaderServiceTest {
     ReaderRepo readerRepo;
 
     @Test
-    void testCreate() {
-        when(readerRepo.save(any(Reader.class))).thenReturn(new Reader());
-        ReaderDTO result = readerService.create(NewReader.builder().password("password").build());
-        verify(readerRepo, times(1)).save(any(Reader.class));
-        assertThat(result).isNotNull();
-    }
-
-    @Test
     void testFindByID() {
         when(readerRepo.findById(any(UUID.class))).thenReturn(Optional.of(new Reader()));
         ReaderDTO result = readerService.findByID(UUID.randomUUID());

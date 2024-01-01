@@ -19,28 +19,24 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 public class ReaderServiceImpl implements ReaderService {
-    private final ReaderRepo readerRepo;
 
+    private final ReaderRepo readerRepo;
     private final ReaderMapper readerMapper;
 
     @Override
-    public ReaderDTO create(NewReader newReader) {
-        Reader newReaderEntity = readerMapper.modelToEntity(newReader);
-        return readerMapper.entityToDTO(readerRepo.save(newReaderEntity));
-    }
-
-    @Override
-    public ReaderDTO findByID(UUID id) {
+    public ReaderDTO findByID(UUID id) throws ReaderNotFoundException {
         return readerMapper.entityToDTO(readerRepo.findById(id).orElseThrow(() -> new ReaderNotFoundException(id)));
     }
 
+    // TODO - Convert to pagination
     @Override
     public List<ReaderDTO> findAll() {
         return readerMapper.entityListToDTO(readerRepo.findAll());
     }
 
+    // FIXME - Need to ensure the user is removing themself
     @Override
-    public ReaderDTO removeReader(UUID id) {
+    public ReaderDTO removeReader(UUID id) throws ReaderNotFoundException {
         Reader reader = readerRepo.findById(id).orElseThrow(() -> new ReaderNotFoundException(id));
         reader.setDeparted(LocalDateTime.now());
         return readerMapper.entityToDTO(readerRepo.save(reader));

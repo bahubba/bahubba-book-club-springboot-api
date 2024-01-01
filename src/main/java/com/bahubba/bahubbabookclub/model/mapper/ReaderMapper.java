@@ -12,7 +12,7 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 /**
- * Mapping logic for readers (users)
+ * Mapping logic for {@link Reader} entities and {@link ReaderDTO} DTOs
  */
 @Mapper(componentModel = "spring", uses = PasswordEncoderMapper.class)
 public interface ReaderMapper {
