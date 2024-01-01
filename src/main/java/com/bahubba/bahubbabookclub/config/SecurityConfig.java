@@ -23,15 +23,13 @@ import java.util.List;
 public class SecurityConfig {
 
     private final AuthenticationProvider authenticationProvider;
-
     private final JwtAuthenticationFilter jwtAuthFilter;
 
     /**
      * Sets up security for the application
      * @param httpSecurity HTTP security object for Spring
      * @return SecurityFilterChain
-     * @throws Exception
-     * TODO - Update allowed origins after deploying and setting up a reverse proxy
+     * @throws Exception If security cannot be configured
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {

@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Data sent for creating a new reader (user)
+ * Data sent with HTTP request for creating a new reader (user)
  */
 @Data
 @Builder

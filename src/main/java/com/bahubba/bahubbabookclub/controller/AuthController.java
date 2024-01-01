@@ -1,5 +1,6 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
@@ -9,6 +10,8 @@ import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
 import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.service.AuthService;
 import com.bahubba.bahubbabookclub.service.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,21 +31,26 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Auth Controller", description = "Auth endpoints")
 @RequiredArgsConstructor
 @Log4j2
 public class AuthController {
 
     private final AuthService authService;
-
     private final JwtService jwtService;
 
     /**
      * Registers a reader (user)
+     *
      * @param newReader New reader (user) information
-     * @return persisted reader information
+     * @return Persisted reader information
+     * @throws ReaderNotFoundException The reader was not found
      */
     @PostMapping("/register")
-    public ResponseEntity<ResponseWrapperDTO<ReaderDTO>> register (@RequestBody NewReader newReader) {
+    @Operation(summary = "Register", description = "Registers a reader (user)")
+    public ResponseEntity<ResponseWrapperDTO<ReaderDTO>> register(@RequestBody NewReader newReader)
+        throws ReaderNotFoundException {
+
         try {
             AuthDTO authDTO = authService.register(newReader);
 
@@ -69,10 +78,11 @@ public class AuthController {
 
     /**
      * Accepts user credentials and returns auth and refresh JWTs in HTTP-Only cookies
-     * @param req user credentials (username and password)
-     * @return the user's stored info and JWTs
+     * @param req User credentials (username and password)
+     * @return The user's stored info and JWTs
      */
     @PostMapping("/authenticate")
+    @Operation(summary = "Authenticate/Log In", description = "Accepts user credentials and returns auth and refresh JWTs in HTTP-Only cookies")
     public ResponseEntity<ResponseWrapperDTO<ReaderDTO>> authenticate (@RequestBody AuthRequest req) {
         try {
             AuthDTO authDTO = authService.authenticate(req);
@@ -110,9 +120,10 @@ public class AuthController {
     /**
      * Generates a new auth (and refresh) token based on a valid refresh token
      * @param req HTTP request from the client
-     * @return a string message with success status of the re-authentication
+     * @return A message with success status of the re-authentication
      */
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh Authentication", description = "Generates a new auth (and refresh) token based on a valid refresh token")
     public ResponseEntity<MessageResponseDTO> refreshToken(HttpServletRequest req) {
 
         try {
@@ -135,9 +146,10 @@ public class AuthController {
     /**
      * Logs out the user by deleting the auth and refresh tokens
      * @param req HTTP request from the client
-     * @return a string message with success status of the logout
+     * @return A message with success status of the logout
      */
     @PostMapping("/logout")
+    @Operation(summary = "Logout", description = "Logs out the user by deleting the auth and refresh tokens")
     public ResponseEntity<MessageResponseDTO> logout(HttpServletRequest req) {
         AuthDTO authDTO = authService.logout(req);
 

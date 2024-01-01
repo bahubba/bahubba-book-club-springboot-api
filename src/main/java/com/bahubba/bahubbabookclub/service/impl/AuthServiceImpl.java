@@ -13,11 +13,13 @@ import com.bahubba.bahubbabookclub.repository.ReaderRepo;
 import com.bahubba.bahubbabookclub.service.AuthService;
 import com.bahubba.bahubbabookclub.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,23 +35,14 @@ public class AuthServiceImpl implements AuthService {
     @Value("${app.properties.refresh_cookie_name}")
     private String refreshCookieName;
 
+    private final AuthenticationManager authManager;
+    private final JwtService jwtService;
     private final ReaderRepo readerRepo;
-
+    private final NotificationRepo notificationRepo;
     private final ReaderMapper readerMapper;
 
-    private final JwtService jwtService;
-
-    private final NotificationRepo notificationRepo;
-
-    private final AuthenticationManager authManager;
-
-    /**
-     * Registers a reader (user)
-     * @param newReader New reader (user) information
-     * @return persisted reader information
-     */
     @Override
-    public AuthDTO register(NewReader newReader) {
+    public AuthDTO register(NewReader newReader) throws ReaderNotFoundException {
         // Generate and persist a Reader entity
         Reader reader = readerRepo.save(readerMapper.modelToEntity(newReader));
 
@@ -78,13 +71,8 @@ public class AuthServiceImpl implements AuthService {
             .build();
     }
 
-    /**
-     * Accepts user credentials and returns auth and refresh JWTs in HTTP-Only cookies
-     * @param req user credentials (username and password)
-     * @return the user's stored info and JWTs
-     */
     @Override
-    public AuthDTO authenticate(AuthRequest req) {
+    public AuthDTO authenticate(@NotNull AuthRequest req) throws AuthenticationException, ReaderNotFoundException {
         authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsernameOrEmail(), req.getPassword()));
 
         Reader reader = readerRepo.findByUsernameOrEmail(req.getUsernameOrEmail(), req.getUsernameOrEmail())

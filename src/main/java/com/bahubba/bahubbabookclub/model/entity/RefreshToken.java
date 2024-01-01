@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Refresh tokens (JWT) entities
+ * Refresh tokens (JWT) entities used for refreshing authentication tokens
  */
 @Entity
 @Table(name = "refresh_token")

@@ -1,7 +1,6 @@
 package com.bahubba.bahubbabookclub.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import com.bahubba.bahubbabookclub.util.APIConstants.ErrorMessages;
 
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ public class ReaderNotFoundException extends RuntimeException {
      * Generates exception for missing reader in security context
      */
     public ReaderNotFoundException() {
-        super("Not logged in or reader not found");
+        super(ErrorMessages.READER_NOT_FOUND);
     }
 
     /**

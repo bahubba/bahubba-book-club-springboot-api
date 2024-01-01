@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Pagination info sent with HTTP requests expecting paginated responses
+ */
 @Data
 @SuperBuilder
 @AllArgsConstructor

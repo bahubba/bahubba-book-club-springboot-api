@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 /**
- * Mapping logic for Book Clubs
+ * Mapping logic for {@link BookClub} entities and {@link BookClubDTO} DTOs
  */
 @Mapper(componentModel = "spring")
 public interface BookClubMapper {

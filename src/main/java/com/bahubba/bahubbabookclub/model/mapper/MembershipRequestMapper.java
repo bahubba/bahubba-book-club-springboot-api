@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 /**
- * Mapping logic for Membership Requests
+ * Mapping logic for {@link MembershipRequest} entities and {@link MembershipRequestDTO} DTOs
  */
 @Mapper(componentModel = "spring")
 public interface MembershipRequestMapper {

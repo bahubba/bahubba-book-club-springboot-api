@@ -424,7 +424,7 @@ class BookClubServiceTest {
         when(bookClubRepo.findById(any(UUID.class))).thenReturn(Optional.of(BookClub.builder().publicity(Publicity.PRIVATE).build()));
         when(bookClubMembershipRepo.existsByBookClubIdAndReaderId(any(UUID.class), any(UUID.class))).thenReturn(false);
 
-        assertThrows(BookClubNotFoundException.class, () -> bookClubService.findByID(UUID.randomUUID()));
+        assertThrows(MembershipNotFoundException.class, () -> bookClubService.findByID(UUID.randomUUID()));
 
         securityUtilMockedStatic.close();
     }

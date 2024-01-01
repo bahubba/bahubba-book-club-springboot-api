@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * A composite key table to track which notifications a reader has viewed
+ */
 @Entity
 @Table(name = "notification_views")
 @Data

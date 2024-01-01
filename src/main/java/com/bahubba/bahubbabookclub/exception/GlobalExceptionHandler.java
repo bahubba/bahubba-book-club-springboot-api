@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/**
+ * Global exception handler to return proper HTTP status codes and possibly data
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler

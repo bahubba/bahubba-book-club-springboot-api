@@ -8,6 +8,9 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
+/**
+ * Mapping logic for {@link BookClubMembership} entities and {@link BookClubMembershipDTO} DTOs
+ */
 @Mapper(componentModel = "spring")
 public interface BookClubMembershipMapper {
     @Mapping(target = "isOwner", source = "owner")

@@ -69,24 +69,6 @@ class BookClubControllerTest {
     }
 
     @Test
-    void testGetByName_Unauthorized() {
-        when(bookClubService.findByName(anyString())).thenThrow(new ReaderNotFoundException());
-        ResponseEntity<BookClubDTO> rsp = bookClubController.getByName("foo");
-        verify(bookClubService, times(1)).findByName(anyString());
-        assertThat(rsp).isNotNull();
-        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-    }
-
-    @Test
-    void testGetByName_BookClubNotFound() {
-        when(bookClubService.findByName(anyString())).thenThrow(new BookClubNotFoundException("foo"));
-        ResponseEntity<BookClubDTO> rsp = bookClubController.getByName("foo");
-        verify(bookClubService, times(1)).findByName(anyString());
-        assertThat(rsp).isNotNull();
-        assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
     void testGetAllForReader() {
         when(bookClubService.findAllForReader(anyInt(), anyInt())).thenReturn(Page.empty());
         ResponseEntity<Page<BookClubDTO>> rsp = bookClubController.getAllForReader(1, 1);

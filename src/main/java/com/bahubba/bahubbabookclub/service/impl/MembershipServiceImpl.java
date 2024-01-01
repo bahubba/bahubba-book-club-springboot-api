@@ -15,6 +15,7 @@ import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.service.MembershipService;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,30 +29,16 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 public class MembershipServiceImpl implements MembershipService {
+
     private final BookClubMembershipRepo bookClubMembershipRepo;
-
     private final BookClubRepo bookClubRepo;
-
     private final BookClubMembershipMapper bookClubMembershipMapper;
-
     private final BookClubMapper bookClubMapper;
-
     private final ReaderMapper readerMapper;
 
-    /**
-     * Get all members of a book club
-     * @param bookClubName The name of a book club
-     * @param pageNum The page number to retrieve
-     * @param pageSize The number of results per page
-     * @return A list of all members of the book club
-     * @throws ReaderNotFoundException if the reader is not logged in or doesn't exist
-     * @throws UnauthorizedBookClubActionException if the reader is not an admin of the book club
-     * @throws PageSizeTooSmallException if the page size is too small
-     * @throws PageSizeTooLargeException if the page size is too large
-     */
     @Override
-    public Page<BookClubMembershipDTO> getAll(String bookClubName, int pageNum, int pageSize) throws
-        ReaderNotFoundException,
+    public Page<BookClubMembershipDTO> getAll(String bookClubName, int pageNum, int pageSize)
+        throws ReaderNotFoundException,
         UnauthorizedBookClubActionException,
         PageSizeTooSmallException,
         PageSizeTooLargeException {
@@ -85,13 +72,8 @@ public class MembershipServiceImpl implements MembershipService {
         return getPageOfMembershipsForBookClub(bookClubName, pageNum, pageSize);
     }
 
-    /**
-     * Get the role of a reader in a book club
-     * @param bookClubName The name of the book club
-     * @return The reader's role in the book club
-     */
     @Override
-    public BookClubRole getRole(String bookClubName) {
+    public BookClubRole getRole(String bookClubName) throws ReaderNotFoundException, MembershipNotFoundException {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
@@ -107,12 +89,10 @@ public class MembershipServiceImpl implements MembershipService {
         return membership.getClubRole();
     }
 
-    /**
-     * Get a reader's membership in a book club (or lack thereof) and the book club
-     * @param bookClubName The name of the book club
-     * @return The reader's membership in the book club (or lack thereof) and the book club
-     */
-    public BookClubMembershipDTO getMembership(String bookClubName) throws ReaderNotFoundException {
+    @Override
+    public BookClubMembershipDTO getMembership(String bookClubName)
+        throws ReaderNotFoundException, BookClubNotFoundException {
+
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
@@ -139,13 +119,12 @@ public class MembershipServiceImpl implements MembershipService {
         return bookClubMembershipMapper.entityToDTO(membership);
     }
 
-    /**
-     * Update a reader's role in a book club
-     * @param membershipUpdate The book club and reader to update
-     * @return The updated membership
-     */
     @Override
-    public BookClubMembershipDTO updateMembership(MembershipUpdate membershipUpdate) {
+    public BookClubMembershipDTO updateMembership(MembershipUpdate membershipUpdate)
+        throws ReaderNotFoundException,
+        BadBookClubActionException,
+        UnauthorizedBookClubActionException,
+        MembershipNotFoundException {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
@@ -177,14 +156,13 @@ public class MembershipServiceImpl implements MembershipService {
         return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(membership));
     }
 
-    /**
-     * Delete a reader's membership in a book club
-     * @param bookClubName The name of the book club
-     * @param readerID The ID of the reader
-     * @return The deleted membership
-     */
     @Override
-    public BookClubMembershipDTO deleteMembership(String bookClubName, UUID readerID) {
+    public BookClubMembershipDTO deleteMembership(String bookClubName, UUID readerID)
+        throws ReaderNotFoundException,
+        BadBookClubActionException,
+        UnauthorizedBookClubActionException,
+        MembershipNotFoundException {
+
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
@@ -216,13 +194,12 @@ public class MembershipServiceImpl implements MembershipService {
         return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(membership));
     }
 
-    /**
-     * Change ownership of a book club
-     * @param ownershipChange The book club and new owner ID
-     * @return true if successful
-     */
     @Override
-    public Boolean changeOwnership(OwnershipChange ownershipChange) {
+    public Boolean changeOwnership(OwnershipChange ownershipChange)
+        throws ReaderNotFoundException,
+        BadBookClubActionException,
+        UnauthorizedBookClubActionException,
+        MembershipNotFoundException {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if(reader == null) {
@@ -259,7 +236,7 @@ public class MembershipServiceImpl implements MembershipService {
      * @param pageSize The number of results per page
      * @return A page of memberships for the book club
      */
-    private Page<BookClubMembershipDTO> getPageOfMembershipsForBookClub(String bookClubName, int pageNum, int pageSize) {
+    private @NotNull Page<BookClubMembershipDTO> getPageOfMembershipsForBookClub(String bookClubName, int pageNum, int pageSize) {
         // Get results
         Page<BookClubMembership> entityPage = bookClubMembershipRepo.findAllByBookClubNameOrderByJoined(
             bookClubName, PageRequest.of(pageNum, pageSize)

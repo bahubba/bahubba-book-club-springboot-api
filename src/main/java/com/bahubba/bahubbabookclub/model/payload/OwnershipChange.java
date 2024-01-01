@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+/**
+ * Data sent with HTTP request for changing ownership of a book club
+ */
 @Data
 @Builder
 @AllArgsConstructor

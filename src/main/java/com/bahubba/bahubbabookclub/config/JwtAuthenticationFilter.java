@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -30,11 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /**
      * Excludes auth endpoints from filters
      * @param request HTTP request from the client
-     * @return true for auth endpoints
-     * @throws ServletException
+     * @return true for auth endpoints, false for all others
      */
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getRequestURI().startsWith("/api/v1/auth");
     }
 
@@ -43,15 +43,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param request HTTP request from the client
      * @param response HTTP response to send back to the client
      * @param filterChain Full chain of filters to run the request through
-     * @throws ServletException
-     * @throws IOException
+     * @throws UsernameNotFoundException If user is not found
+     * @throws ServletException If thrown by a filter
+     * @throws IOException If thrown by a filter
      */
     @Override
     protected void doFilterInternal(
         @NonNull HttpServletRequest request,
         @NonNull HttpServletResponse response,
         @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+    ) throws UsernameNotFoundException, ServletException, IOException {
         final String jwt = jwtService.getJwtFromCookies(request);
         final String username;
 
