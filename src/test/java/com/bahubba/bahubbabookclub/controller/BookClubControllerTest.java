@@ -1,29 +1,23 @@
 package com.bahubba.bahubbabookclub.controller;
 
-import com.bahubba.bahubbabookclub.exception.BookClubNotFoundException;
-import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-/**
- * Unit tests for {@link BookClubController} endpoints
- */
+/** Unit tests for {@link BookClubController} endpoints */
 @SpringBootTest
 @ActiveProfiles("test")
 class BookClubControllerTest {
@@ -107,9 +101,11 @@ class BookClubControllerTest {
     @Test
     void testSearch() {
         when(bookClubService.search(anyString(), anyInt(), anyInt())).thenReturn(Page.empty());
-        ResponseEntity<Page<BookClubDTO>> rsp = bookClubController.search(
-            BookClubSearch.builder().searchTerm("foo").pageNum(1).pageSize(1).build()
-        );
+        ResponseEntity<Page<BookClubDTO>> rsp = bookClubController.search(BookClubSearch.builder()
+                .searchTerm("foo")
+                .pageNum(1)
+                .pageSize(1)
+                .build());
         verify(bookClubService, times(1)).search(anyString(), anyInt(), anyInt());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();

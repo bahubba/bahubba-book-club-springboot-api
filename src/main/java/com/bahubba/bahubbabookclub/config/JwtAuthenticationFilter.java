@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,11 +17,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-
-/**
- * Filters all requests to non-auth endpoints by validity of JWT from the request's auth cookie
- */
+/** Filters all requests to non-auth endpoints by validity of JWT from the request's auth cookie */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -30,6 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * Excludes auth endpoints from filters
+     *
      * @param request HTTP request from the client
      * @return true for auth endpoints, false for all others
      */
@@ -40,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * Authorization filter logic for protected endpoints
+     *
      * @param request HTTP request from the client
      * @param response HTTP response to send back to the client
      * @param filterChain Full chain of filters to run the request through
@@ -49,10 +48,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(
-        @NonNull HttpServletRequest request,
-        @NonNull HttpServletResponse response,
-        @NonNull FilterChain filterChain
-    ) throws UsernameNotFoundException, ServletException, IOException {
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
+            throws UsernameNotFoundException, ServletException, IOException {
         final String jwt = jwtService.getJwtFromCookies(request);
         final String username;
 
@@ -64,11 +63,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-                );
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

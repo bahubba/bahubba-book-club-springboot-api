@@ -1,16 +1,13 @@
 package com.bahubba.bahubbabookclub.model.payload;
 
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
-/**
- * Data sent with HTTP request for updating a reader's membership in a book club
- */
+/** Data sent with HTTP request for updating a reader's membership in a book club */
 @Data
 @Builder
 @AllArgsConstructor

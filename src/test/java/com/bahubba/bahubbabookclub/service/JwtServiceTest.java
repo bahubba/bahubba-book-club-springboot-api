@@ -1,5 +1,10 @@
 package com.bahubba.bahubbabookclub.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
@@ -11,6 +16,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,19 +29,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
-/**
- * Unit tests for the JwtService
- */
+/** Unit tests for the JwtService */
 @SpringBootTest
 @ActiveProfiles("test")
 class JwtServiceTest {
@@ -57,7 +54,8 @@ class JwtServiceTest {
 
     @Test
     void testGenerateJwtCookie() {
-        ResponseCookie result = jwtService.generateJwtCookie(Reader.builder().username("name").build());
+        ResponseCookie result =
+                jwtService.generateJwtCookie(Reader.builder().username("name").build());
 
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo(authCookieName);
@@ -109,12 +107,10 @@ class JwtServiceTest {
 
     @Test
     void testExtractUsername() {
-        String result = jwtService.extractUsername(
-            Jwts.builder()
+        String result = jwtService.extractUsername(Jwts.builder()
                 .setSubject("someuser")
                 .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
-                .compact()
-        );
+                .compact());
 
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo("someuser");
@@ -123,13 +119,12 @@ class JwtServiceTest {
     @Test
     void testIsTokenValid() {
         boolean result = jwtService.isTokenValid(
-            Jwts.builder()
-                .setSubject("someuser")
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
-                .compact(),
-            Reader.builder().username("someuser").build()
-        );
+                Jwts.builder()
+                        .setSubject("someuser")
+                        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
+                        .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
+                        .compact(),
+                Reader.builder().username("someuser").build());
 
         assertThat(result).isTrue();
     }
@@ -137,33 +132,23 @@ class JwtServiceTest {
     @Test
     void testIsTokenValid_MismatchedName() {
         boolean result = jwtService.isTokenValid(
-            Jwts.builder()
-                .setSubject("someuser")
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
-                .compact(),
-            Reader.builder().username("someotheruser").build()
-        );
+                Jwts.builder()
+                        .setSubject("someuser")
+                        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                        .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
+                        .compact(),
+                Reader.builder().username("someotheruser").build());
 
         assertThat(result).isFalse();
     }
 
     @Test
     void testRefreshTokenFromReq() {
-        when(refreshTokenRepo.findByToken(anyString())).thenReturn(
-            Optional.of(
-                RefreshToken
-                    .builder()
-                    .reader(
-                        Reader
-                            .builder()
-                            .username("someuser")
-                            .build()
-                    )
-                    .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
-                    .build()
-            )
-        );
+        when(refreshTokenRepo.findByToken(anyString()))
+                .thenReturn(Optional.of(RefreshToken.builder()
+                        .reader(Reader.builder().username("someuser").build())
+                        .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
+                        .build()));
 
         MockHttpServletRequest mockReq = new MockHttpServletRequest();
         mockReq.setCookies(new Cookie(refreshCookieName, "sometoken"));
@@ -180,20 +165,11 @@ class JwtServiceTest {
     // TODO - Add test for exception from missing Reader in token
     @Test
     void testRefreshToken() {
-        when(refreshTokenRepo.findByToken(anyString())).thenReturn(
-            Optional.of(
-                RefreshToken
-                    .builder()
-                    .reader(
-                        Reader
-                            .builder()
-                            .username("someuser")
-                            .build()
-                    )
-                    .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
-                    .build()
-            )
-        );
+        when(refreshTokenRepo.findByToken(anyString()))
+                .thenReturn(Optional.of(RefreshToken.builder()
+                        .reader(Reader.builder().username("someuser").build())
+                        .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
+                        .build()));
 
         AuthDTO result = jwtService.refreshToken("sometoken");
 
@@ -206,25 +182,16 @@ class JwtServiceTest {
 
     @Test
     void testRefreshToken_expired() {
-        when(refreshTokenRepo.findByToken(anyString())).thenReturn(
-            Optional.of(
-                RefreshToken
-                    .builder()
-                    .reader(
-                        Reader
-                            .builder()
-                            .username("someuser")
-                            .build()
-                    )
-                    .expiryDate(Instant.now().minusMillis(1000L * 60L * 60L))
-                    .build()
-            )
-        );
+        when(refreshTokenRepo.findByToken(anyString()))
+                .thenReturn(Optional.of(RefreshToken.builder()
+                        .reader(Reader.builder().username("someuser").build())
+                        .expiryDate(Instant.now().minusMillis(1000L * 60L * 60L))
+                        .build()));
 
         // Test that the exception is thrown
         assertThatThrownBy(() -> jwtService.refreshToken("sometoken"))
-            .isInstanceOf(TokenRefreshException.class)
-            .hasMessageContaining("Refresh token expired");
+                .isInstanceOf(TokenRefreshException.class)
+                .hasMessageContaining("Refresh token expired");
     }
 
     @Test
@@ -233,28 +200,27 @@ class JwtServiceTest {
 
         // Test that the exception is thrown
         assertThatThrownBy(() -> jwtService.refreshToken("sometoken"))
-            .isInstanceOf(TokenRefreshException.class)
-            .hasMessageContaining("Refresh token missing");
+                .isInstanceOf(TokenRefreshException.class)
+                .hasMessageContaining("Refresh token missing");
     }
 
     @Test
     void testRefreshToken_missingToken() {
         assertThatThrownBy(() -> jwtService.refreshToken(new MockHttpServletRequest()))
-            .isInstanceOf(TokenRefreshException.class)
-            .hasMessageContaining("Refresh token missing");
+                .isInstanceOf(TokenRefreshException.class)
+                .hasMessageContaining("Refresh token missing");
     }
 
     @Test
     void testCreateRefreshToken() {
-        when(readerRepo.findById(any(UUID.class))).thenReturn(Optional.of(Reader.builder().username("someuser").build()));
+        when(readerRepo.findById(any(UUID.class)))
+                .thenReturn(Optional.of(Reader.builder().username("someuser").build()));
 
-        when(refreshTokenRepo.save(any(RefreshToken.class))).thenReturn(
-            RefreshToken
-                .builder()
-                .token("sometoken")
-                .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
-                .build()
-        );
+        when(refreshTokenRepo.save(any(RefreshToken.class)))
+                .thenReturn(RefreshToken.builder()
+                        .token("sometoken")
+                        .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
+                        .build());
 
         RefreshToken result = jwtService.createRefreshToken(UUID.randomUUID());
 
@@ -270,13 +236,14 @@ class JwtServiceTest {
 
         // Test that the exception is thrown
         assertThatThrownBy(() -> jwtService.createRefreshToken(UUID.randomUUID()))
-            .isInstanceOf(ReaderNotFoundException.class)
-            .hasMessageContaining("Reader could not be found");
+                .isInstanceOf(ReaderNotFoundException.class)
+                .hasMessageContaining("Reader could not be found");
     }
 
     @Test
     void testDeleteByReaderID() {
-        when(readerRepo.findById(any(UUID.class))).thenReturn(Optional.of(Reader.builder().username("someuser").build()));
+        when(readerRepo.findById(any(UUID.class)))
+                .thenReturn(Optional.of(Reader.builder().username("someuser").build()));
 
         jwtService.deleteByReaderID(UUID.randomUUID());
 
@@ -289,26 +256,17 @@ class JwtServiceTest {
 
         // Test that the exception is thrown
         assertThatThrownBy(() -> jwtService.deleteByReaderID(UUID.randomUUID()))
-            .isInstanceOf(ReaderNotFoundException.class)
-            .hasMessageContaining("Reader could not be found");
+                .isInstanceOf(ReaderNotFoundException.class)
+                .hasMessageContaining("Reader could not be found");
     }
 
     @Test
     void testDeleteRefreshToken() {
-        when(refreshTokenRepo.findByToken(anyString())).thenReturn(
-            Optional.of(
-                RefreshToken
-                    .builder()
-                    .reader(
-                        Reader
-                            .builder()
-                            .username("someuser")
-                            .build()
-                    )
-                    .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
-                    .build()
-            )
-        );
+        when(refreshTokenRepo.findByToken(anyString()))
+                .thenReturn(Optional.of(RefreshToken.builder()
+                        .reader(Reader.builder().username("someuser").build())
+                        .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
+                        .build()));
 
         MockHttpServletRequest req = new MockHttpServletRequest();
         req.setCookies(new Cookie(refreshCookieName, "sometoken"));

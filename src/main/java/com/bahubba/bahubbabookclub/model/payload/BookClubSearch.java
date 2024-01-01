@@ -6,9 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-/**
- * Data sent with HTTP request for searching for book clubs
- */
+/** Data sent with HTTP request for searching for book clubs */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder

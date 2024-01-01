@@ -5,14 +5,13 @@ import lombok.experimental.UtilityClass;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-/**
- * Utility class for security-related methods
- */
+/** Utility class for security-related methods */
 @UtilityClass
 public class SecurityUtil {
 
     /**
      * Gets the current user's details
+     *
      * @return The current user
      */
     public static Reader getCurrentUserDetails() {

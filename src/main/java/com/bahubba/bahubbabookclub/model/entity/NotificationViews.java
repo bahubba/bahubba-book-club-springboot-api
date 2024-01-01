@@ -2,17 +2,14 @@ package com.bahubba.bahubbabookclub.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-/**
- * A composite key table to track which notifications a reader has viewed
- */
+/** A composite key table to track which notifications a reader has viewed */
 @Entity
 @Table(name = "notification_views")
 @Data
@@ -26,12 +23,10 @@ public class NotificationViews implements Serializable {
     @Id
     @ManyToOne(optional = false)
     @JoinColumn(name = "notification_id")
-    @NotNull
-    private Notification notification;
+    @NotNull private Notification notification;
 
     @Id
     @ManyToOne(optional = false)
     @JoinColumn(name = "reader_id")
-    @NotNull
-    private Reader reader;
+    @NotNull private Reader reader;
 }

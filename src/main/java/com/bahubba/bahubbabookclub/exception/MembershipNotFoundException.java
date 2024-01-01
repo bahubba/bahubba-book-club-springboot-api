@@ -3,12 +3,14 @@ package com.bahubba.bahubbabookclub.exception;
 import java.util.UUID;
 
 /**
- * Custom exception for when a client searches for a book club that doesn't exist (in an active state)
+ * Custom exception for when a client searches for a book club that doesn't exist (in an active
+ * state)
  */
 public class MembershipNotFoundException extends RuntimeException {
 
     /**
      * Generates exception for missing book club membership by reader ID and book club ID
+     *
      * @param readerId reader ID
      * @param bookClubId book club ID
      */
@@ -18,6 +20,7 @@ public class MembershipNotFoundException extends RuntimeException {
 
     /**
      * Generates exception for missing book club membership by reader username and book club name
+     *
      * @param username reader username
      * @param bookClubName book club name
      */
@@ -27,6 +30,7 @@ public class MembershipNotFoundException extends RuntimeException {
 
     /**
      * Generates exception for missing book club membership by reader ID and book club name
+     *
      * @param readerID reader ID
      * @param bookClubName book club name
      */

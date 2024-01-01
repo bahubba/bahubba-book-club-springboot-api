@@ -3,18 +3,15 @@ package com.bahubba.bahubbabookclub.repository;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import jakarta.validation.constraints.NotNull;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.UUID;
-
-/**
- * JPA Repository for the {@link BookClub} entity
- */
+/** JPA Repository for the {@link BookClub} entity */
 @Repository
 public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
     @NotNull Page<BookClub> findAll(@NotNull Pageable pageable);
@@ -22,17 +19,17 @@ public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
     Optional<BookClub> findByName(final String name);
 
     @Query(
-        nativeQuery = true,
-        value = "SELECT bc.* FROM book_club bc " +
-            "INNER JOIN book_club_readers bcr " +
-            "ON bc.id = bcr.book_club_id " +
-            "INNER JOIN reader r " +
-            "ON bcr.reader_id = r.id " +
-            "WHERE bc.disbanded IS NULL " +
-            "AND bcr.departed IS NULL " +
-            "AND r.id = :readerId"
-    )
+            nativeQuery = true,
+            value = "SELECT bc.* FROM book_club bc "
+                    + "INNER JOIN book_club_readers bcr "
+                    + "ON bc.id = bcr.book_club_id "
+                    + "INNER JOIN reader r "
+                    + "ON bcr.reader_id = r.id "
+                    + "WHERE bc.disbanded IS NULL "
+                    + "AND bcr.departed IS NULL "
+                    + "AND r.id = :readerId")
     Page<BookClub> findAllForReader(final UUID readerId, Pageable pageable);
 
-    Page<BookClub> findAllByPublicityNotAndNameContainsIgnoreCase(final Publicity publicity, final String searchTerm, Pageable pageable);
+    Page<BookClub> findAllByPublicityNotAndNameContainsIgnoreCase(
+            final Publicity publicity, final String searchTerm, Pageable pageable);
 }

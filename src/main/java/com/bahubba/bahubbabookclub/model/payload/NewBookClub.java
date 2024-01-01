@@ -6,9 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Data sent with HTTP request for creating a new book club
- */
+/** Data sent with HTTP request for creating a new book club */
 @Data
 @Builder
 @AllArgsConstructor

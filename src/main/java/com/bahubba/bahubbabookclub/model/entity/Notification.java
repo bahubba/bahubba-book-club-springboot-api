@@ -3,20 +3,17 @@ package com.bahubba.bahubbabookclub.model.entity;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Notification entity
- */
+/** Notification entity */
 @Entity
 @Table(name = "notification")
 @Data
@@ -34,29 +31,25 @@ public class Notification implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "source_reader_id")
-    @NotNull
-    private Reader sourceReader;
+    @NotNull private Reader sourceReader;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "target_reader_id")
-    @NotNull
-    private Reader targetReader;
+    @NotNull private Reader targetReader;
 
     @ManyToOne
     @JoinColumn(name = "book_club_id")
     private BookClub bookClub;
 
     @Column(nullable = false)
-    @NotNull
-    @Enumerated(EnumType.STRING)
+    @NotNull @Enumerated(EnumType.STRING)
     private NotificationType type;
 
     @Column(name = "action_link")
     private String actionLink;
 
     @Column(nullable = false)
-    @NotNull
-    @Builder.Default
+    @NotNull @Builder.Default
     private LocalDateTime generated = LocalDateTime.now();
 
     @OneToMany(mappedBy = "notification", fetch = FetchType.LAZY)

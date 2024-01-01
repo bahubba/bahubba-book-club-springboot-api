@@ -2,19 +2,18 @@ package com.bahubba.bahubbabookclub.model.entity;
 
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import jakarta.persistence.*;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 /**
- * Membership of {@link Reader}s (users) in {@link BookClub}s
- * TODO - Utilize composite key instead of having a dedicated id
+ * Membership of {@link Reader}s (users) in {@link BookClub}s TODO - Utilize composite key instead
+ * of having a dedicated id
  */
 @Entity
 @Table(name = "book_club_readers")

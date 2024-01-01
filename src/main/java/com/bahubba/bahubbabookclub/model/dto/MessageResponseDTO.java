@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * String messages to be returned to clients
- */
+/** String messages to be returned to clients */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

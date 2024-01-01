@@ -1,5 +1,9 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.payload.MembershipRequestAction;
 import com.bahubba.bahubbabookclub.model.payload.NewMembershipRequest;
@@ -12,10 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @SpringBootTest
 @ActiveProfiles("test")
 class MembershipRequestControllerTest {
@@ -27,8 +27,10 @@ class MembershipRequestControllerTest {
 
     @Test
     void testRequestMembership() {
-        when(membershipRequestService.requestMembership(any(NewMembershipRequest.class))).thenReturn(new MembershipRequestDTO());
-        ResponseEntity<MembershipRequestDTO> rsp = membershipRequestController.requestMembership(new NewMembershipRequest());
+        when(membershipRequestService.requestMembership(any(NewMembershipRequest.class)))
+                .thenReturn(new MembershipRequestDTO());
+        ResponseEntity<MembershipRequestDTO> rsp =
+                membershipRequestController.requestMembership(new NewMembershipRequest());
         verify(membershipRequestService, times(1)).requestMembership(any(NewMembershipRequest.class));
         assertThat(rsp).isNotNull();
     }
@@ -44,26 +46,22 @@ class MembershipRequestControllerTest {
     @Test
     void testGetMembershipRequestsForBookClub() {
         when(membershipRequestService.getMembershipRequestsForBookClub(anyString(), anyInt(), anyInt()))
-            .thenReturn(Page.empty());
+                .thenReturn(Page.empty());
 
-        ResponseEntity<Page<MembershipRequestDTO>> rsp = membershipRequestController
-            .getMembershipRequestsForBookClub("foo", 1, 1);
+        ResponseEntity<Page<MembershipRequestDTO>> rsp =
+                membershipRequestController.getMembershipRequestsForBookClub("foo", 1, 1);
 
-        verify(membershipRequestService, times(1)).getMembershipRequestsForBookClub(
-            anyString(),
-            anyInt(),
-            anyInt()
-        );
+        verify(membershipRequestService, times(1)).getMembershipRequestsForBookClub(anyString(), anyInt(), anyInt());
         assertThat(rsp).isNotNull();
     }
 
     @Test
     void testReviewMembershipRequest() {
-        when(membershipRequestService.reviewMembershipRequest(any(MembershipRequestAction.class))).thenReturn(new MembershipRequestDTO());
+        when(membershipRequestService.reviewMembershipRequest(any(MembershipRequestAction.class)))
+                .thenReturn(new MembershipRequestDTO());
 
         ResponseEntity<MembershipRequestDTO> rsp = membershipRequestController.reviewMembershipRequest(
-            MembershipRequestAction.builder().build()
-        );
+                MembershipRequestAction.builder().build());
 
         verify(membershipRequestService, times(1)).reviewMembershipRequest(any());
         assertThat(rsp).isNotNull();

@@ -1,10 +1,15 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
 import com.bahubba.bahubbabookclub.service.MembershipService;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,15 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
-/**
- * Unit tests for {@link MembershipController} endpoints
- */
+/** Unit tests for {@link MembershipController} endpoints */
 @SpringBootTest
 @ActiveProfiles("test")
 class MembershipControllerTest {
@@ -55,7 +52,8 @@ class MembershipControllerTest {
 
     @Test
     void testGetMembership() {
-        when(membershipService.getMembership(anyString())).thenReturn(BookClubMembershipDTO.builder().build());
+        when(membershipService.getMembership(anyString()))
+                .thenReturn(BookClubMembershipDTO.builder().build());
 
         ResponseEntity<BookClubMembershipDTO> rsp = membershipController.getMembership("foo");
 
@@ -65,9 +63,11 @@ class MembershipControllerTest {
 
     @Test
     void testUpdateMembership() {
-        when(membershipService.updateMembership(any())).thenReturn(BookClubMembershipDTO.builder().build());
+        when(membershipService.updateMembership(any()))
+                .thenReturn(BookClubMembershipDTO.builder().build());
 
-        ResponseEntity<BookClubMembershipDTO> rsp = membershipController.updateMembership(MembershipUpdate.builder().build());
+        ResponseEntity<BookClubMembershipDTO> rsp =
+                membershipController.updateMembership(MembershipUpdate.builder().build());
 
         verify(membershipService, times(1)).updateMembership(any());
         assertThat(rsp).isNotNull();
@@ -75,7 +75,8 @@ class MembershipControllerTest {
 
     @Test
     void testDeleteMembership() {
-        when(membershipService.deleteMembership(anyString(), any(UUID.class))).thenReturn(BookClubMembershipDTO.builder().build());
+        when(membershipService.deleteMembership(anyString(), any(UUID.class)))
+                .thenReturn(BookClubMembershipDTO.builder().build());
 
         ResponseEntity<BookClubMembershipDTO> rsp = membershipController.deleteMembership("foo", UUID.randomUUID());
 
@@ -87,7 +88,8 @@ class MembershipControllerTest {
     void testChangeOwnership() {
         when(membershipService.changeOwnership(any(OwnershipChange.class))).thenReturn(true);
 
-        ResponseEntity<Boolean> rsp = membershipController.changeOwnership(OwnershipChange.builder().build());
+        ResponseEntity<Boolean> rsp =
+                membershipController.changeOwnership(OwnershipChange.builder().build());
 
         verify(membershipService, times(1)).changeOwnership(any(OwnershipChange.class));
         assertThat(rsp).isNotNull();
