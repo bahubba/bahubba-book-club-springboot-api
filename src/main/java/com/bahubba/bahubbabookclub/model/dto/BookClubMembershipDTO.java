@@ -1,16 +1,13 @@
 package com.bahubba.bahubbabookclub.model.dto;
 
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-/**
- * Book club membership info to be returned to clients
- */
+/** Book club membership info to be returned to clients */
 @Data
 @Builder
 @AllArgsConstructor

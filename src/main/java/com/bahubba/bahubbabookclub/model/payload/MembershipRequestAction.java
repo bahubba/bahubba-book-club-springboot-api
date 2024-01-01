@@ -8,9 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Data sent with HTTP request for taking an action on a membership request
- */
+/** Data sent with HTTP request for taking an action on a membership request */
 @Data
 @Builder
 @AllArgsConstructor

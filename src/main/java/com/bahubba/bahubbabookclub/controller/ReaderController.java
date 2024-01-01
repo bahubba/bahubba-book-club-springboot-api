@@ -2,20 +2,16 @@ package com.bahubba.bahubbabookclub.controller;
 
 import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
-import com.bahubba.bahubbabookclub.model.payload.NewReader;
 import com.bahubba.bahubbabookclub.service.ReaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
-
-/**
- * Reader (user) endpoints
- */
+/** Reader (user) endpoints */
 @RestController
 @RequestMapping("/api/v1/readers")
 @Tag(name = "Reader Controller", description = "Reader (user) endpoints")
@@ -26,6 +22,7 @@ public class ReaderController {
 
     /**
      * Retrieve a reader (user) by ID
+     *
      * @param id The reader (user) ID
      * @return The reader (user) info
      * @throws ReaderNotFoundException The reader was not found
@@ -38,6 +35,7 @@ public class ReaderController {
 
     /**
      * Retrieves all readers (users)
+     *
      * @return All readers (users)
      */
     @GetMapping("/all")
@@ -48,6 +46,7 @@ public class ReaderController {
 
     /**
      * Removes (soft deletes) reader (user)
+     *
      * @param id The reader (user) ID
      * @return Persisted data from the soft deleted reader (user)
      * @throws ReaderNotFoundException The reader was not found

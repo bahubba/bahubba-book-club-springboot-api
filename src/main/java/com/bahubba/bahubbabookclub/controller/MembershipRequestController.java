@@ -12,9 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Membership Request endpoints
- */
+/** Membership Request endpoints */
 @RestController
 @RequestMapping("/api/v1/membership-requests")
 @Tag(name = "Membership Request Controller", description = "Membership Request endpoints")
@@ -24,6 +22,7 @@ public class MembershipRequestController {
 
     /**
      * Create a membership request
+     *
      * @param newMembershipRequest ID of the book club and message for the request
      * @return Persisted version of the new membership request
      * @throws ReaderNotFoundException The reader was not found
@@ -31,26 +30,31 @@ public class MembershipRequestController {
      */
     @PostMapping("/request-membership")
     @Operation(summary = "Request Membership", description = "Request membership in a book club")
-    public ResponseEntity<MembershipRequestDTO> requestMembership(@RequestBody NewMembershipRequest newMembershipRequest)
-        throws ReaderNotFoundException, BookClubNotFoundException {
+    public ResponseEntity<MembershipRequestDTO> requestMembership(
+            @RequestBody NewMembershipRequest newMembershipRequest)
+            throws ReaderNotFoundException, BookClubNotFoundException {
 
         return ResponseEntity.ok(membershipRequestService.requestMembership(newMembershipRequest));
     }
 
     /**
      * See if a user has a pending request for a given book club
+     *
      * @param bookClubName The name of the book club
      * @return A message indicating whether the user has a pending request
      * @throws ReaderNotFoundException The reader was not found
      */
     @GetMapping("/has-pending-request/{bookClubName}")
-    @Operation(summary = "Has Pending Request", description = "Check if the reader has a pending request for a book club")
+    @Operation(
+            summary = "Has Pending Request",
+            description = "Check if the reader has a pending request for a book club")
     public ResponseEntity<Boolean> hasPendingRequest(@PathVariable String bookClubName) throws ReaderNotFoundException {
         return ResponseEntity.ok(membershipRequestService.hasPendingRequest(bookClubName));
     }
 
     /**
      * Get all memberships for a given book club
+     *
      * @param bookClubName The name of the book club
      * @return A page of membership requests for the book club
      * @throws ReaderNotFoundException The reader was not found or was not in the book club
@@ -62,36 +66,31 @@ public class MembershipRequestController {
     @GetMapping("/all-for-club/{bookClubName}")
     @Operation(summary = "Get All Requests", description = "Get all membership requests for a book club")
     public ResponseEntity<Page<MembershipRequestDTO>> getMembershipRequestsForBookClub(
-        @PathVariable String bookClubName,
-        @RequestParam int pageNum,
-        @RequestParam int pageSize
-    ) throws ReaderNotFoundException,
-        BookClubNotFoundException,
-        UnauthorizedBookClubActionException,
-        PageSizeTooSmallException,
-        PageSizeTooLargeException {
+            @PathVariable String bookClubName, @RequestParam int pageNum, @RequestParam int pageSize)
+            throws ReaderNotFoundException, BookClubNotFoundException, UnauthorizedBookClubActionException,
+                    PageSizeTooSmallException, PageSizeTooLargeException {
 
-        return ResponseEntity
-            .ok(membershipRequestService.getMembershipRequestsForBookClub(bookClubName, pageNum, pageSize));
+        return ResponseEntity.ok(
+                membershipRequestService.getMembershipRequestsForBookClub(bookClubName, pageNum, pageSize));
     }
 
     /**
      * Approve or reject a membership request
+     *
      * @param membershipRequestAction Approval or rejection of the request
      * @return The updated version of the membership request
      * @throws ReaderNotFoundException The reader was not found or was not in the book club
      * @throws MembershipRequestNotFoundException The membership request was not found
      * @throws UnauthorizedBookClubActionException The reader was not an admin of the book club
-     * @throws BadBookClubActionException The membership request was not open or the target reader was already a member
+     * @throws BadBookClubActionException The membership request was not open or the target reader was
+     *     already a member
      */
     @PatchMapping("/review")
     @Operation(summary = "Review Request", description = "Approve or reject a membership request")
     public ResponseEntity<MembershipRequestDTO> reviewMembershipRequest(
-        @RequestBody MembershipRequestAction membershipRequestAction
-    ) throws ReaderNotFoundException,
-        MembershipRequestNotFoundException,
-        UnauthorizedBookClubActionException,
-        BadBookClubActionException {
+            @RequestBody MembershipRequestAction membershipRequestAction)
+            throws ReaderNotFoundException, MembershipRequestNotFoundException, UnauthorizedBookClubActionException,
+                    BadBookClubActionException {
 
         return ResponseEntity.ok(membershipRequestService.reviewMembershipRequest(membershipRequestAction));
     }

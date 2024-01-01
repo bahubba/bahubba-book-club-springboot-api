@@ -22,9 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
-/**
- * Registration and authentication logic
- */
+/** Registration and authentication logic */
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -47,36 +45,32 @@ public class AuthServiceImpl implements AuthService {
         Reader reader = readerRepo.save(readerMapper.modelToEntity(newReader));
 
         // Generate and persist a notification
-        notificationRepo.save(
-            Notification
-                .builder()
+        notificationRepo.save(Notification.builder()
                 .sourceReader(reader)
                 .targetReader(reader)
                 .type(NotificationType.NEW_READER)
-                .build()
-        );
+                .build());
 
         // Generate auth and refresh JWTs
         ResponseCookie jwtCookie = jwtService.generateJwtCookie(reader);
         ResponseCookie refreshCookie = jwtService.generateJwtRefreshCookie(
-            jwtService.createRefreshToken(reader.getId()).getToken()
-        );
+                jwtService.createRefreshToken(reader.getId()).getToken());
 
         // Return the reader's stored info and JWTs
-        return AuthDTO
-            .builder()
-            .reader(readerMapper.entityToDTO(reader))
-            .token(jwtCookie)
-            .refreshToken(refreshCookie)
-            .build();
+        return AuthDTO.builder()
+                .reader(readerMapper.entityToDTO(reader))
+                .token(jwtCookie)
+                .refreshToken(refreshCookie)
+                .build();
     }
 
     @Override
     public AuthDTO authenticate(@NotNull AuthRequest req) throws AuthenticationException, ReaderNotFoundException {
         authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsernameOrEmail(), req.getPassword()));
 
-        Reader reader = readerRepo.findByUsernameOrEmail(req.getUsernameOrEmail(), req.getUsernameOrEmail())
-            .orElseThrow(() -> new ReaderNotFoundException(req.getUsernameOrEmail()));
+        Reader reader = readerRepo
+                .findByUsernameOrEmail(req.getUsernameOrEmail(), req.getUsernameOrEmail())
+                .orElseThrow(() -> new ReaderNotFoundException(req.getUsernameOrEmail()));
 
         ResponseCookie jwtCookie = jwtService.generateJwtCookie(reader);
 
@@ -84,15 +78,13 @@ public class AuthServiceImpl implements AuthService {
         jwtService.deleteByReaderID(reader.getId());
 
         ResponseCookie refreshCookie = jwtService.generateJwtRefreshCookie(
-            jwtService.createRefreshToken(reader.getId()).getToken()
-        );
+                jwtService.createRefreshToken(reader.getId()).getToken());
 
-        return AuthDTO
-            .builder()
-            .reader(readerMapper.entityToDTO(reader))
-            .token(jwtCookie)
-            .refreshToken(refreshCookie)
-            .build();
+        return AuthDTO.builder()
+                .reader(readerMapper.entityToDTO(reader))
+                .token(jwtCookie)
+                .refreshToken(refreshCookie)
+                .build();
     }
 
     @Override
@@ -100,8 +92,8 @@ public class AuthServiceImpl implements AuthService {
         jwtService.deleteRefreshToken(req);
 
         return AuthDTO.builder()
-            .token(jwtService.generateCookie(authCookieName, "", ""))
-            .refreshToken(jwtService.generateCookie(refreshCookieName, "", ""))
-            .build();
+                .token(jwtService.generateCookie(authCookieName, "", ""))
+                .refreshToken(jwtService.generateCookie(refreshCookieName, "", ""))
+                .build();
     }
 }

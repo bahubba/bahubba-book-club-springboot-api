@@ -3,19 +3,16 @@ package com.bahubba.bahubbabookclub.model.entity;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
 import jakarta.persistence.*;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-/**
- * Requests from Readers (users) for book club membership
- */
+/** Requests from Readers (users) for book club membership */
 @Entity
 @Table(name = "membership_request")
 @Data

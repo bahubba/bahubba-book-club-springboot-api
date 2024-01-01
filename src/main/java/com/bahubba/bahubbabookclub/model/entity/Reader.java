@@ -3,6 +3,13 @@ package com.bahubba.bahubbabookclub.model.entity;
 import com.bahubba.bahubbabookclub.model.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,17 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-/**
- * Readers (users)
- */
+/** Readers (users) */
 @Entity
 @Table(name = "reader")
 @Data
@@ -38,12 +35,10 @@ public class Reader implements UserDetails, Serializable {
     private UUID id;
 
     @Column(nullable = false, unique = true)
-    @NotNull
-    private String username;
+    @NotNull private String username;
 
     @Column(nullable = false, unique = true)
-    @NotNull
-    private String email;
+    @NotNull private String email;
 
     @Column(name = "given_name")
     private String givenName;
@@ -64,22 +59,19 @@ public class Reader implements UserDetails, Serializable {
     private Set<BookClubMembership> memberships;
 
     @Column(nullable = false)
-    @NotNull
-    @Builder.Default
+    @NotNull @Builder.Default
     private LocalDateTime joined = LocalDateTime.now();
 
     @Column
     private LocalDateTime departed;
 
     @Column(nullable = false)
-    @NotNull
-    @Enumerated(EnumType.STRING)
+    @NotNull @Enumerated(EnumType.STRING)
     @Builder.Default
     private Role role = Role.USER;
 
     @Column(nullable = false)
-    @NotNull
-    private String password;
+    @NotNull private String password;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -3,15 +3,14 @@ package com.bahubba.bahubbabookclub.exception;
 import java.io.Serial;
 import java.io.Serializable;
 
-/**
- * Custom exception for issues when creating a refresh auth token
- */
+/** Custom exception for issues when creating a refresh auth token */
 public class TokenRefreshException extends RuntimeException implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructor
+     *
      * @param token refresh token
      * @param message reason the refresh token action failed
      */

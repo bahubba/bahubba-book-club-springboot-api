@@ -17,6 +17,10 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
+import java.security.Key;
+import java.time.Instant;
+import java.util.*;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,14 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
 
-import java.security.Key;
-import java.time.Instant;
-import java.util.*;
-import java.util.function.Function;
-
-/**
- * JWT service layer
- */
+/** JWT service layer */
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -77,7 +74,8 @@ public class JwtServiceImpl implements JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // TODO - Update validity checks with error handling (see https://www.bezkoder.com/spring-security-refresh-token/)
+    // TODO - Update validity checks with error handling (see
+    // https://www.bezkoder.com/spring-security-refresh-token/)
     @Override
     public boolean isTokenValid(String token, @NotNull UserDetails userDetails) {
         final String username = extractUsername(token);
@@ -93,7 +91,7 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public AuthDTO refreshToken(HttpServletRequest req) throws TokenRefreshException {
         String refreshToken = getJwtRefreshFromCookies(req);
-        if(refreshToken == null || refreshToken.isEmpty()) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
             throw new TokenRefreshException(refreshToken, "Refresh token missing");
         }
         return refreshToken(getJwtRefreshFromCookies(req));
@@ -102,18 +100,18 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public AuthDTO refreshToken(String refreshToken) throws TokenRefreshException {
         return getByToken(refreshToken)
-            .map(this::verifyExpiration)
-            .map(RefreshToken::getReader)
-            .map(reader -> {
-                ResponseCookie jwtCookie = this.generateJwtCookie(reader);
+                .map(this::verifyExpiration)
+                .map(RefreshToken::getReader)
+                .map(reader -> {
+                    ResponseCookie jwtCookie = this.generateJwtCookie(reader);
 
-                return AuthDTO.builder()
-                    .reader(readerMapper.entityToDTO(reader))
-                    .token(jwtCookie)
-                    .refreshToken(this.generateJwtRefreshCookie(refreshToken))
-                    .build();
-            })
-            .orElseThrow(() -> new TokenRefreshException(refreshToken, "Refresh token missing"));
+                    return AuthDTO.builder()
+                            .reader(readerMapper.entityToDTO(reader))
+                            .token(jwtCookie)
+                            .refreshToken(this.generateJwtRefreshCookie(refreshToken))
+                            .build();
+                })
+                .orElseThrow(() -> new TokenRefreshException(refreshToken, "Refresh token missing"));
     }
 
     @Override
@@ -126,12 +124,11 @@ public class JwtServiceImpl implements JwtService {
         // Get the current reader
         Reader reader = readerRepo.findById(readerID).orElseThrow(() -> new ReaderNotFoundException(readerID));
 
-        RefreshToken refreshToken = RefreshToken
-            .builder()
-            .reader(reader)
-            .token(UUID.randomUUID().toString())
-            .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
-            .build();
+        RefreshToken refreshToken = RefreshToken.builder()
+                .reader(reader)
+                .token(UUID.randomUUID().toString())
+                .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
+                .build();
 
         return refreshTokenRepo.save(refreshToken);
     }
@@ -146,24 +143,30 @@ public class JwtServiceImpl implements JwtService {
         return token;
     }
 
-    // TODO - Handle the exception, it shouldn't bubble up, as it doesn't matter if they don't have existing refresh tokens
+    // TODO - Handle the exception, it shouldn't bubble up, as it doesn't matter if they don't have
+    // existing refresh tokens
     @Override
     public int deleteByReaderID(UUID readerID) throws ReaderNotFoundException {
         return refreshTokenRepo.deleteByReader(
-            readerRepo.findById(readerID)
-                .orElseThrow(() -> new ReaderNotFoundException(readerID))
-        );
+                readerRepo.findById(readerID).orElseThrow(() -> new ReaderNotFoundException(readerID)));
     }
 
     @Override
     public ResponseCookie generateCookie(String name, String value, String path) {
-        return ResponseCookie.from(name, value).path(path).maxAge(24L * 60L * 60L).httpOnly(true).secure(true).domain(null).sameSite("None").build();
+        return ResponseCookie.from(name, value)
+                .path(path)
+                .maxAge(24L * 60L * 60L)
+                .httpOnly(true)
+                .secure(true)
+                .domain(null)
+                .sameSite("None")
+                .build();
     }
 
     @Override
     public void deleteRefreshToken(HttpServletRequest req) {
         String refreshToken = getJwtRefreshFromCookies(req);
-        if(refreshToken != null && !refreshToken.isEmpty()) {
+        if (refreshToken != null && !refreshToken.isEmpty()) {
             Optional<RefreshToken> refreshTokenEntity = refreshTokenRepo.findByToken(refreshToken);
             refreshTokenEntity.ifPresent(refreshTokenRepo::delete);
         }
@@ -171,29 +174,29 @@ public class JwtServiceImpl implements JwtService {
 
     /**
      * Generates a JWT token
+     *
      * @param extraClaims Extra claims to add to the token
      * @param userDetails The reader's details
      * @return A string JWT token
      */
     private String generateToken(Map<String, Object> extraClaims, @NotNull UserDetails userDetails) {
-        return Jwts
-            .builder()
-            .setClaims(extraClaims)
-            .setSubject(userDetails.getUsername())
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
-            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-            .compact();
+        return Jwts.builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     /**
      * Gets a cookie from an incoming HTTP request by name
+     *
      * @param req The incoming HTTP request
      * @param name The name of the cookie
      * @return The cookie's value
      */
-    @Nullable
-    private String getCookieValueByName(HttpServletRequest req, String name) {
+    @Nullable private String getCookieValueByName(HttpServletRequest req, String name) {
         Cookie cookie = WebUtils.getCookie(req, name);
         if (cookie != null) {
             return cookie.getValue();
@@ -206,15 +209,21 @@ public class JwtServiceImpl implements JwtService {
 
     /**
      * Extracts all claims from a JWT token
+     *
      * @param token The JWT token
      * @return All claims from the JWT token
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     /**
      * Generates a signing key for JWTs using a secret key
+     *
      * @return A JWT signing key
      */
     private @NotNull Key getSigningKey() {
@@ -224,6 +233,7 @@ public class JwtServiceImpl implements JwtService {
 
     /**
      * Checks if a JWT token is expired
+     *
      * @param token The JWT token
      * @return Whether the JWT token is expired
      */
@@ -233,6 +243,7 @@ public class JwtServiceImpl implements JwtService {
 
     /**
      * Extracts the expiration date from a JWT token
+     *
      * @param token The JWT token
      * @return The expiration date of the JWT token
      */

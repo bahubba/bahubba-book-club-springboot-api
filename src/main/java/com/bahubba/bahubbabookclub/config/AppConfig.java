@@ -17,9 +17,7 @@ import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-/**
- * Configures beans to be used within the application
- */
+/** Configures beans to be used within the application */
 @Configuration
 @PropertySource("classpath:application.yaml")
 @RequiredArgsConstructor
@@ -29,17 +27,20 @@ public class AppConfig {
 
     /**
      * Creates a UserDetailsService for loading users by username
+     *
      * @return UserDetailsService
      * @throws UsernameNotFoundException If user is not found
      */
     @Bean
     public UserDetailsService userDetailsService() throws UsernameNotFoundException {
-        return username -> readerRepo.findByUsernameAndDepartedIsNull(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return username -> readerRepo
+                .findByUsernameAndDepartedIsNull(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     /**
      * Creates an AuthenticationProvider
+     *
      * @return AuthenticationProvider
      */
     @Bean
@@ -52,6 +53,7 @@ public class AppConfig {
 
     /**
      * Creates an AuthenticationManager
+     *
      * @param authConfig authentication configuration
      * @return AuthenticationConfiguration
      * @throws Exception If authentication manager cannot be created
@@ -63,6 +65,7 @@ public class AppConfig {
 
     /**
      * Creates a password encoder
+     *
      * @return PasswordEncoder
      */
     @Bean
@@ -70,16 +73,14 @@ public class AppConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Custom Swagger configuration
-     */
+    /** Custom Swagger configuration */
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
-            .apiInfo(new ApiInfoBuilder()
-                .title("BAHubba Book Club API")
-                .description("API for the BAHubba Book Club application")
-                .version("1.0.0")
-                .build());
+                .apiInfo(new ApiInfoBuilder()
+                        .title("BAHubba Book Club API")
+                        .description("API for the BAHubba Book Club application")
+                        .version("1.0.0")
+                        .build());
     }
 }

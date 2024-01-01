@@ -1,17 +1,14 @@
 package com.bahubba.bahubbabookclub.model.dto;
 
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-/**
- * Book club information to be returned to clients
- */
+/** Book club information to be returned to clients */
 @Data
 @Builder
 @AllArgsConstructor

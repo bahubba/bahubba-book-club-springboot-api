@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseCookie;
 
-/**
- * Authentication information to be returned to clients
- */
+/** Authentication information to be returned to clients */
 @Data
 @Builder
 @AllArgsConstructor

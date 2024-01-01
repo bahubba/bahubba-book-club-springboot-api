@@ -1,11 +1,10 @@
 package com.bahubba.bahubbabookclub.exception;
 
-/**
- * Custom exception for when a membership request that doesn't exist
- */
+/** Custom exception for when a membership request that doesn't exist */
 public class MembershipRequestNotFoundException extends RuntimeException {
     /**
      * Generates exception for missing membership request by Reader and Book Club IDs
+     *
      * @param username the username of the reader requesting membership
      * @param bookClubName the name of the book club the reader is requesting membership in
      */

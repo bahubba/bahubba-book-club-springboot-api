@@ -1,8 +1,6 @@
 package com.bahubba.bahubbabookclub.model.enums;
 
-/**
- * Enumerates the types of notifications that can be sent to a user
- */
+/** Enumerates the types of notifications that can be sent to a user */
 public enum NotificationType {
     REGISTERED,
     INVITED_TO_CLUB,

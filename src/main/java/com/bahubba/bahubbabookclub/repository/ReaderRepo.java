@@ -1,15 +1,12 @@
 package com.bahubba.bahubbabookclub.repository;
 
 import com.bahubba.bahubbabookclub.model.entity.Reader;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.UUID;
-
-/**
- * JPA Repository for the {@link Reader} entity
- */
+/** JPA Repository for the {@link Reader} entity */
 @Repository
 public interface ReaderRepo extends JpaRepository<Reader, UUID> {
     Optional<Reader> findByUsername(final String username);

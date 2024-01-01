@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Wrapper for responses to include a message and data
+ *
  * @param <T> data type
  */
 @Data

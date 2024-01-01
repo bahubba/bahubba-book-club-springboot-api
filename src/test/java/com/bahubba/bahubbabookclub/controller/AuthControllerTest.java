@@ -1,5 +1,9 @@
 package com.bahubba.bahubbabookclub.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
@@ -22,13 +26,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-/**
- * Unit tests for the authentication endpoints
- */
+/** Unit tests for the authentication endpoints */
 @SpringBootTest
 @ActiveProfiles("test")
 class AuthControllerTest {
@@ -44,13 +42,12 @@ class AuthControllerTest {
 
     @Test
     void testRegisterUser() {
-        when(authService.register(any(NewReader.class))).thenReturn(
-            AuthDTO.builder()
-                .reader(new ReaderDTO())
-                .token(ResponseCookie.from("foo", "bar").build())
-                .refreshToken(ResponseCookie.from("bar", "foo").build())
-                .build()
-        );
+        when(authService.register(any(NewReader.class)))
+                .thenReturn(AuthDTO.builder()
+                        .reader(new ReaderDTO())
+                        .token(ResponseCookie.from("foo", "bar").build())
+                        .refreshToken(ResponseCookie.from("bar", "foo").build())
+                        .build());
 
         ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.register(new NewReader());
 
@@ -78,13 +75,12 @@ class AuthControllerTest {
 
     @Test
     void testAuthenticate() {
-        when(authService.authenticate(any(AuthRequest.class))).thenReturn(
-            AuthDTO.builder()
-                .reader(new ReaderDTO())
-                .token(ResponseCookie.from("foo", "bar").build())
-                .refreshToken(ResponseCookie.from("bar", "foo").build())
-                .build()
-        );
+        when(authService.authenticate(any(AuthRequest.class)))
+                .thenReturn(AuthDTO.builder()
+                        .reader(new ReaderDTO())
+                        .token(ResponseCookie.from("foo", "bar").build())
+                        .refreshToken(ResponseCookie.from("bar", "foo").build())
+                        .build());
 
         ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.authenticate(new AuthRequest());
 
@@ -112,12 +108,11 @@ class AuthControllerTest {
 
     @Test
     void testRefreshToken() {
-        when(jwtService.refreshToken(any(HttpServletRequest.class))).thenReturn(
-            AuthDTO.builder()
-                .token(ResponseCookie.from("foo", "bar").build())
-                .refreshToken(ResponseCookie.from("bar", "foo").build())
-                .build()
-        );
+        when(jwtService.refreshToken(any(HttpServletRequest.class)))
+                .thenReturn(AuthDTO.builder()
+                        .token(ResponseCookie.from("foo", "bar").build())
+                        .refreshToken(ResponseCookie.from("bar", "foo").build())
+                        .build());
 
         ResponseEntity<MessageResponseDTO> rsp = authController.refreshToken(new MockHttpServletRequest());
 
@@ -127,7 +122,8 @@ class AuthControllerTest {
 
     @Test
     void testRefreshToken_invalidRefreshToken() {
-        when(jwtService.refreshToken(any(HttpServletRequest.class))).thenThrow(new TokenRefreshException("sometoken", "some error"));
+        when(jwtService.refreshToken(any(HttpServletRequest.class)))
+                .thenThrow(new TokenRefreshException("sometoken", "some error"));
 
         ResponseEntity<MessageResponseDTO> rsp = authController.refreshToken(new MockHttpServletRequest());
 
@@ -139,13 +135,11 @@ class AuthControllerTest {
 
     @Test
     void testLogout() {
-        when(authService.logout(any(HttpServletRequest.class))).thenReturn(
-            AuthDTO.builder()
-                .token(ResponseCookie.from("foo", "bar").build())
-                .refreshToken(ResponseCookie.from("bar", "foo").build())
-                .build()
-
-        );
+        when(authService.logout(any(HttpServletRequest.class)))
+                .thenReturn(AuthDTO.builder()
+                        .token(ResponseCookie.from("foo", "bar").build())
+                        .refreshToken(ResponseCookie.from("bar", "foo").build())
+                        .build());
 
         ResponseEntity<MessageResponseDTO> rsp = authController.logout(new MockHttpServletRequest());
 
