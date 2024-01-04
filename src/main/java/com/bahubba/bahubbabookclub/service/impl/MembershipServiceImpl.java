@@ -210,10 +210,9 @@ public class MembershipServiceImpl implements MembershipService {
 
         // Get the new owner's membership
         BookClubMembership newOwnerMembership = bookClubMembershipRepo
-                .findByBookClubNameAndReaderIdAndDepartedIsNull(
-                        newOwner.getBookClubName(), newOwner.getNewOwnerID())
-                .orElseThrow(() -> new MembershipNotFoundException(
-                        newOwner.getNewOwnerID(), newOwner.getBookClubName()));
+                .findByBookClubNameAndReaderIdAndDepartedIsNull(newOwner.getBookClubName(), newOwner.getNewOwnerID())
+                .orElseThrow(
+                        () -> new MembershipNotFoundException(newOwner.getNewOwnerID(), newOwner.getBookClubName()));
 
         // Change ownership (and make the new owner an admin in case they weren't already)
         newOwnerMembership.setClubRole(BookClubRole.ADMIN);
