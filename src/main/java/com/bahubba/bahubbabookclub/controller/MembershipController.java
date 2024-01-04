@@ -4,7 +4,7 @@ import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
-import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
+import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import com.bahubba.bahubbabookclub.service.MembershipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -118,7 +118,7 @@ public class MembershipController {
     /**
      * Change ownership of a book club
      *
-     * @param ownershipChange The book club's name and new owner's ID
+     * @param newOwner The book club's name and new owner's ID
      * @return A message with whether the change was successful
      * @throws ReaderNotFoundException The reader was not logged in or did not exist
      * @throws BadBookClubActionException The reader is trying to make themselves the owner
@@ -126,13 +126,13 @@ public class MembershipController {
      *     club
      * @throws MembershipNotFoundException The target reader was not a member of the book club
      */
-    @PatchMapping("/change-ownership")
-    @Operation(summary = "Change Ownership", description = "Changes ownership of a book club")
-    public ResponseEntity<Boolean> changeOwnership(@RequestBody OwnershipChange ownershipChange)
+    @PatchMapping("/add-owner")
+    @Operation(summary = "Add Owner", description = "Adds a new owner to a book club")
+    public ResponseEntity<Boolean> addOwner(@RequestBody NewOwner newOwner)
             throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
                     MembershipNotFoundException {
 
-        membershipService.changeOwnership(ownershipChange);
+        membershipService.addOwner(newOwner);
         return ResponseEntity.ok(true);
     }
 }

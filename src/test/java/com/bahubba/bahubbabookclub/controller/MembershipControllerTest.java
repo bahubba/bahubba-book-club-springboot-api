@@ -7,7 +7,7 @@ import static org.mockito.Mockito.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
-import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
+import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import com.bahubba.bahubbabookclub.service.MembershipService;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -86,12 +86,12 @@ class MembershipControllerTest {
 
     @Test
     void testChangeOwnership() {
-        when(membershipService.changeOwnership(any(OwnershipChange.class))).thenReturn(true);
+        when(membershipService.addOwner(any(NewOwner.class))).thenReturn(true);
 
         ResponseEntity<Boolean> rsp =
-                membershipController.changeOwnership(OwnershipChange.builder().build());
+                membershipController.addOwner(NewOwner.builder().build());
 
-        verify(membershipService, times(1)).changeOwnership(any(OwnershipChange.class));
+        verify(membershipService, times(1)).addOwner(any(NewOwner.class));
         assertThat(rsp).isNotNull();
     }
 }

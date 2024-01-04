@@ -10,7 +10,7 @@ import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
 import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
-import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
+import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.service.MembershipService;
@@ -189,7 +189,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public Boolean changeOwnership(OwnershipChange ownershipChange)
+    public Boolean addOwner(NewOwner newOwner)
             throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
                     MembershipNotFoundException {
         // Get the current reader from the security context
@@ -199,21 +199,21 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         // Ensure the owner isn't trying to change ownership to themselves (the existing owner)
-        if (reader.getId().equals(ownershipChange.getNewOwnerID())) {
+        if (reader.getId().equals(newOwner.getNewOwnerID())) {
             throw new BadBookClubActionException();
         }
 
         // Ensure the reader is not trying to change ownership of a book club they don't own
         bookClubMembershipRepo
-                .findByBookClubNameAndReaderIdAndIsOwnerTrue(ownershipChange.getBookClubName(), reader.getId())
+                .findByBookClubNameAndReaderIdAndIsOwnerTrue(newOwner.getBookClubName(), reader.getId())
                 .orElseThrow(UnauthorizedBookClubActionException::new);
 
         // Get the new owner's membership
         BookClubMembership newOwnerMembership = bookClubMembershipRepo
                 .findByBookClubNameAndReaderIdAndDepartedIsNull(
-                        ownershipChange.getBookClubName(), ownershipChange.getNewOwnerID())
+                        newOwner.getBookClubName(), newOwner.getNewOwnerID())
                 .orElseThrow(() -> new MembershipNotFoundException(
-                        ownershipChange.getNewOwnerID(), ownershipChange.getBookClubName()));
+                        newOwner.getNewOwnerID(), newOwner.getBookClubName()));
 
         // Change ownership (and make the new owner an admin in case they weren't already)
         newOwnerMembership.setClubRole(BookClubRole.ADMIN);
