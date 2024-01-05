@@ -4,7 +4,7 @@ import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
-import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
+import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 
@@ -80,7 +80,7 @@ public interface MembershipService {
     /**
      * Change ownership of a book club
      *
-     * @param ownershipChange The book club and new owner ID
+     * @param newOwner The book club and new owner ID
      * @return true if successful
      * @throws ReaderNotFoundException The reader was not logged in or did not exist
      * @throws BadBookClubActionException The reader is trying to make themselves the owner
@@ -88,7 +88,7 @@ public interface MembershipService {
      *     club
      * @throws MembershipNotFoundException The target reader was not a member of the book club
      */
-    Boolean changeOwnership(OwnershipChange ownershipChange)
+    Boolean addOwner(NewOwner newOwner)
             throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
                     MembershipNotFoundException;
 }

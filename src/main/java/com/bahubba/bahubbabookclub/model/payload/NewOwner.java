@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OwnershipChange {
+public class NewOwner {
     private String bookClubName;
     private UUID newOwnerID;
 }

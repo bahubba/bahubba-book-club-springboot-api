@@ -13,7 +13,7 @@ import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Reader;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
-import com.bahubba.bahubbabookclub.model.payload.OwnershipChange;
+import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
@@ -628,7 +628,7 @@ class MembershipServiceTest {
                         .build()));
         when(bookClubMembershipRepo.save(any(BookClubMembership.class))).thenReturn(new BookClubMembership());
 
-        Boolean result = membershipService.changeOwnership(OwnershipChange.builder()
+        Boolean result = membershipService.addOwner(NewOwner.builder()
                 .bookClubName("foo")
                 .newOwnerID(testNewOwnerID)
                 .build());
@@ -650,7 +650,7 @@ class MembershipServiceTest {
 
         assertThrows(
                 ReaderNotFoundException.class,
-                () -> membershipService.changeOwnership(OwnershipChange.builder()
+                () -> membershipService.addOwner(NewOwner.builder()
                         .bookClubName("foo")
                         .newOwnerID(UUID.randomUUID())
                         .build()));
@@ -675,7 +675,7 @@ class MembershipServiceTest {
 
         assertThrows(
                 BadBookClubActionException.class,
-                () -> membershipService.changeOwnership(OwnershipChange.builder()
+                () -> membershipService.addOwner(NewOwner.builder()
                         .bookClubName("foo")
                         .newOwnerID(testReaderID)
                         .build()));
@@ -704,7 +704,7 @@ class MembershipServiceTest {
 
         assertThrows(
                 UnauthorizedBookClubActionException.class,
-                () -> membershipService.changeOwnership(OwnershipChange.builder()
+                () -> membershipService.addOwner(NewOwner.builder()
                         .bookClubName("foo")
                         .newOwnerID(testNewOwnerID)
                         .build()));
@@ -735,7 +735,7 @@ class MembershipServiceTest {
 
         assertThrows(
                 MembershipNotFoundException.class,
-                () -> membershipService.changeOwnership(OwnershipChange.builder()
+                () -> membershipService.addOwner(NewOwner.builder()
                         .bookClubName("foo")
                         .newOwnerID(testNewOwnerID)
                         .build()));
