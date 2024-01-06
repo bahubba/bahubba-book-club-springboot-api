@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
+import com.bahubba.bahubbabookclub.model.payload.MembershipCompositeID;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import com.bahubba.bahubbabookclub.service.MembershipService;
@@ -92,6 +93,16 @@ class MembershipControllerTest {
                 membershipController.addOwner(NewOwner.builder().build());
 
         verify(membershipService, times(1)).addOwner(any(NewOwner.class));
+        assertThat(rsp).isNotNull();
+    }
+
+    @Test
+    void testRevokeOwnership() {
+        when(membershipService.revokeOwnership(any(MembershipCompositeID.class))).thenReturn(BookClubMembershipDTO.builder().build());
+
+        ResponseEntity<BookClubMembershipDTO> rsp = membershipController.revokeOwnership(MembershipCompositeID.builder().build());
+
+        verify(membershipService, times(1)).revokeOwnership(any(MembershipCompositeID.class));
         assertThat(rsp).isNotNull();
     }
 }

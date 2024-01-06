@@ -3,6 +3,7 @@ package com.bahubba.bahubbabookclub.service;
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
+import com.bahubba.bahubbabookclub.model.payload.MembershipCompositeID;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import java.util.UUID;
@@ -91,4 +92,18 @@ public interface MembershipService {
     Boolean addOwner(NewOwner newOwner)
             throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
                     MembershipNotFoundException;
+
+    /**
+     * Revoke a user's ownership of a book club
+     *
+     * @param membershipCompositeID The IDs of the book club and the user to revoke ownership from
+     * @return An updated version of the membership
+     * @throws ReaderNotFoundException The user was not logged in or did not exist
+     * @throws BadBookClubActionException The user is trying to revoke their own ownership, or the target user was not an active owner
+     * @throws UnauthorizedBookClubActionException The user was not an owner of the book
+     * @throws MembershipNotFoundException The target user was not a member of the book club
+     */
+    BookClubMembershipDTO revokeOwnership(MembershipCompositeID membershipCompositeID)
+        throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
+                MembershipNotFoundException;
 }

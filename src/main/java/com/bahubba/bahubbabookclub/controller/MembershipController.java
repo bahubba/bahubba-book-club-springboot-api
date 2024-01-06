@@ -3,6 +3,7 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
+import com.bahubba.bahubbabookclub.model.payload.MembershipCompositeID;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import com.bahubba.bahubbabookclub.service.MembershipService;
@@ -134,5 +135,23 @@ public class MembershipController {
 
         membershipService.addOwner(newOwner);
         return ResponseEntity.ok(true);
+    }
+
+    /**
+     * Revoke a user's ownership of a book club
+     *
+     * @param membershipCompositeID The book club's and user's IDs
+     * @return The updated membership
+     * @throws ReaderNotFoundException The user was not logged in or did not exist
+     * @throws BadBookClubActionException The user is trying to revoke their own ownership, or the target user was not an active owner
+     * @throws UnauthorizedBookClubActionException The user was not an owner of the book
+     * @throws MembershipNotFoundException The target user was not a member of the book club
+     */
+    @PatchMapping("/revoke-ownership")
+    @Operation(summary = "Revoke Ownership", description = "Revoke ownership of a book club from a user")
+    public ResponseEntity<BookClubMembershipDTO> revokeOwnership(@RequestBody MembershipCompositeID membershipCompositeID)
+        throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException, MembershipNotFoundException {
+
+        return ResponseEntity.ok(membershipService.revokeOwnership(membershipCompositeID));
     }
 }

@@ -9,6 +9,7 @@ import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
 import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
+import com.bahubba.bahubbabookclub.model.payload.MembershipCompositeID;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewOwner;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
@@ -17,6 +18,7 @@ import com.bahubba.bahubbabookclub.service.MembershipService;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -220,6 +222,44 @@ public class MembershipServiceImpl implements MembershipService {
         bookClubMembershipRepo.save(newOwnerMembership);
 
         return true;
+    }
+
+    @Override
+    public BookClubMembershipDTO revokeOwnership(MembershipCompositeID membershipCompositeID)
+            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException, MembershipNotFoundException {
+        // Get the current reader from the security context
+        Reader reader = SecurityUtil.getCurrentUserDetails();
+        if (reader == null) {
+            throw new ReaderNotFoundException("Not logged in or reader not found");
+        }
+
+        // Ensure the user is not trying to revoke their own membership
+        if (reader.getId().equals(membershipCompositeID.getUserID())) {
+            throw new BadBookClubActionException("Cannot revoke your own membership");
+        }
+
+        // Get the memberships of the user and the target user
+        List<BookClubMembership> memberships = bookClubMembershipRepo
+                .findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndReaderIdIn(
+                        membershipCompositeID.getBookClubID(),
+                        List.of(reader.getId(), membershipCompositeID.getUserID()));
+
+        // Ensure the user is an active owner of the book club
+        memberships.stream()
+                .filter(membership -> membership.getReader().getId().equals(reader.getId()))
+                .findFirst()
+                .orElseThrow(UnauthorizedBookClubActionException::new);
+
+        // Ensure the target user is an active owner of the book club
+        BookClubMembership targetMembership = memberships.stream()
+                .filter(membership -> membership.getReader().getId().equals(membershipCompositeID.getUserID()))
+                .findFirst()
+                .orElseThrow(() -> new MembershipNotFoundException(
+                        membershipCompositeID.getUserID(), membershipCompositeID.getBookClubID()));
+
+        // Set the target user's ownership to false and persist it to the DB, then return the updated membership
+        targetMembership.setOwner(false);
+        return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(targetMembership));
     }
 
     /**
