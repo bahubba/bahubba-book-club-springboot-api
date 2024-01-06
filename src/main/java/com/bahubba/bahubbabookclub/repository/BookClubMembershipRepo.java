@@ -2,7 +2,6 @@ package com.bahubba.bahubbabookclub.repository;
 
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,5 +31,6 @@ public interface BookClubMembershipRepo extends JpaRepository<BookClubMembership
 
     Optional<BookClubMembership> findByBookClubNameAndReaderIdAndIsOwnerTrue(String bookClubName, UUID readerId);
 
-    List<BookClubMembership> findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndReaderIdIn(UUID bookClubId, List<UUID> readerIds);
+    List<BookClubMembership> findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndReaderIdIn(
+            UUID bookClubId, List<UUID> readerIds);
 }

@@ -149,8 +149,10 @@ public class MembershipController {
      */
     @PatchMapping("/revoke-ownership")
     @Operation(summary = "Revoke Ownership", description = "Revoke ownership of a book club from a user")
-    public ResponseEntity<BookClubMembershipDTO> revokeOwnership(@RequestBody MembershipCompositeID membershipCompositeID)
-        throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException, MembershipNotFoundException {
+    public ResponseEntity<BookClubMembershipDTO> revokeOwnership(
+            @RequestBody MembershipCompositeID membershipCompositeID)
+            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
+                    MembershipNotFoundException {
 
         return ResponseEntity.ok(membershipService.revokeOwnership(membershipCompositeID));
     }

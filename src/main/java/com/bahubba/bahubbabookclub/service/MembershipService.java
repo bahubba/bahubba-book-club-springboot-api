@@ -104,6 +104,6 @@ public interface MembershipService {
      * @throws MembershipNotFoundException The target user was not a member of the book club
      */
     BookClubMembershipDTO revokeOwnership(MembershipCompositeID membershipCompositeID)
-        throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
-                MembershipNotFoundException;
+            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
+                    MembershipNotFoundException;
 }

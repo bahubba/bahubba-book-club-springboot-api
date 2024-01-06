@@ -226,7 +226,8 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public BookClubMembershipDTO revokeOwnership(MembershipCompositeID membershipCompositeID)
-            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException, MembershipNotFoundException {
+            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
+                    MembershipNotFoundException {
         // Get the current reader from the security context
         Reader reader = SecurityUtil.getCurrentUserDetails();
         if (reader == null) {
@@ -239,8 +240,8 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         // Get the memberships of the user and the target user
-        List<BookClubMembership> memberships = bookClubMembershipRepo
-                .findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndReaderIdIn(
+        List<BookClubMembership> memberships =
+                bookClubMembershipRepo.findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndReaderIdIn(
                         membershipCompositeID.getBookClubID(),
                         List.of(reader.getId(), membershipCompositeID.getUserID()));
 

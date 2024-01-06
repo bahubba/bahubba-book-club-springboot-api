@@ -98,9 +98,11 @@ class MembershipControllerTest {
 
     @Test
     void testRevokeOwnership() {
-        when(membershipService.revokeOwnership(any(MembershipCompositeID.class))).thenReturn(BookClubMembershipDTO.builder().build());
+        when(membershipService.revokeOwnership(any(MembershipCompositeID.class)))
+                .thenReturn(BookClubMembershipDTO.builder().build());
 
-        ResponseEntity<BookClubMembershipDTO> rsp = membershipController.revokeOwnership(MembershipCompositeID.builder().build());
+        ResponseEntity<BookClubMembershipDTO> rsp = membershipController.revokeOwnership(
+                MembershipCompositeID.builder().build());
 
         verify(membershipService, times(1)).revokeOwnership(any(MembershipCompositeID.class));
         assertThat(rsp).isNotNull();
