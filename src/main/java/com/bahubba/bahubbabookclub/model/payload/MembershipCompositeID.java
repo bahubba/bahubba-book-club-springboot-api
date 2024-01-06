@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Data sent with HTTP request for changing ownership of a book club */
+/** The composite key of a book club membership, passed when taking actions on that membership */
 @Data
 @Builder
 @AllArgsConstructor
