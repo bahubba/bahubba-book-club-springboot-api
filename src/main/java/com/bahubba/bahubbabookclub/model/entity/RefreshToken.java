@@ -22,8 +22,8 @@ public class RefreshToken {
     private UUID id;
 
     @OneToOne
-    @JoinColumn(name = "reader_id", referencedColumnName = "id")
-    private Reader reader;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @Column(nullable = false, unique = true)
     private String token;

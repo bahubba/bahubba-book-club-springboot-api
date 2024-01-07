@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Requests from Readers (users) for book club membership */
+/** Requests from Users (users) for book club membership */
 @Entity
 @Table(name = "membership_request")
 @Data
@@ -29,8 +29,8 @@ public class MembershipRequest implements Serializable {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "reader_id", referencedColumnName = "id")
-    private Reader reader;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "book_club_id", referencedColumnName = "id")
@@ -54,7 +54,7 @@ public class MembershipRequest implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "reviewer_id", referencedColumnName = "id")
-    private Reader reviewer;
+    private User reviewer;
 
     @Column(name = "review_message")
     private String reviewMessage;

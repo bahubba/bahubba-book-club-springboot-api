@@ -5,7 +5,7 @@ import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.MembershipRequest;
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.RequestAction;
 import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
@@ -39,11 +39,11 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
 
     @Override
     public MembershipRequestDTO requestMembership(NewMembershipRequest newMembershipRequest)
-            throws ReaderNotFoundException, BookClubNotFoundException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+            throws UserNotFoundException, BookClubNotFoundException {
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
         // Get the book club to request membership in
@@ -55,33 +55,33 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
         // Create the membership request and persist it
         return membershipRequestMapper.entityToDTO(membershipRequestRepo.save(MembershipRequest.builder()
                 .bookClub(bookClub)
-                .reader(reader)
+                .user(user)
                 .message(newMembershipRequest.getMessage())
                 .build()));
     }
 
     @Override
-    public Boolean hasPendingRequest(String bookClubName) throws ReaderNotFoundException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+    public Boolean hasPendingRequest(String bookClubName) throws UserNotFoundException {
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Check if the reader has a pending membership request for the book club
-        return membershipRequestRepo.existsByBookClubNameAndReaderIdAndStatus(
-                bookClubName, reader.getId(), RequestStatus.OPEN);
+        // Check if the user has a pending membership request for the book club
+        return membershipRequestRepo.existsByBookClubNameAndUserIdAndStatus(
+                bookClubName, user.getId(), RequestStatus.OPEN);
     }
 
     // TODO - custom sorting, filters?
     @Override
     public Page<MembershipRequestDTO> getMembershipRequestsForBookClub(String bookClubName, int pageNum, int pageSize)
-            throws ReaderNotFoundException, BookClubNotFoundException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, BookClubNotFoundException, UnauthorizedBookClubActionException,
                     PageSizeTooSmallException, PageSizeTooLargeException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
         // Get the book club
@@ -89,11 +89,11 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
                 .findByName(bookClubName)
                 .orElseThrow(() -> new BookClubNotFoundException("Book club not found"));
 
-        // Ensure the reader is an admin of the book club
+        // Ensure the user is an admin of the book club
         BookClubMembership membership = bookClub.getMembers().stream()
-                .filter(member -> member.getReader().getId().equals(reader.getId()))
+                .filter(member -> member.getUser().getId().equals(user.getId()))
                 .findFirst()
-                .orElseThrow(() -> new ReaderNotFoundException(reader.getUsername(), bookClub.getName()));
+                .orElseThrow(() -> new UserNotFoundException(user.getUsername(), bookClub.getName()));
         if (!membership.getClubRole().equals(BookClubRole.ADMIN)) {
             throw new UnauthorizedBookClubActionException();
         }
@@ -117,12 +117,12 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
 
     @Override
     public MembershipRequestDTO reviewMembershipRequest(MembershipRequestAction membershipRequestAction)
-            throws ReaderNotFoundException, MembershipRequestNotFoundException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, MembershipRequestNotFoundException, UnauthorizedBookClubActionException,
                     BadBookClubActionException {
-        // Get the current reader from the security context
-        Reader reviewer = SecurityUtil.getCurrentUserDetails();
+        // Get the current user from the security context
+        User reviewer = SecurityUtil.getCurrentUserDetails();
         if (reviewer == null) {
-            throw new ReaderNotFoundException();
+            throw new UserNotFoundException();
         }
 
         // Get the membership request to review
@@ -131,7 +131,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
                 .orElseThrow(() -> new MembershipRequestNotFoundException(
                         membershipRequestAction
                                 .getMembershipRequest()
-                                .getReader()
+                                .getUser()
                                 .getUsername(),
                         membershipRequestAction
                                 .getMembershipRequest()
@@ -140,9 +140,9 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
 
         // Ensure the reviewer is an admin of the book club
         BookClubMembership reviewerMembership = membershipRequest.getBookClub().getMembers().stream()
-                .filter(member -> member.getReader().getId().equals(reviewer.getId()))
+                .filter(member -> member.getUser().getId().equals(reviewer.getId()))
                 .findFirst()
-                .orElseThrow(() -> new ReaderNotFoundException(
+                .orElseThrow(() -> new UserNotFoundException(
                         reviewer.getUsername(), membershipRequest.getBookClub().getName()));
         if (!reviewerMembership.getClubRole().equals(BookClubRole.ADMIN)) {
             throw new UnauthorizedBookClubActionException();
@@ -153,14 +153,14 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
             throw new BadBookClubActionException();
         }
 
-        // Attempt to add the reader to the book club with the specified role if the request was
+        // Attempt to add the user to the book club with the specified role if the request was
         // approved
         if (membershipRequestAction.getAction().equals(RequestAction.APPROVE)) {
-            // Ensure the reader isn't already a member of the book club
+            // Ensure the user isn't already a member of the book club
             BookClubMembership existingMembership = membershipRequest.getBookClub().getMembers().stream()
-                    .filter(member -> member.getReader()
+                    .filter(member -> member.getUser()
                             .getId()
-                            .equals(membershipRequest.getReader().getId()))
+                            .equals(membershipRequest.getUser().getId()))
                     .findFirst()
                     .orElse(null);
 
@@ -168,10 +168,10 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
                 throw new BadBookClubActionException();
             }
 
-            // Add the reader to the book club
+            // Add the user to the book club
             bookClubMembershipRepo.save(BookClubMembership.builder()
                     .bookClub(membershipRequest.getBookClub())
-                    .reader(membershipRequest.getReader())
+                    .user(membershipRequest.getUser())
                     .clubRole(membershipRequestAction.getRole())
                     .build());
         }

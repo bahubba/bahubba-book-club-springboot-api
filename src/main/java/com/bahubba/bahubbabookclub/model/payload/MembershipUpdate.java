@@ -7,13 +7,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Data sent with HTTP request for updating a reader's membership in a book club */
+/** Data sent with HTTP request for updating a user's membership in a book club */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class MembershipUpdate {
     private String bookClubName;
-    private UUID readerID;
+    private UUID userID;
     private BookClubRole role;
 }

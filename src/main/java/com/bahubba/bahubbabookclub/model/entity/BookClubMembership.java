@@ -12,11 +12,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Membership of {@link Reader}s (users) in {@link BookClub}s TODO - Utilize composite key instead
+ * Membership of {@link User}s (users) in {@link BookClub}s TODO - Utilize composite key instead
  * of having a dedicated id
  */
 @Entity
-@Table(name = "book_club_readers")
+@Table(name = "book_club_users")
 @Data
 @Builder
 @NoArgsConstructor
@@ -35,13 +35,13 @@ public class BookClubMembership implements Serializable {
     private BookClub bookClub;
 
     @ManyToOne
-    @JoinColumn(name = "reader_id", referencedColumnName = "id")
-    private Reader reader;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @Column(name = "club_role", nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private BookClubRole clubRole = BookClubRole.READER;
+    private BookClubRole clubRole = BookClubRole.USER;
 
     @Column(name = "is_owner", nullable = false)
     @Builder.Default

@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** A composite key table to track which notifications a reader has viewed */
+/** A composite key table to track which notifications a user has viewed */
 @Entity
 @Table(name = "notification_views")
 @Data
@@ -27,6 +27,6 @@ public class NotificationViews implements Serializable {
 
     @Id
     @ManyToOne(optional = false)
-    @JoinColumn(name = "reader_id")
-    @NotNull private Reader reader;
+    @JoinColumn(name = "user_id")
+    @NotNull private User user;
 }

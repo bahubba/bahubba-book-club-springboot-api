@@ -8,11 +8,11 @@ import static org.mockito.Mockito.*;
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.dto.MembershipRequestDTO;
-import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
+import com.bahubba.bahubbabookclub.model.dto.UserDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.MembershipRequest;
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.RequestAction;
 import com.bahubba.bahubbabookclub.model.enums.RequestStatus;
@@ -52,7 +52,7 @@ class MembershipRequestServiceTest {
     @Test
     void testRequestMembership() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
-        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(new Reader());
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(new User());
         when(bookClubRepo.findByName(anyString())).thenReturn(Optional.of(new BookClub()));
         when(membershipRequestRepo.save(any(MembershipRequest.class))).thenReturn(new MembershipRequest());
 
@@ -66,11 +66,11 @@ class MembershipRequestServiceTest {
     }
 
     @Test
-    void testRequestMembership_ReaderNotFound() {
+    void testRequestMembership_UserNotFound() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
 
-        assertThrows(ReaderNotFoundException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             membershipRequestService.requestMembership(
                     NewMembershipRequest.builder().bookClubName("foo").build());
         });
@@ -83,25 +83,25 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(UUID.randomUUID()).build());
-        when(membershipRequestRepo.existsByBookClubNameAndReaderIdAndStatus(
+                .thenReturn(User.builder().id(UUID.randomUUID()).build());
+        when(membershipRequestRepo.existsByBookClubNameAndUserIdAndStatus(
                         anyString(), any(UUID.class), any(RequestStatus.class)))
                 .thenReturn(true);
 
         Boolean result = membershipRequestService.hasPendingRequest("foo");
 
         verify(membershipRequestRepo, times(1))
-                .existsByBookClubNameAndReaderIdAndStatus(anyString(), any(UUID.class), any(RequestStatus.class));
+                .existsByBookClubNameAndUserIdAndStatus(anyString(), any(UUID.class), any(RequestStatus.class));
         assertThat(result).isNotNull();
         securityUtilMockedStatic.close();
     }
 
     @Test
-    void testHasPendingRequest_ReaderNotFound() {
+    void testHasPendingRequest_UserNotFound() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
 
-        assertThrows(ReaderNotFoundException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             membershipRequestService.hasPendingRequest("foo");
         });
 
@@ -115,14 +115,14 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).build());
+                .thenReturn(User.builder().id(testID).build());
 
         when(bookClubRepo.findByName(anyString()))
                 .thenReturn(Optional.of(BookClub.builder()
                         .id(UUID.randomUUID())
                         .members(Set.of(BookClubMembership.builder()
                                 .clubRole(BookClubRole.ADMIN)
-                                .reader(Reader.builder().id(testID).build())
+                                .user(User.builder().id(testID).build())
                                 .build()))
                         .build()));
         when(membershipRequestRepo.findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
@@ -139,11 +139,11 @@ class MembershipRequestServiceTest {
     }
 
     @Test
-    void testGetMembershipRequestsForBookClub_ReaderNotFound() {
+    void testGetMembershipRequestsForBookClub_UserNotFound() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
 
-        assertThrows(ReaderNotFoundException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             membershipRequestService.getMembershipRequestsForBookClub("foo", 1, 1);
         });
 
@@ -161,7 +161,7 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).build());
+                .thenReturn(User.builder().id(testID).build());
 
         when(bookClubRepo.findByName(anyString())).thenReturn(Optional.empty());
 
@@ -177,25 +177,25 @@ class MembershipRequestServiceTest {
     }
 
     @Test
-    void testGetMembershipRequestsForBookClub_ReaderNotMember() {
+    void testGetMembershipRequestsForBookClub_UserNotMember() {
         var testID = UUID.randomUUID();
 
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).build());
+                .thenReturn(User.builder().id(testID).build());
 
         when(bookClubRepo.findByName(anyString()))
                 .thenReturn(Optional.of(BookClub.builder()
                         .id(UUID.randomUUID())
                         .members(Set.of(BookClubMembership.builder()
                                 .clubRole(BookClubRole.ADMIN)
-                                .reader(Reader.builder().id(UUID.randomUUID()).build())
+                                .user(User.builder().id(UUID.randomUUID()).build())
                                 .build()))
                         .build()));
 
         assertThrows(
-                ReaderNotFoundException.class,
+                UserNotFoundException.class,
                 () -> membershipRequestService.getMembershipRequestsForBookClub("foo", 1, 1));
 
         verify(bookClubRepo, times(1)).findByName(anyString());
@@ -206,20 +206,20 @@ class MembershipRequestServiceTest {
     }
 
     @Test
-    void testGetMembershipRequestsForBookClub_ReaderNotAdmin() {
+    void testGetMembershipRequestsForBookClub_UserNotAdmin() {
         var testID = UUID.randomUUID();
 
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).build());
+                .thenReturn(User.builder().id(testID).build());
 
         when(bookClubRepo.findByName(anyString()))
                 .thenReturn(Optional.of(BookClub.builder()
                         .id(UUID.randomUUID())
                         .members(Set.of(BookClubMembership.builder()
-                                .clubRole(BookClubRole.READER)
-                                .reader(Reader.builder().id(testID).build())
+                                .clubRole(BookClubRole.USER)
+                                .user(User.builder().id(testID).build())
                                 .build()))
                         .build()));
 
@@ -241,14 +241,14 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).build());
+                .thenReturn(User.builder().id(testID).build());
 
         when(bookClubRepo.findByName(anyString()))
                 .thenReturn(Optional.of(BookClub.builder()
                         .id(UUID.randomUUID())
                         .members(Set.of(BookClubMembership.builder()
                                 .clubRole(BookClubRole.ADMIN)
-                                .reader(Reader.builder().id(testID).build())
+                                .user(User.builder().id(testID).build())
                                 .build()))
                         .build()));
         when(membershipRequestRepo.findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
@@ -272,14 +272,14 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).build());
+                .thenReturn(User.builder().id(testID).build());
 
         when(bookClubRepo.findByName(anyString()))
                 .thenReturn(Optional.of(BookClub.builder()
                         .id(UUID.randomUUID())
                         .members(Set.of(BookClubMembership.builder()
                                 .clubRole(BookClubRole.ADMIN)
-                                .reader(Reader.builder().id(testID).build())
+                                .user(User.builder().id(testID).build())
                                 .build()))
                         .build()));
         when(membershipRequestRepo.findAllByBookClubIdOrderByRequestedDesc(any(UUID.class), any(Pageable.class)))
@@ -303,15 +303,15 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).username("foo").build());
+                .thenReturn(User.builder().id(testID).username("foo").build());
         when(membershipRequestRepo.findById(any(UUID.class)))
                 .thenReturn(Optional.of(MembershipRequest.builder()
                         .id(UUID.randomUUID())
-                        .reader(Reader.builder().id(UUID.randomUUID()).build())
+                        .user(User.builder().id(UUID.randomUUID()).build())
                         .bookClub(BookClub.builder()
                                 .members(Set.of(BookClubMembership.builder()
                                         .clubRole(BookClubRole.ADMIN)
-                                        .reader(Reader.builder().id(testID).build())
+                                        .user(User.builder().id(testID).build())
                                         .build()))
                                 .build())
                         .status(RequestStatus.OPEN)
@@ -319,12 +319,12 @@ class MembershipRequestServiceTest {
         when(membershipRequestRepo.save(any(MembershipRequest.class))).thenReturn(new MembershipRequest());
 
         MembershipRequestDTO result = membershipRequestService.reviewMembershipRequest(MembershipRequestAction.builder()
-                .role(BookClubRole.READER)
+                .role(BookClubRole.USER)
                 .reviewMessage("bar")
                 .action(RequestAction.APPROVE)
                 .membershipRequest(MembershipRequestDTO.builder()
                         .id(UUID.randomUUID())
-                        .reader(ReaderDTO.builder()
+                        .user(UserDTO.builder()
                                 .id(UUID.randomUUID())
                                 .username("foo")
                                 .build())
@@ -347,15 +347,15 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).username("foo").build());
+                .thenReturn(User.builder().id(testID).username("foo").build());
         when(membershipRequestRepo.findById(any(UUID.class)))
                 .thenReturn(Optional.of(MembershipRequest.builder()
                         .id(UUID.randomUUID())
-                        .reader(Reader.builder().id(UUID.randomUUID()).build())
+                        .user(User.builder().id(UUID.randomUUID()).build())
                         .bookClub(BookClub.builder()
                                 .members(Set.of(BookClubMembership.builder()
                                         .clubRole(BookClubRole.ADMIN)
-                                        .reader(Reader.builder().id(testID).build())
+                                        .user(User.builder().id(testID).build())
                                         .build()))
                                 .build())
                         .status(RequestStatus.OPEN)
@@ -363,12 +363,12 @@ class MembershipRequestServiceTest {
         when(membershipRequestRepo.save(any(MembershipRequest.class))).thenReturn(new MembershipRequest());
 
         MembershipRequestDTO result = membershipRequestService.reviewMembershipRequest(MembershipRequestAction.builder()
-                .role(BookClubRole.READER)
+                .role(BookClubRole.USER)
                 .reviewMessage("bar")
                 .action(RequestAction.REJECT)
                 .membershipRequest(MembershipRequestDTO.builder()
                         .id(UUID.randomUUID())
-                        .reader(ReaderDTO.builder()
+                        .user(UserDTO.builder()
                                 .id(UUID.randomUUID())
                                 .username("foo")
                                 .build())
@@ -385,11 +385,11 @@ class MembershipRequestServiceTest {
     }
 
     @Test
-    void testReviewMembershipRequest_ReaderNotFound() {
+    void testReviewMembershipRequest_UserNotFound() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(null);
 
-        assertThrows(ReaderNotFoundException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             membershipRequestService.reviewMembershipRequest(
                     MembershipRequestAction.builder().build());
         });
@@ -403,13 +403,13 @@ class MembershipRequestServiceTest {
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
                 .thenReturn(
-                        Reader.builder().id(UUID.randomUUID()).username("foo").build());
+                        User.builder().id(UUID.randomUUID()).username("foo").build());
         when(membershipRequestRepo.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(MembershipRequestNotFoundException.class, () -> {
             membershipRequestService.reviewMembershipRequest(MembershipRequestAction.builder()
                     .membershipRequest(MembershipRequestDTO.builder()
-                            .reader(ReaderDTO.builder().username("foo").build())
+                            .user(UserDTO.builder().username("foo").build())
                             .bookClub(BookClubDTO.builder().name("foo").build())
                             .build())
                     .build());
@@ -425,15 +425,15 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).username("foo").build());
+                .thenReturn(User.builder().id(testID).username("foo").build());
         when(membershipRequestRepo.findById(any(UUID.class)))
                 .thenReturn(Optional.of(MembershipRequest.builder()
                         .id(UUID.randomUUID())
-                        .reader(Reader.builder().id(UUID.randomUUID()).build())
+                        .user(User.builder().id(UUID.randomUUID()).build())
                         .bookClub(BookClub.builder()
                                 .members(Set.of(BookClubMembership.builder()
                                         .clubRole(BookClubRole.ADMIN)
-                                        .reader(Reader.builder()
+                                        .user(User.builder()
                                                 .id(UUID.randomUUID())
                                                 .build())
                                         .build()))
@@ -442,14 +442,14 @@ class MembershipRequestServiceTest {
                         .build()));
 
         assertThrows(
-                ReaderNotFoundException.class,
+                UserNotFoundException.class,
                 () -> membershipRequestService.reviewMembershipRequest(MembershipRequestAction.builder()
-                        .role(BookClubRole.READER)
+                        .role(BookClubRole.USER)
                         .reviewMessage("bar")
                         .action(RequestAction.APPROVE)
                         .membershipRequest(MembershipRequestDTO.builder()
                                 .id(UUID.randomUUID())
-                                .reader(ReaderDTO.builder()
+                                .user(UserDTO.builder()
                                         .id(UUID.randomUUID())
                                         .username("foo")
                                         .build())
@@ -471,15 +471,15 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).username("foo").build());
+                .thenReturn(User.builder().id(testID).username("foo").build());
         when(membershipRequestRepo.findById(any(UUID.class)))
                 .thenReturn(Optional.of(MembershipRequest.builder()
                         .id(UUID.randomUUID())
-                        .reader(Reader.builder().id(UUID.randomUUID()).build())
+                        .user(User.builder().id(UUID.randomUUID()).build())
                         .bookClub(BookClub.builder()
                                 .members(Set.of(BookClubMembership.builder()
-                                        .clubRole(BookClubRole.READER)
-                                        .reader(Reader.builder().id(testID).build())
+                                        .clubRole(BookClubRole.USER)
+                                        .user(User.builder().id(testID).build())
                                         .build()))
                                 .build())
                         .status(RequestStatus.OPEN)
@@ -488,12 +488,12 @@ class MembershipRequestServiceTest {
         assertThrows(
                 UnauthorizedBookClubActionException.class,
                 () -> membershipRequestService.reviewMembershipRequest(MembershipRequestAction.builder()
-                        .role(BookClubRole.READER)
+                        .role(BookClubRole.USER)
                         .reviewMessage("bar")
                         .action(RequestAction.APPROVE)
                         .membershipRequest(MembershipRequestDTO.builder()
                                 .id(UUID.randomUUID())
-                                .reader(ReaderDTO.builder()
+                                .user(UserDTO.builder()
                                         .id(UUID.randomUUID())
                                         .username("foo")
                                         .build())
@@ -515,15 +515,15 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testID).username("foo").build());
+                .thenReturn(User.builder().id(testID).username("foo").build());
         when(membershipRequestRepo.findById(any(UUID.class)))
                 .thenReturn(Optional.of(MembershipRequest.builder()
                         .id(UUID.randomUUID())
-                        .reader(Reader.builder().id(UUID.randomUUID()).build())
+                        .user(User.builder().id(UUID.randomUUID()).build())
                         .bookClub(BookClub.builder()
                                 .members(Set.of(BookClubMembership.builder()
                                         .clubRole(BookClubRole.ADMIN)
-                                        .reader(Reader.builder().id(testID).build())
+                                        .user(User.builder().id(testID).build())
                                         .build()))
                                 .build())
                         .status(RequestStatus.APPROVED)
@@ -532,12 +532,12 @@ class MembershipRequestServiceTest {
         assertThrows(
                 BadBookClubActionException.class,
                 () -> membershipRequestService.reviewMembershipRequest(MembershipRequestAction.builder()
-                        .role(BookClubRole.READER)
+                        .role(BookClubRole.USER)
                         .reviewMessage("bar")
                         .action(RequestAction.APPROVE)
                         .membershipRequest(MembershipRequestDTO.builder()
                                 .id(UUID.randomUUID())
-                                .reader(ReaderDTO.builder()
+                                .user(UserDTO.builder()
                                         .id(UUID.randomUUID())
                                         .username("foo")
                                         .build())
@@ -560,22 +560,22 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(Reader.builder().id(testReviewerID).username("foo").build());
+                .thenReturn(User.builder().id(testReviewerID).username("foo").build());
         when(membershipRequestRepo.findById(any(UUID.class)))
                 .thenReturn(Optional.of(MembershipRequest.builder()
                         .id(UUID.randomUUID())
-                        .reader(Reader.builder().id(testMemberID).build())
+                        .user(User.builder().id(testMemberID).build())
                         .bookClub(BookClub.builder()
                                 .members(Set.of(
                                         BookClubMembership.builder()
                                                 .clubRole(BookClubRole.ADMIN)
-                                                .reader(Reader.builder()
+                                                .user(User.builder()
                                                         .id(testReviewerID)
                                                         .build())
                                                 .build(),
                                         BookClubMembership.builder()
-                                                .clubRole(BookClubRole.READER)
-                                                .reader(Reader.builder()
+                                                .clubRole(BookClubRole.USER)
+                                                .user(User.builder()
                                                         .id(testMemberID)
                                                         .build())
                                                 .build()))
@@ -586,12 +586,12 @@ class MembershipRequestServiceTest {
         assertThrows(
                 BadBookClubActionException.class,
                 () -> membershipRequestService.reviewMembershipRequest(MembershipRequestAction.builder()
-                        .role(BookClubRole.READER)
+                        .role(BookClubRole.USER)
                         .reviewMessage("bar")
                         .action(RequestAction.APPROVE)
                         .membershipRequest(MembershipRequestDTO.builder()
                                 .id(UUID.randomUUID())
-                                .reader(ReaderDTO.builder()
+                                .user(UserDTO.builder()
                                         .id(testMemberID)
                                         .username("foo")
                                         .build())

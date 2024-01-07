@@ -18,14 +18,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-/** Readers (users) */
+/** Users (users) */
 @Entity
-@Table(name = "reader")
+@Table(name = "app_user")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reader implements UserDetails, Serializable {
+public class User implements UserDetails, Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -55,7 +55,7 @@ public class Reader implements UserDetails, Serializable {
     @Column
     private String title;
 
-    @OneToMany(mappedBy = "reader", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<BookClubMembership> memberships;
 
     @Column(nullable = false)

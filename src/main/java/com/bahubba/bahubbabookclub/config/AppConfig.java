@@ -1,6 +1,6 @@
 package com.bahubba.bahubbabookclub.config;
 
-import com.bahubba.bahubbabookclub.repository.ReaderRepo;
+import com.bahubba.bahubbabookclub.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +23,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 @RequiredArgsConstructor
 public class AppConfig {
 
-    private final ReaderRepo readerRepo;
+    private final UserRepo userRepo;
 
     /**
      * Creates a UserDetailsService for loading users by username
@@ -33,7 +33,7 @@ public class AppConfig {
      */
     @Bean
     public UserDetailsService userDetailsService() throws UsernameNotFoundException {
-        return username -> readerRepo
+        return username -> userRepo
                 .findByUsernameAndDepartedIsNull(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }

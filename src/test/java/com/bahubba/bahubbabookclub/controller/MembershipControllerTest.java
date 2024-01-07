@@ -42,7 +42,7 @@ class MembershipControllerTest {
 
     @Test
     void testGetRole() {
-        when(membershipService.getRole(anyString())).thenReturn(BookClubRole.READER);
+        when(membershipService.getRole(anyString())).thenReturn(BookClubRole.USER);
 
         ResponseEntity<BookClubRole> rsp = membershipController.getRole("foo");
 

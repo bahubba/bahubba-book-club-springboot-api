@@ -7,12 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Reader (user) information to be returned to clients */
+/** User information to be returned to clients */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReaderDTO {
+public class UserDTO {
     private UUID id;
     private String username;
     private String email;

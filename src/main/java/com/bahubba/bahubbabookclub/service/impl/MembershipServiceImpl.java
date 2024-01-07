@@ -4,11 +4,11 @@ import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubMembershipDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
-import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
+import com.bahubba.bahubbabookclub.model.mapper.UserMapper;
 import com.bahubba.bahubbabookclub.model.payload.MembershipCompositeID;
 import com.bahubba.bahubbabookclub.model.payload.MembershipUpdate;
 import com.bahubba.bahubbabookclub.model.payload.NewOwner;
@@ -35,22 +35,22 @@ public class MembershipServiceImpl implements MembershipService {
     private final BookClubRepo bookClubRepo;
     private final BookClubMembershipMapper bookClubMembershipMapper;
     private final BookClubMapper bookClubMapper;
-    private final ReaderMapper readerMapper;
+    private final UserMapper userMapper;
 
     @Override
     public Page<BookClubMembershipDTO> getAll(String bookClubName, int pageNum, int pageSize)
-            throws ReaderNotFoundException, UnauthorizedBookClubActionException, PageSizeTooSmallException,
+            throws UserNotFoundException, UnauthorizedBookClubActionException, PageSizeTooSmallException,
                     PageSizeTooLargeException {
 
-        // Get the reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+        // Get the user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Get the Reader's membership in the book club, ensuring they are an admin
+        // Get the User's membership in the book club, ensuring they are an admin
         bookClubMembershipRepo
-                .findByBookClubNameAndClubRoleAndReaderId(bookClubName, BookClubRole.ADMIN, reader.getId())
+                .findByBookClubNameAndClubRoleAndUserId(bookClubName, BookClubRole.ADMIN, user.getId())
                 .orElseThrow(UnauthorizedBookClubActionException::new);
 
         // Ensure the page size is valid
@@ -65,38 +65,38 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public BookClubRole getRole(String bookClubName) throws ReaderNotFoundException, MembershipNotFoundException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+    public BookClubRole getRole(String bookClubName) throws UserNotFoundException, MembershipNotFoundException {
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Get the reader's role in the book club (if any)
+        // Get the user's role in the book club (if any)
         BookClubMembership membership = bookClubMembershipRepo
-                .findByBookClubNameAndReaderId(bookClubName, reader.getId())
-                .orElseThrow(() -> new MembershipNotFoundException(reader.getUsername(), bookClubName));
+                .findByBookClubNameAndUserId(bookClubName, user.getId())
+                .orElseThrow(() -> new MembershipNotFoundException(user.getUsername(), bookClubName));
 
-        // Return the reader's role
+        // Return the user's role
         return membership.getClubRole();
     }
 
     @Override
     public BookClubMembershipDTO getMembership(String bookClubName)
-            throws ReaderNotFoundException, BookClubNotFoundException {
+            throws UserNotFoundException, BookClubNotFoundException {
 
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Get the reader's membership in the book club (if any)
+        // Get the user's membership in the book club (if any)
         BookClubMembership membership = bookClubMembershipRepo
-                .findByBookClubNameAndReaderId(bookClubName, reader.getId())
+                .findByBookClubNameAndUserId(bookClubName, user.getId())
                 .orElse(null);
 
-        // If there is no membership, create a transient one with the reader and no role
+        // If there is no membership, create a transient one with the user and no role
         if (membership == null) {
             BookClub bookClub = bookClubRepo
                     .findByName(bookClubName)
@@ -104,7 +104,7 @@ public class MembershipServiceImpl implements MembershipService {
 
             return BookClubMembershipDTO.builder()
                     .bookClub(bookClubMapper.entityToDTO(bookClub))
-                    .reader(readerMapper.entityToDTO(reader))
+                    .user(userMapper.entityToDTO(user))
                     .clubRole(BookClubRole.NONE)
                     .isOwner(false)
                     .build();
@@ -116,71 +116,71 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public BookClubMembershipDTO updateMembership(MembershipUpdate membershipUpdate)
-            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
                     MembershipNotFoundException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Ensure the reader is not trying to update their own role
-        if (reader.getId().equals(membershipUpdate.getReaderID())) {
+        // Ensure the user is not trying to update their own role
+        if (user.getId().equals(membershipUpdate.getUserID())) {
             throw new BadBookClubActionException();
         }
 
-        // Get the requesting reader's membership in the book club to ensure they're an admin
+        // Get the requesting user's membership in the book club to ensure they're an admin
         bookClubMembershipRepo
-                .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
-                        membershipUpdate.getBookClubName(), reader.getId(), BookClubRole.ADMIN)
+                .findByBookClubNameAndUserIdAndClubRoleAndDepartedIsNull(
+                        membershipUpdate.getBookClubName(), user.getId(), BookClubRole.ADMIN)
                 .orElseThrow(UnauthorizedBookClubActionException::new);
 
-        // Get the target reader's membership in the book club
+        // Get the target user's membership in the book club
         BookClubMembership membership = bookClubMembershipRepo
-                .findByBookClubNameAndReaderIdAndDepartedIsNull(
-                        membershipUpdate.getBookClubName(), membershipUpdate.getReaderID())
+                .findByBookClubNameAndUserIdAndDepartedIsNull(
+                        membershipUpdate.getBookClubName(), membershipUpdate.getUserID())
                 .orElseThrow(() -> new MembershipNotFoundException(
-                        membershipUpdate.getReaderID(), membershipUpdate.getBookClubName()));
+                        membershipUpdate.getUserID(), membershipUpdate.getBookClubName()));
 
-        // Ensure the target reader is not the owner of the book club, and we're not trying to change to
+        // Ensure the target user is not the owner of the book club, and we're not trying to change to
         // the same role
         if (membership.isOwner() || membership.getClubRole() == membershipUpdate.getRole()) {
             throw new BadBookClubActionException();
         }
 
-        // Update the reader's role
+        // Update the user's role
         membership.setClubRole(membershipUpdate.getRole());
         return bookClubMembershipMapper.entityToDTO(bookClubMembershipRepo.save(membership));
     }
 
     @Override
-    public BookClubMembershipDTO deleteMembership(String bookClubName, UUID readerID)
-            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
+    public BookClubMembershipDTO deleteMembership(String bookClubName, UUID userID)
+            throws UserNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
                     MembershipNotFoundException {
 
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException("Not logged in or user not found");
         }
 
-        // Ensure the reader is not trying to delete their own membership
-        if (reader.getId().equals(readerID)) {
+        // Ensure the user is not trying to delete their own membership
+        if (user.getId().equals(userID)) {
             throw new BadBookClubActionException();
         }
 
-        // Get the requesting reader's membership in the book club to ensure they're an admin
+        // Get the requesting user's membership in the book club to ensure they're an admin
         bookClubMembershipRepo
-                .findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
-                        bookClubName, reader.getId(), BookClubRole.ADMIN)
+                .findByBookClubNameAndUserIdAndClubRoleAndDepartedIsNull(
+                        bookClubName, user.getId(), BookClubRole.ADMIN)
                 .orElseThrow(UnauthorizedBookClubActionException::new);
 
-        // Get the target reader's membership in the book club
+        // Get the target user's membership in the book club
         BookClubMembership membership = bookClubMembershipRepo
-                .findByBookClubNameAndReaderIdAndDepartedIsNull(bookClubName, readerID)
-                .orElseThrow(() -> new MembershipNotFoundException(readerID, bookClubName));
+                .findByBookClubNameAndUserIdAndDepartedIsNull(bookClubName, userID)
+                .orElseThrow(() -> new MembershipNotFoundException(userID, bookClubName));
 
-        // Ensure the target reader is not the owner of the book club
+        // Ensure the target user is not the owner of the book club
         if (membership.isOwner()) {
             throw new BadBookClubActionException();
         }
@@ -192,27 +192,27 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public Boolean addOwner(NewOwner newOwner)
-            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
                     MembershipNotFoundException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException("Not logged in or user not found");
         }
 
         // Ensure the owner isn't trying to change ownership to themselves (the existing owner)
-        if (reader.getId().equals(newOwner.getNewOwnerID())) {
+        if (user.getId().equals(newOwner.getNewOwnerID())) {
             throw new BadBookClubActionException();
         }
 
-        // Ensure the reader is not trying to change ownership of a book club they don't own
+        // Ensure the user is not trying to change ownership of a book club they don't own
         bookClubMembershipRepo
-                .findByBookClubNameAndReaderIdAndIsOwnerTrue(newOwner.getBookClubName(), reader.getId())
+                .findByBookClubNameAndUserIdAndIsOwnerTrue(newOwner.getBookClubName(), user.getId())
                 .orElseThrow(UnauthorizedBookClubActionException::new);
 
         // Get the new owner's membership
         BookClubMembership newOwnerMembership = bookClubMembershipRepo
-                .findByBookClubNameAndReaderIdAndDepartedIsNull(newOwner.getBookClubName(), newOwner.getNewOwnerID())
+                .findByBookClubNameAndUserIdAndDepartedIsNull(newOwner.getBookClubName(), newOwner.getNewOwnerID())
                 .orElseThrow(
                         () -> new MembershipNotFoundException(newOwner.getNewOwnerID(), newOwner.getBookClubName()));
 
@@ -226,34 +226,34 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public BookClubMembershipDTO revokeOwnership(MembershipCompositeID membershipCompositeID)
-            throws ReaderNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, BadBookClubActionException, UnauthorizedBookClubActionException,
                     MembershipNotFoundException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException("Not logged in or reader not found");
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException("Not logged in or user not found");
         }
 
         // Ensure the user is not trying to revoke their own membership
-        if (reader.getId().equals(membershipCompositeID.getUserID())) {
+        if (user.getId().equals(membershipCompositeID.getUserID())) {
             throw new BadBookClubActionException("Cannot revoke your own membership");
         }
 
         // Get the memberships of the user and the target user
         List<BookClubMembership> memberships =
-                bookClubMembershipRepo.findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndReaderIdIn(
+                bookClubMembershipRepo.findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndUserIdIn(
                         membershipCompositeID.getBookClubID(),
-                        List.of(reader.getId(), membershipCompositeID.getUserID()));
+                        List.of(user.getId(), membershipCompositeID.getUserID()));
 
         // Ensure the user is an active owner of the book club
         memberships.stream()
-                .filter(membership -> membership.getReader().getId().equals(reader.getId()))
+                .filter(membership -> membership.getUser().getId().equals(user.getId()))
                 .findFirst()
                 .orElseThrow(UnauthorizedBookClubActionException::new);
 
         // Ensure the target user is an active owner of the book club
         BookClubMembership targetMembership = memberships.stream()
-                .filter(membership -> membership.getReader().getId().equals(membershipCompositeID.getUserID()))
+                .filter(membership -> membership.getUser().getId().equals(membershipCompositeID.getUserID()))
                 .findFirst()
                 .orElseThrow(() -> new MembershipNotFoundException(
                         membershipCompositeID.getUserID(), membershipCompositeID.getBookClubID()));

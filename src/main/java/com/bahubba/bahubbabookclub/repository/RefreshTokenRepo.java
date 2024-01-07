@@ -1,6 +1,6 @@
 package com.bahubba.bahubbabookclub.repository;
 
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,5 +14,5 @@ public interface RefreshTokenRepo extends JpaRepository<RefreshToken, UUID> {
     Optional<RefreshToken> findByToken(String token);
 
     @Modifying
-    int deleteByReader(Reader reader);
+    int deleteByUser(User user);
 }

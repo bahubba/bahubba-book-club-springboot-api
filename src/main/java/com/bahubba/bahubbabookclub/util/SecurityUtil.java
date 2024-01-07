@@ -1,6 +1,6 @@
 package com.bahubba.bahubbabookclub.util;
 
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import lombok.experimental.UtilityClass;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,10 +14,10 @@ public class SecurityUtil {
      *
      * @return The current user
      */
-    public static Reader getCurrentUserDetails() {
+    public static User getCurrentUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
-            return (Reader) authentication.getPrincipal();
+            return (User) authentication.getPrincipal();
         }
         return null;
     }

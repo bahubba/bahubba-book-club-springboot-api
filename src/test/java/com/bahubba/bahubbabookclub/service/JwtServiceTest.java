@@ -5,12 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
+import com.bahubba.bahubbabookclub.exception.UserNotFoundException;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
-import com.bahubba.bahubbabookclub.repository.ReaderRepo;
+import com.bahubba.bahubbabookclub.repository.UserRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -41,7 +41,7 @@ class JwtServiceTest {
     private RefreshTokenRepo refreshTokenRepo;
 
     @MockBean
-    private ReaderRepo readerRepo;
+    private UserRepo userRepo;
 
     @Value("${app.properties.auth_cookie_name}")
     private String authCookieName;
@@ -55,7 +55,7 @@ class JwtServiceTest {
     @Test
     void testGenerateJwtCookie() {
         ResponseCookie result =
-                jwtService.generateJwtCookie(Reader.builder().username("name").build());
+                jwtService.generateJwtCookie(User.builder().username("name").build());
 
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo(authCookieName);
@@ -124,7 +124,7 @@ class JwtServiceTest {
                         .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hr validity
                         .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
                         .compact(),
-                Reader.builder().username("someuser").build());
+                User.builder().username("someuser").build());
 
         assertThat(result).isTrue();
     }
@@ -137,7 +137,7 @@ class JwtServiceTest {
                         .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                         .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
                         .compact(),
-                Reader.builder().username("someotheruser").build());
+                User.builder().username("someotheruser").build());
 
         assertThat(result).isFalse();
     }
@@ -146,7 +146,7 @@ class JwtServiceTest {
     void testRefreshTokenFromReq() {
         when(refreshTokenRepo.findByToken(anyString()))
                 .thenReturn(Optional.of(RefreshToken.builder()
-                        .reader(Reader.builder().username("someuser").build())
+                        .user(User.builder().username("someuser").build())
                         .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
                         .build()));
 
@@ -157,17 +157,17 @@ class JwtServiceTest {
 
         verify(refreshTokenRepo, times(1)).findByToken(anyString());
         assertThat(result).isNotNull();
-        assertThat(result.getReader()).isNotNull();
+        assertThat(result.getUser()).isNotNull();
         assertThat(result.getToken()).isNotNull();
         assertThat(result.getRefreshToken()).isNotNull();
     }
 
-    // TODO - Add test for exception from missing Reader in token
+    // TODO - Add test for exception from missing User in token
     @Test
     void testRefreshToken() {
         when(refreshTokenRepo.findByToken(anyString()))
                 .thenReturn(Optional.of(RefreshToken.builder()
-                        .reader(Reader.builder().username("someuser").build())
+                        .user(User.builder().username("someuser").build())
                         .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
                         .build()));
 
@@ -175,7 +175,7 @@ class JwtServiceTest {
 
         verify(refreshTokenRepo, times(1)).findByToken(anyString());
         assertThat(result).isNotNull();
-        assertThat(result.getReader()).isNotNull();
+        assertThat(result.getUser()).isNotNull();
         assertThat(result.getToken()).isNotNull();
         assertThat(result.getRefreshToken()).isNotNull();
     }
@@ -184,7 +184,7 @@ class JwtServiceTest {
     void testRefreshToken_expired() {
         when(refreshTokenRepo.findByToken(anyString()))
                 .thenReturn(Optional.of(RefreshToken.builder()
-                        .reader(Reader.builder().username("someuser").build())
+                        .user(User.builder().username("someuser").build())
                         .expiryDate(Instant.now().minusMillis(1000L * 60L * 60L))
                         .build()));
 
@@ -195,7 +195,7 @@ class JwtServiceTest {
     }
 
     @Test
-    void testRefreshToken_readerNotFound() {
+    void testRefreshToken_userNotFound() {
         when(refreshTokenRepo.findByToken(anyString())).thenReturn(Optional.empty());
 
         // Test that the exception is thrown
@@ -213,8 +213,8 @@ class JwtServiceTest {
 
     @Test
     void testCreateRefreshToken() {
-        when(readerRepo.findById(any(UUID.class)))
-                .thenReturn(Optional.of(Reader.builder().username("someuser").build()));
+        when(userRepo.findById(any(UUID.class)))
+                .thenReturn(Optional.of(User.builder().username("someuser").build()));
 
         when(refreshTokenRepo.save(any(RefreshToken.class)))
                 .thenReturn(RefreshToken.builder()
@@ -231,40 +231,40 @@ class JwtServiceTest {
     }
 
     @Test
-    void testCreateRefreshToken_readerNotFound() {
-        when(readerRepo.findById(any(UUID.class))).thenReturn(Optional.empty());
+    void testCreateRefreshToken_userNotFound() {
+        when(userRepo.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         // Test that the exception is thrown
         assertThatThrownBy(() -> jwtService.createRefreshToken(UUID.randomUUID()))
-                .isInstanceOf(ReaderNotFoundException.class)
-                .hasMessageContaining("Reader could not be found");
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User could not be found");
     }
 
     @Test
-    void testDeleteByReaderID() {
-        when(readerRepo.findById(any(UUID.class)))
-                .thenReturn(Optional.of(Reader.builder().username("someuser").build()));
+    void testDeleteByUserID() {
+        when(userRepo.findById(any(UUID.class)))
+                .thenReturn(Optional.of(User.builder().username("someuser").build()));
 
-        jwtService.deleteByReaderID(UUID.randomUUID());
+        jwtService.deleteByUserID(UUID.randomUUID());
 
-        verify(refreshTokenRepo, times(1)).deleteByReader(any(Reader.class));
+        verify(refreshTokenRepo, times(1)).deleteByUser(any(User.class));
     }
 
     @Test
-    void testDeleteByReaderId_readerNotFound() {
-        when(readerRepo.findById(any(UUID.class))).thenReturn(Optional.empty());
+    void testDeleteByUserId_userNotFound() {
+        when(userRepo.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         // Test that the exception is thrown
-        assertThatThrownBy(() -> jwtService.deleteByReaderID(UUID.randomUUID()))
-                .isInstanceOf(ReaderNotFoundException.class)
-                .hasMessageContaining("Reader could not be found");
+        assertThatThrownBy(() -> jwtService.deleteByUserID(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User could not be found");
     }
 
     @Test
     void testDeleteRefreshToken() {
         when(refreshTokenRepo.findByToken(anyString()))
                 .thenReturn(Optional.of(RefreshToken.builder()
-                        .reader(Reader.builder().username("someuser").build())
+                        .user(User.builder().username("someuser").build())
                         .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
                         .build()));
 
