@@ -14,11 +14,11 @@ import org.springframework.data.jpa.repository.Query;
 
 /** JPA Repository for the {@link MembershipRequest} entity */
 public interface MembershipRequestRepo extends JpaRepository<MembershipRequest, UUID> {
-    Boolean existsByBookClubNameAndReaderIdAndStatus(
-            final String bookClubName, final UUID readerId, final RequestStatus status);
+    Boolean existsByBookClubNameAndUserIdAndStatus(
+            final String bookClubName, final UUID userId, final RequestStatus status);
 
-    Boolean existsByBookClubNameAndReaderIdAndStatusIn(
-            final String bookClubName, final UUID readerId, final List<RequestStatus> statuses);
+    Boolean existsByBookClubNameAndUserIdAndStatusIn(
+            final String bookClubName, final UUID userId, final List<RequestStatus> statuses);
 
     Page<MembershipRequest> findAllByBookClubIdOrderByRequestedDesc(final UUID bookClubId, Pageable pageable);
 

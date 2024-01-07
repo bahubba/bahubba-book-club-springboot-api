@@ -12,7 +12,7 @@ import org.springframework.http.ResponseCookie;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthDTO {
-    ReaderDTO reader;
+    UserDTO user;
     ResponseCookie token;
     ResponseCookie refreshToken;
 }

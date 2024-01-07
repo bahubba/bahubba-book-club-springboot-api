@@ -5,13 +5,13 @@ import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
-import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
+import com.bahubba.bahubbabookclub.model.mapper.UserMapper;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
@@ -35,35 +35,35 @@ public class BookClubServiceImpl implements BookClubService {
 
     private final BookClubRepo bookClubRepo;
     private final BookClubMapper bookClubMapper;
-    private final ReaderMapper readerMapper;
+    private final UserMapper userMapper;
     private final BookClubMembershipMapper bookClubMembershipMapper;
     private final BookClubMembershipRepo bookClubMembershipRepo;
     private final NotificationRepo notificationRepo;
 
     @Override
-    public BookClubDTO create(NewBookClub newBookClub) throws ReaderNotFoundException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+    public BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException {
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Convert the book club to an entity, add the reader as a member/owner, and persist it
+        // Convert the book club to an entity, add the user as a member/owner, and persist it
         BookClub newBookClubEntity = bookClubMapper.modelToEntity(newBookClub);
         newBookClubEntity = bookClubRepo.save(newBookClubEntity);
 
-        // Add the reader as a member/owner
+        // Add the user as a member/owner
         bookClubMembershipRepo.save(BookClubMembership.builder()
                 .bookClub(newBookClubEntity)
-                .reader(reader)
+                .user(user)
                 .clubRole(BookClubRole.ADMIN)
                 .isOwner(true)
                 .build());
 
         // Generate a notification for the book club's creation
         notificationRepo.save(Notification.builder()
-                .sourceReader(reader)
-                .targetReader(reader)
+                .sourceUser(user)
+                .targetUser(user)
                 .bookClub(newBookClubEntity)
                 .type(NotificationType.BOOK_CLUB_CREATED)
                 .build());
@@ -71,11 +71,11 @@ public class BookClubServiceImpl implements BookClubService {
         return bookClubMapper.entityToDTO(newBookClubEntity);
     }
 
-    public BookClubDTO update(BookClubDTO bookClubDTO) throws ReaderNotFoundException, BookClubNotFoundException {
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+    public BookClubDTO update(BookClubDTO bookClubDTO) throws UserNotFoundException, BookClubNotFoundException {
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
         // Find the book club to update
@@ -99,7 +99,7 @@ public class BookClubServiceImpl implements BookClubService {
 
     @Override
     public BookClubDTO findByID(UUID id)
-            throws BookClubNotFoundException, ReaderNotFoundException, MembershipNotFoundException {
+            throws BookClubNotFoundException, UserNotFoundException, MembershipNotFoundException {
 
         // Get the book club by ID
         BookClub bookClub = bookClubRepo.findById(id).orElseThrow(() -> new BookClubNotFoundException(id));
@@ -109,13 +109,13 @@ public class BookClubServiceImpl implements BookClubService {
             return bookClubMapper.entityToDTO(bookClub);
         }
 
-        // Otherwise, check if the current reader is a member of the book club
+        // Otherwise, check if the current user is a member of the book club
         return checkBookClubMembership(bookClub);
     }
 
     @Override
     public BookClubDTO findByName(String name)
-            throws BookClubNotFoundException, ReaderNotFoundException, MembershipNotFoundException {
+            throws BookClubNotFoundException, UserNotFoundException, MembershipNotFoundException {
         // Get the book club by name
         BookClub bookClub = bookClubRepo.findByName(name).orElseThrow(() -> new BookClubNotFoundException(name));
 
@@ -124,28 +124,28 @@ public class BookClubServiceImpl implements BookClubService {
             return bookClubMapper.entityToDTO(bookClub);
         }
 
-        // Otherwise, check if the current reader is a member of the book club
+        // Otherwise, check if the current user is a member of the book club
         return checkBookClubMembership(bookClub);
     }
 
     @Override
-    public Page<BookClubDTO> findAllForReader(int pageNum, int pageSize)
-            throws ReaderNotFoundException, PageSizeTooSmallException, PageSizeTooLargeException {
+    public Page<BookClubDTO> findAllForUser(int pageNum, int pageSize)
+            throws UserNotFoundException, PageSizeTooSmallException, PageSizeTooLargeException {
 
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
         // Ensure the page size is appropriate
         if (pageSize < 0) {
-            throw new PageSizeTooSmallException(10, getPageOfAllForReader(reader.getId(), pageNum, 10));
+            throw new PageSizeTooSmallException(10, getPageOfAllForUser(user.getId(), pageNum, 10));
         } else if (pageSize > 50) {
-            throw new PageSizeTooLargeException(50, 50, getPageOfAllForReader(reader.getId(), pageNum, 50));
+            throw new PageSizeTooLargeException(50, 50, getPageOfAllForUser(user.getId(), pageNum, 50));
         }
 
-        return getPageOfAllForReader(reader.getId(), pageNum, pageSize);
+        return getPageOfAllForUser(user.getId(), pageNum, pageSize);
     }
 
     @Override
@@ -188,77 +188,77 @@ public class BookClubServiceImpl implements BookClubService {
 
     @Override
     public BookClubDTO disbandBookClubByID(UUID id)
-            throws ReaderNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
                     BadBookClubActionException {
 
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Find the reader's membership in the book club
+        // Find the user's membership in the book club
         BookClubMembership membership = bookClubMembershipRepo
-                .findByBookClubIdAndReaderId(id, reader.getId())
-                .orElseThrow(() -> new MembershipNotFoundException(reader.getId(), id));
+                .findByBookClubIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new MembershipNotFoundException(user.getId(), id));
 
         return disbandBookClub(membership);
     }
 
     @Override
     public BookClubDTO disbandBookClubByName(String name)
-            throws ReaderNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
                     BadBookClubActionException {
 
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Find the reader's membership in the book club
+        // Find the user's membership in the book club
         BookClubMembership membership = bookClubMembershipRepo
-                .findByBookClubNameAndReaderId(name, reader.getId())
-                .orElseThrow(() -> new MembershipNotFoundException(reader.getUsername(), name));
+                .findByBookClubNameAndUserId(name, user.getId())
+                .orElseThrow(() -> new MembershipNotFoundException(user.getUsername(), name));
 
         return disbandBookClub(membership);
     }
 
     /**
-     * Ensure a reader is a member of a book club before returning the book club
+     * Ensure a user is a member of a book club before returning the book club
      *
      * @param bookClub The book club to check
-     * @return The book club if the reader is a member
-     * @throws ReaderNotFoundException The reader was not logged in
-     * @throws MembershipNotFoundException The reader was not a member of the book club
+     * @return The book club if the user is a member
+     * @throws UserNotFoundException The user was not logged in
+     * @throws MembershipNotFoundException The user was not a member of the book club
      */
     private BookClubDTO checkBookClubMembership(BookClub bookClub)
-            throws ReaderNotFoundException, MembershipNotFoundException {
+            throws UserNotFoundException, MembershipNotFoundException {
 
-        // Get the current reader from the security context
-        Reader reader = SecurityUtil.getCurrentUserDetails();
-        if (reader == null) {
-            throw new ReaderNotFoundException();
+        // Get the current user from the security context
+        User user = SecurityUtil.getCurrentUserDetails();
+        if (user == null) {
+            throw new UserNotFoundException();
         }
 
-        // Check if the reader is a member of the book club
-        if (!bookClubMembershipRepo.existsByBookClubIdAndReaderId(bookClub.getId(), reader.getId())) {
-            throw new MembershipNotFoundException(reader.getUsername(), bookClub.getName());
+        // Check if the user is a member of the book club
+        if (!bookClubMembershipRepo.existsByBookClubIdAndUserId(bookClub.getId(), user.getId())) {
+            throw new MembershipNotFoundException(user.getUsername(), bookClub.getName());
         }
 
         return bookClubMapper.entityToDTO(bookClub);
     }
 
     /**
-     * Retrieves a page of book clubs that the reader has some role in
+     * Retrieves a page of book clubs that the user has some role in
      *
-     * @param readerID The UUID of the reader
+     * @param userID The UUID of the user
      * @param pageNum The page number
      * @param pageSize The number of results per page
      */
-    private @NotNull Page<BookClubDTO> getPageOfAllForReader(UUID readerID, int pageNum, int pageSize) {
+    private @NotNull Page<BookClubDTO> getPageOfAllForUser(UUID userID, int pageNum, int pageSize) {
         // Get results
-        Page<BookClub> entityPage = bookClubRepo.findAllForReader(readerID, PageRequest.of(pageNum, pageSize));
+        Page<BookClub> entityPage = bookClubRepo.findAllForUser(userID, PageRequest.of(pageNum, pageSize));
 
         // Convert results to DTOs and return
         return entityPage.map(bookClubMapper::entityToDTO);
@@ -297,14 +297,14 @@ public class BookClubServiceImpl implements BookClubService {
     /**
      * Disband a book club
      *
-     * @param membership The membership of the reader in the book club to disband
+     * @param membership The membership of the user in the book club to disband
      * @return The disbanded book club
-     * @throws UnauthorizedBookClubActionException The reader was not the owner of the book club
+     * @throws UnauthorizedBookClubActionException The user was not the owner of the book club
      * @throws BadBookClubActionException The book club was already disbanded
      */
     private BookClubDTO disbandBookClub(@NotNull BookClubMembership membership)
             throws UnauthorizedBookClubActionException, BadBookClubActionException {
-        // Ensure the reader is the owner of the book club
+        // Ensure the user is the owner of the book club
         if (!membership.isOwner()) {
             throw new UnauthorizedBookClubActionException();
         }

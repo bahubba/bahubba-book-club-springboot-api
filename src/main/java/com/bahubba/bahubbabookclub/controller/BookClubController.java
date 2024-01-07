@@ -27,11 +27,11 @@ public class BookClubController {
      *
      * @param newBookClub Metadata for a new book club
      * @return Persisted version of the new book club
-     * @throws ReaderNotFoundException The reader was not found
+     * @throws UserNotFoundException The user was not found
      */
     @PostMapping("/create")
     @Operation(summary = "Create", description = "Creates a new book club")
-    public ResponseEntity<BookClubDTO> create(@RequestBody NewBookClub newBookClub) throws ReaderNotFoundException {
+    public ResponseEntity<BookClubDTO> create(@RequestBody NewBookClub newBookClub) throws UserNotFoundException {
         return ResponseEntity.ok(bookClubService.create(newBookClub));
     }
 
@@ -40,13 +40,13 @@ public class BookClubController {
      *
      * @param bookClub New book club metadata
      * @return Persisted version of the new book club
-     * @throws ReaderNotFoundException The reader was not found
+     * @throws UserNotFoundException The user was not found
      * @throws BookClubNotFoundException The book club was not found
      */
     @Operation(summary = "Update", description = "Updates a book club's metadata")
     @PatchMapping("/update")
     public ResponseEntity<BookClubDTO> update(@RequestBody BookClubDTO bookClub)
-            throws ReaderNotFoundException, BookClubNotFoundException {
+            throws UserNotFoundException, BookClubNotFoundException {
 
         return ResponseEntity.ok(bookClubService.update(bookClub));
     }
@@ -57,13 +57,13 @@ public class BookClubController {
      * @param id The book club's ID
      * @return The book club's info
      * @throws BookClubNotFoundException The book club was not found
-     * @throws ReaderNotFoundException The reader was not found
-     * @throws MembershipNotFoundException The reader was not a member of the book club
+     * @throws UserNotFoundException The user was not found
+     * @throws MembershipNotFoundException The user was not a member of the book club
      */
     @GetMapping("/by-id/{id}")
     @Operation(summary = "Get by ID", description = "Retrieves a book club by ID")
     public ResponseEntity<BookClubDTO> getByID(@PathVariable UUID id)
-            throws BookClubNotFoundException, ReaderNotFoundException, MembershipNotFoundException {
+            throws BookClubNotFoundException, UserNotFoundException, MembershipNotFoundException {
 
         return ResponseEntity.ok(bookClubService.findByID(id));
     }
@@ -74,31 +74,31 @@ public class BookClubController {
      * @param name The book club's name
      * @return The book club's info
      * @throws BookClubNotFoundException The book club was not found
-     * @throws ReaderNotFoundException The reader was not found
-     * @throws MembershipNotFoundException The reader was not a member of the book club
+     * @throws UserNotFoundException The user was not found
+     * @throws MembershipNotFoundException The user was not a member of the book club
      */
     @GetMapping("/by-name/{name}")
     @Operation(summary = "Get by Name", description = "Retrieves a book club by name")
     public ResponseEntity<BookClubDTO> getByName(@PathVariable String name)
-            throws BookClubNotFoundException, ReaderNotFoundException, MembershipNotFoundException {
+            throws BookClubNotFoundException, UserNotFoundException, MembershipNotFoundException {
 
         return ResponseEntity.ok(bookClubService.findByName(name));
     }
 
     /**
-     * Retrieves all book clubs for a given reader
+     * Retrieves all book clubs for a given user
      *
-     * @return A page of all book clubs that the requesting reader has a role in
-     * @throws ReaderNotFoundException The reader wasn't found in the DB
+     * @return A page of all book clubs that the requesting user has a role in
+     * @throws UserNotFoundException The user wasn't found in the DB
      * @throws PageSizeTooSmallException The page size was < 1
      * @throws PageSizeTooLargeException The page size was > 50
      */
-    @GetMapping("/all-for-reader")
-    @Operation(summary = "Get All for Reader", description = "Retrieves all book clubs for a given reader")
-    public ResponseEntity<Page<BookClubDTO>> getAllForReader(@RequestParam int pageNum, @RequestParam int pageSize)
-            throws ReaderNotFoundException, PageSizeTooSmallException, PageSizeTooLargeException {
+    @GetMapping("/all-for-user")
+    @Operation(summary = "Get All for User", description = "Retrieves all book clubs for a given user")
+    public ResponseEntity<Page<BookClubDTO>> getAllForUser(@RequestParam int pageNum, @RequestParam int pageSize)
+            throws UserNotFoundException, PageSizeTooSmallException, PageSizeTooLargeException {
 
-        return ResponseEntity.ok(bookClubService.findAllForReader(pageNum, pageSize));
+        return ResponseEntity.ok(bookClubService.findAllForUser(pageNum, pageSize));
     }
 
     // TODO - pre-authorize this endpoint to only allow admins to access it
@@ -122,15 +122,15 @@ public class BookClubController {
      *
      * @param id The book club's ID
      * @return The updated book club
-     * @throws ReaderNotFoundException The reader was not found
-     * @throws MembershipNotFoundException The reader was not a member of the book club
-     * @throws UnauthorizedBookClubActionException The reader was not the owner of the book club
+     * @throws UserNotFoundException The user was not found
+     * @throws MembershipNotFoundException The user was not a member of the book club
+     * @throws UnauthorizedBookClubActionException The user was not the owner of the book club
      * @throws BadBookClubActionException The book club was already disbanded
      */
     @DeleteMapping("/disband/{id}")
     @Operation(summary = "Disband by ID", description = "Disbands (soft deletes) a book club by ID")
     public ResponseEntity<BookClubDTO> disbandBookClub(@PathVariable UUID id)
-            throws ReaderNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
                     BadBookClubActionException {
         return ResponseEntity.ok(bookClubService.disbandBookClubByID(id));
     }
@@ -140,15 +140,15 @@ public class BookClubController {
      *
      * @param name The book club's name
      * @return The updated book club
-     * @throws ReaderNotFoundException The reader was not found
-     * @throws MembershipNotFoundException The reader was not a member of the book club
-     * @throws UnauthorizedBookClubActionException The reader was not the owner of the book club
+     * @throws UserNotFoundException The user was not found
+     * @throws MembershipNotFoundException The user was not a member of the book club
+     * @throws UnauthorizedBookClubActionException The user was not the owner of the book club
      * @throws BadBookClubActionException The book club was already disbanded
      */
     @DeleteMapping("/disband-by-name/{name}")
     @Operation(summary = "Disband by Name", description = "Disbands (soft deletes) a book club by name")
     public ResponseEntity<BookClubDTO> disbandBookClubByName(@PathVariable String name)
-            throws ReaderNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
+            throws UserNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
                     BadBookClubActionException {
 
         return ResponseEntity.ok(bookClubService.disbandBookClubByName(name));

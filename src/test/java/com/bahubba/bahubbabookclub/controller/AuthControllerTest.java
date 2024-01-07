@@ -7,10 +7,10 @@ import static org.mockito.Mockito.*;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
-import com.bahubba.bahubbabookclub.model.dto.ReaderDTO;
+import com.bahubba.bahubbabookclub.model.dto.UserDTO;
 import com.bahubba.bahubbabookclub.model.dto.ResponseWrapperDTO;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
-import com.bahubba.bahubbabookclub.model.payload.NewReader;
+import com.bahubba.bahubbabookclub.model.payload.NewUser;
 import com.bahubba.bahubbabookclub.service.AuthService;
 import com.bahubba.bahubbabookclub.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,16 +42,16 @@ class AuthControllerTest {
 
     @Test
     void testRegisterUser() {
-        when(authService.register(any(NewReader.class)))
+        when(authService.register(any(NewUser.class)))
                 .thenReturn(AuthDTO.builder()
-                        .reader(new ReaderDTO())
+                        .user(new UserDTO())
                         .token(ResponseCookie.from("foo", "bar").build())
                         .refreshToken(ResponseCookie.from("bar", "foo").build())
                         .build());
 
-        ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.register(new NewReader());
+        ResponseEntity<ResponseWrapperDTO<UserDTO>> rsp = authController.register(new NewUser());
 
-        verify(authService, times(1)).register(any(NewReader.class));
+        verify(authService, times(1)).register(any(NewUser.class));
         assertThat(rsp).isNotNull();
         assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(rsp.getBody()).isNotNull();
@@ -61,11 +61,11 @@ class AuthControllerTest {
 
     @Test
     void testRegister_duplicateUsernameOrEmail() {
-        when(authService.register(any(NewReader.class))).thenThrow(new DataIntegrityViolationException("some error"));
+        when(authService.register(any(NewUser.class))).thenThrow(new DataIntegrityViolationException("some error"));
 
-        ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.register(new NewReader());
+        ResponseEntity<ResponseWrapperDTO<UserDTO>> rsp = authController.register(new NewUser());
 
-        verify(authService, times(1)).register(any(NewReader.class));
+        verify(authService, times(1)).register(any(NewUser.class));
         assertThat(rsp).isNotNull();
         assertThat(rsp.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(rsp.getBody()).isNotNull();
@@ -77,12 +77,12 @@ class AuthControllerTest {
     void testAuthenticate() {
         when(authService.authenticate(any(AuthRequest.class)))
                 .thenReturn(AuthDTO.builder()
-                        .reader(new ReaderDTO())
+                        .user(new UserDTO())
                         .token(ResponseCookie.from("foo", "bar").build())
                         .refreshToken(ResponseCookie.from("bar", "foo").build())
                         .build());
 
-        ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.authenticate(new AuthRequest());
+        ResponseEntity<ResponseWrapperDTO<UserDTO>> rsp = authController.authenticate(new AuthRequest());
 
         verify(authService, times(1)).authenticate(any(AuthRequest.class));
         assertThat(rsp).isNotNull();
@@ -96,7 +96,7 @@ class AuthControllerTest {
     void testAuthenticate_invalidCredentials() {
         when(authService.authenticate(any(AuthRequest.class))).thenThrow(new BadCredentialsException("some error"));
 
-        ResponseEntity<ResponseWrapperDTO<ReaderDTO>> rsp = authController.authenticate(new AuthRequest());
+        ResponseEntity<ResponseWrapperDTO<UserDTO>> rsp = authController.authenticate(new AuthRequest());
 
         verify(authService, times(1)).authenticate(any(AuthRequest.class));
         assertThat(rsp).isNotNull();

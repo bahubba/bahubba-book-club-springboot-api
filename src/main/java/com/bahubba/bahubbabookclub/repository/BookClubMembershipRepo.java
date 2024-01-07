@@ -13,24 +13,24 @@ import org.springframework.stereotype.Repository;
 /** JPA Repository for the {@link BookClubMembership} entity */
 @Repository
 public interface BookClubMembershipRepo extends JpaRepository<BookClubMembership, UUID> {
-    Optional<BookClubMembership> findByBookClubNameAndReaderId(String bookClubName, UUID readerId);
+    Optional<BookClubMembership> findByBookClubNameAndUserId(String bookClubName, UUID userId);
 
-    Optional<BookClubMembership> findByBookClubNameAndReaderIdAndDepartedIsNull(String bookClubName, UUID readerId);
+    Optional<BookClubMembership> findByBookClubNameAndUserIdAndDepartedIsNull(String bookClubName, UUID userId);
 
-    Optional<BookClubMembership> findByBookClubNameAndReaderIdAndClubRoleAndDepartedIsNull(
-            String bookClubName, UUID readerId, BookClubRole clubRole);
+    Optional<BookClubMembership> findByBookClubNameAndUserIdAndClubRoleAndDepartedIsNull(
+            String bookClubName, UUID userId, BookClubRole clubRole);
 
-    Optional<BookClubMembership> findByBookClubIdAndReaderId(UUID bookClubId, UUID readerId);
+    Optional<BookClubMembership> findByBookClubIdAndUserId(UUID bookClubId, UUID userId);
 
-    Boolean existsByBookClubIdAndReaderId(UUID bookClubId, UUID readerId);
+    Boolean existsByBookClubIdAndUserId(UUID bookClubId, UUID userId);
 
-    Optional<BookClubMembership> findByBookClubNameAndClubRoleAndReaderId(
-            String bookClubName, BookClubRole role, UUID readerId);
+    Optional<BookClubMembership> findByBookClubNameAndClubRoleAndUserId(
+            String bookClubName, BookClubRole role, UUID userId);
 
     Page<BookClubMembership> findAllByBookClubNameOrderByJoined(String bookClubName, Pageable pageable);
 
-    Optional<BookClubMembership> findByBookClubNameAndReaderIdAndIsOwnerTrue(String bookClubName, UUID readerId);
+    Optional<BookClubMembership> findByBookClubNameAndUserIdAndIsOwnerTrue(String bookClubName, UUID userId);
 
-    List<BookClubMembership> findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndReaderIdIn(
-            UUID bookClubId, List<UUID> readerIds);
+    List<BookClubMembership> findAllByBookClubIdAndIsOwnerTrueAndDepartedIsNullAndUserIdIn(
+            UUID bookClubId, List<UUID> userIds);
 }

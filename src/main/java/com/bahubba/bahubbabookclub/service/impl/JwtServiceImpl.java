@@ -1,12 +1,12 @@
 package com.bahubba.bahubbabookclub.service.impl;
 
-import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
+import com.bahubba.bahubbabookclub.exception.UserNotFoundException;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
-import com.bahubba.bahubbabookclub.model.mapper.ReaderMapper;
-import com.bahubba.bahubbabookclub.repository.ReaderRepo;
+import com.bahubba.bahubbabookclub.model.mapper.UserMapper;
+import com.bahubba.bahubbabookclub.repository.UserRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
 import com.bahubba.bahubbabookclub.service.JwtService;
 import io.jsonwebtoken.Claims;
@@ -45,8 +45,8 @@ public class JwtServiceImpl implements JwtService {
     private String refreshCookieName;
 
     private final RefreshTokenRepo refreshTokenRepo;
-    private final ReaderRepo readerRepo;
-    private final ReaderMapper readerMapper;
+    private final UserRepo userRepo;
+    private final UserMapper userMapper;
 
     @Override
     public ResponseCookie generateJwtCookie(UserDetails userDetails) {
@@ -101,12 +101,12 @@ public class JwtServiceImpl implements JwtService {
     public AuthDTO refreshToken(String refreshToken) throws TokenRefreshException {
         return getByToken(refreshToken)
                 .map(this::verifyExpiration)
-                .map(RefreshToken::getReader)
-                .map(reader -> {
-                    ResponseCookie jwtCookie = this.generateJwtCookie(reader);
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    ResponseCookie jwtCookie = this.generateJwtCookie(user);
 
                     return AuthDTO.builder()
-                            .reader(readerMapper.entityToDTO(reader))
+                            .user(userMapper.entityToDTO(user))
                             .token(jwtCookie)
                             .refreshToken(this.generateJwtRefreshCookie(refreshToken))
                             .build();
@@ -120,12 +120,12 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public RefreshToken createRefreshToken(UUID readerID) throws ReaderNotFoundException {
-        // Get the current reader
-        Reader reader = readerRepo.findById(readerID).orElseThrow(() -> new ReaderNotFoundException(readerID));
+    public RefreshToken createRefreshToken(UUID userID) throws UserNotFoundException {
+        // Get the current user
+        User user = userRepo.findById(userID).orElseThrow(() -> new UserNotFoundException(userID));
 
         RefreshToken refreshToken = RefreshToken.builder()
-                .reader(reader)
+                .user(user)
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusMillis(1000L * 60L * 60L))
                 .build();
@@ -146,9 +146,9 @@ public class JwtServiceImpl implements JwtService {
     // TODO - Handle the exception, it shouldn't bubble up, as it doesn't matter if they don't have
     // existing refresh tokens
     @Override
-    public int deleteByReaderID(UUID readerID) throws ReaderNotFoundException {
-        return refreshTokenRepo.deleteByReader(
-                readerRepo.findById(readerID).orElseThrow(() -> new ReaderNotFoundException(readerID)));
+    public int deleteByUserID(UUID userID) throws UserNotFoundException {
+        return refreshTokenRepo.deleteByUser(
+                userRepo.findById(userID).orElseThrow(() -> new UserNotFoundException(userID)));
     }
 
     @Override
@@ -176,7 +176,7 @@ public class JwtServiceImpl implements JwtService {
      * Generates a JWT token
      *
      * @param extraClaims Extra claims to add to the token
-     * @param userDetails The reader's details
+     * @param userDetails The user's details
      * @return A string JWT token
      */
     private String generateToken(Map<String, Object> extraClaims, @NotNull UserDetails userDetails) {

@@ -1,6 +1,6 @@
 package com.bahubba.bahubbabookclub.service;
 
-import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
+import com.bahubba.bahubbabookclub.exception.UserNotFoundException;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
@@ -77,7 +77,7 @@ public interface JwtService {
      * Generates a new JWT auth token given a valid refresh token
      *
      * @param req The incoming HTTP request
-     * @return A new auth object with the reader's info and auth and refresh JWTs
+     * @return A new auth object with the user's info and auth and refresh JWTs
      * @throws TokenRefreshException The refresh token was missing or expired
      */
     AuthDTO refreshToken(HttpServletRequest req) throws TokenRefreshException;
@@ -86,7 +86,7 @@ public interface JwtService {
      * Generates a new JWT auth token given a valid refresh token
      *
      * @param token The refresh token
-     * @return A new auth object with the reader's info and auth and refresh JWTs
+     * @return A new auth object with the user's info and auth and refresh JWTs
      * @throws TokenRefreshException The refresh token was missing or expired
      */
     AuthDTO refreshToken(String token) throws TokenRefreshException;
@@ -100,13 +100,13 @@ public interface JwtService {
     Optional<RefreshToken> getByToken(String token);
 
     /**
-     * Creates a new refresh token for a reader
+     * Creates a new refresh token for a user
      *
-     * @param readerID The ID of the reader
+     * @param userID The ID of the user
      * @return The new refresh token
-     * @throws ReaderNotFoundException The reader was not found
+     * @throws UserNotFoundException The user was not found
      */
-    RefreshToken createRefreshToken(UUID readerID) throws ReaderNotFoundException;
+    RefreshToken createRefreshToken(UUID userID) throws UserNotFoundException;
 
     /**
      * Verifies that the refresh token is not expired
@@ -118,13 +118,13 @@ public interface JwtService {
     RefreshToken verifyExpiration(RefreshToken token) throws TokenRefreshException;
 
     /**
-     * Deletes a refresh token from the DB by the reader's ID
+     * Deletes a refresh token from the DB by the user's ID
      *
-     * @param readerID The ID of the reader
+     * @param userID The ID of the user
      * @return The number of refresh tokens deleted
-     * @throws ReaderNotFoundException The reader was not found
+     * @throws UserNotFoundException The user was not found
      */
-    int deleteByReaderID(UUID readerID) throws ReaderNotFoundException;
+    int deleteByUserID(UUID userID) throws UserNotFoundException;
 
     /**
      * Generates a response cookie

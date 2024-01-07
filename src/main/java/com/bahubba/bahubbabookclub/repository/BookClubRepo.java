@@ -21,14 +21,14 @@ public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
     @Query(
             nativeQuery = true,
             value = "SELECT bc.* FROM book_club bc "
-                    + "INNER JOIN book_club_readers bcr "
+                    + "INNER JOIN book_club_users bcr "
                     + "ON bc.id = bcr.book_club_id "
-                    + "INNER JOIN reader r "
-                    + "ON bcr.reader_id = r.id "
+                    + "INNER JOIN user r "
+                    + "ON bcr.user_id = r.id "
                     + "WHERE bc.disbanded IS NULL "
                     + "AND bcr.departed IS NULL "
-                    + "AND r.id = :readerId")
-    Page<BookClub> findAllForReader(final UUID readerId, Pageable pageable);
+                    + "AND r.id = :userId")
+    Page<BookClub> findAllForUser(final UUID userId, Pageable pageable);
 
     Page<BookClub> findAllByPublicityNotAndNameContainsIgnoreCase(
             final Publicity publicity, final String searchTerm, Pageable pageable);

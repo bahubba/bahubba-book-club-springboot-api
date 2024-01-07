@@ -5,16 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.bahubba.bahubbabookclub.exception.ReaderNotFoundException;
+import com.bahubba.bahubbabookclub.exception.UserNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
-import com.bahubba.bahubbabookclub.model.entity.Reader;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import com.bahubba.bahubbabookclub.model.enums.Role;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
-import com.bahubba.bahubbabookclub.model.payload.NewReader;
+import com.bahubba.bahubbabookclub.model.payload.NewUser;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
-import com.bahubba.bahubbabookclub.repository.ReaderRepo;
+import com.bahubba.bahubbabookclub.repository.UserRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -36,7 +36,7 @@ class AuthServiceTest {
     AuthService authService;
 
     @MockBean
-    ReaderRepo readerRepo;
+    UserRepo userRepo;
 
     @MockBean
     JwtService jwtService;
@@ -53,8 +53,8 @@ class AuthServiceTest {
     @Test
     void testRegister() {
         UUID tstUUID = UUID.randomUUID();
-        when(readerRepo.save(any(Reader.class)))
-                .thenReturn(Reader.builder()
+        when(userRepo.save(any(User.class)))
+                .thenReturn(User.builder()
                         .id(tstUUID)
                         .username("user")
                         .email("foo@bar.foo")
@@ -68,21 +68,21 @@ class AuthServiceTest {
         when(jwtService.createRefreshToken(any(UUID.class)))
                 .thenReturn(RefreshToken.builder().token("foobar").build());
 
-        when(jwtService.generateJwtCookie(any(Reader.class)))
+        when(jwtService.generateJwtCookie(any(User.class)))
                 .thenReturn(ResponseCookie.from("foo", "bar").build());
 
         AuthDTO result =
-                authService.register(NewReader.builder().password("password").build());
+                authService.register(NewUser.builder().password("password").build());
 
         verify(notificationRepo, times(1)).save(any(Notification.class));
-        verify(jwtService, times(1)).generateJwtCookie(any(Reader.class));
+        verify(jwtService, times(1)).generateJwtCookie(any(User.class));
     }
 
     @Test
     void testAuthenticate() {
         UUID tstUUID = UUID.randomUUID();
-        when(readerRepo.findByUsernameOrEmail(anyString(), anyString()))
-                .thenReturn(Optional.of(Reader.builder()
+        when(userRepo.findByUsernameOrEmail(anyString(), anyString()))
+                .thenReturn(Optional.of(User.builder()
                         .id(tstUUID)
                         .username("user")
                         .email("foo@bar.foo")
@@ -93,8 +93,8 @@ class AuthServiceTest {
                         .password("password")
                         .build()));
 
-        when(readerRepo.findById(any(UUID.class)))
-                .thenReturn(Optional.of(Reader.builder()
+        when(userRepo.findById(any(UUID.class)))
+                .thenReturn(Optional.of(User.builder()
                         .id(tstUUID)
                         .username("user")
                         .email("foo@bar.foo")
@@ -108,7 +108,7 @@ class AuthServiceTest {
         when(jwtService.createRefreshToken(any(UUID.class)))
                 .thenReturn(RefreshToken.builder().token("foobar").build());
 
-        when(jwtService.generateJwtCookie(any(Reader.class)))
+        when(jwtService.generateJwtCookie(any(User.class)))
                 .thenReturn(ResponseCookie.from("foo", "bar").build());
 
         AuthDTO result = authService.authenticate(AuthRequest.builder()
@@ -116,14 +116,14 @@ class AuthServiceTest {
                 .password("password")
                 .build());
 
-        verify(jwtService, times(1)).generateJwtCookie(any(Reader.class));
+        verify(jwtService, times(1)).generateJwtCookie(any(User.class));
     }
 
     @Test
     void testAuthenticate_UserNotFound() {
-        when(readerRepo.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.empty());
+        when(userRepo.findByUsernameOrEmail(anyString(), anyString())).thenReturn(Optional.empty());
         assertThrows(
-                ReaderNotFoundException.class,
+                UserNotFoundException.class,
                 () -> authService.authenticate(AuthRequest.builder()
                         .usernameOrEmail("username")
                         .password("password")

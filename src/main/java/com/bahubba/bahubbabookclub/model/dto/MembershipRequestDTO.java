@@ -16,13 +16,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MembershipRequestDTO {
     private UUID id;
-    private ReaderDTO reader;
+    private UserDTO user;
     private BookClubDTO bookClub;
     private String message;
     private RequestStatus status;
     private BookClubRole role;
     private Boolean viewed;
-    private ReaderDTO reviewer;
+    private UserDTO reviewer;
     private String reviewMessage;
     private LocalDateTime requested;
     private LocalDateTime reviewed;

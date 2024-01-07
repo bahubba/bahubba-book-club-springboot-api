@@ -9,32 +9,32 @@ import java.util.UUID;
 public class MembershipNotFoundException extends RuntimeException {
 
     /**
-     * Generates exception for missing book club membership by reader ID and book club ID
+     * Generates exception for missing book club membership by user ID and book club ID
      *
-     * @param readerId reader ID
+     * @param userId user ID
      * @param bookClubId book club ID
      */
-    public MembershipNotFoundException(UUID readerId, UUID bookClubId) {
-        super("Reader with ID '" + readerId + "' does not have a membership in book club with ID '" + bookClubId + "'");
+    public MembershipNotFoundException(UUID userId, UUID bookClubId) {
+        super("User with ID '" + userId + "' does not have a membership in book club with ID '" + bookClubId + "'");
     }
 
     /**
-     * Generates exception for missing book club membership by reader username and book club name
+     * Generates exception for missing book club membership by user username and book club name
      *
-     * @param username reader username
+     * @param username user username
      * @param bookClubName book club name
      */
     public MembershipNotFoundException(String username, String bookClubName) {
-        super("Reader '" + username + "' does not have a membership in book club '" + bookClubName + "'");
+        super("User '" + username + "' does not have a membership in book club '" + bookClubName + "'");
     }
 
     /**
-     * Generates exception for missing book club membership by reader ID and book club name
+     * Generates exception for missing book club membership by user ID and book club name
      *
-     * @param readerID reader ID
+     * @param userID user ID
      * @param bookClubName book club name
      */
-    public MembershipNotFoundException(UUID readerID, String bookClubName) {
-        super("Reader with ID '" + readerID + "' does not have a membership in '" + bookClubName + "'");
+    public MembershipNotFoundException(UUID userID, String bookClubName) {
+        super("User with ID '" + userID + "' does not have a membership in '" + bookClubName + "'");
     }
 }

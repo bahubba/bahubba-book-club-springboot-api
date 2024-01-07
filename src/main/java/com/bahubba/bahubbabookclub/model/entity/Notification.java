@@ -30,12 +30,12 @@ public class Notification implements Serializable {
     private UUID id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "source_reader_id")
-    @NotNull private Reader sourceReader;
+    @JoinColumn(name = "source_user_id")
+    @NotNull private User sourceUser;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "target_reader_id")
-    @NotNull private Reader targetReader;
+    @JoinColumn(name = "target_user_id")
+    @NotNull private User targetUser;
 
     @ManyToOne
     @JoinColumn(name = "book_club_id")

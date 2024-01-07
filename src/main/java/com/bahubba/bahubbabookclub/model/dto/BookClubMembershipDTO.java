@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookClubMembershipDTO {
     private BookClubDTO bookClub;
-    private ReaderDTO reader;
+    private UserDTO user;
     private BookClubRole clubRole;
 
     @JsonProperty("isOwner")

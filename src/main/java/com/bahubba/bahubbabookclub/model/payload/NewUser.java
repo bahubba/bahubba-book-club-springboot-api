@@ -5,12 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Data sent with HTTP request for creating a new reader (user) */
+/** Data sent with HTTP request for creating a new user */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NewReader {
+public class NewUser {
     private String username;
     private String email;
     private String givenName;

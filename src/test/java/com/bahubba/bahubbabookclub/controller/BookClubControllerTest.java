@@ -63,10 +63,10 @@ class BookClubControllerTest {
     }
 
     @Test
-    void testGetAllForReader() {
-        when(bookClubService.findAllForReader(anyInt(), anyInt())).thenReturn(Page.empty());
-        ResponseEntity<Page<BookClubDTO>> rsp = bookClubController.getAllForReader(1, 1);
-        verify(bookClubService, times(1)).findAllForReader(anyInt(), anyInt());
+    void testGetAllForUser() {
+        when(bookClubService.findAllForUser(anyInt(), anyInt())).thenReturn(Page.empty());
+        ResponseEntity<Page<BookClubDTO>> rsp = bookClubController.getAllForUser(1, 1);
+        verify(bookClubService, times(1)).findAllForUser(anyInt(), anyInt());
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }
