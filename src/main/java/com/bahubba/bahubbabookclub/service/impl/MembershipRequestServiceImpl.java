@@ -129,10 +129,7 @@ public class MembershipRequestServiceImpl implements MembershipRequestService {
         MembershipRequest membershipRequest = membershipRequestRepo
                 .findById(membershipRequestAction.getMembershipRequest().getId())
                 .orElseThrow(() -> new MembershipRequestNotFoundException(
-                        membershipRequestAction
-                                .getMembershipRequest()
-                                .getUser()
-                                .getUsername(),
+                        membershipRequestAction.getMembershipRequest().getUser().getUsername(),
                         membershipRequestAction
                                 .getMembershipRequest()
                                 .getBookClub()

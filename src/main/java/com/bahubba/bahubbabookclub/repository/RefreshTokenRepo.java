@@ -1,7 +1,7 @@
 package com.bahubba.bahubbabookclub.repository;
 
-import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

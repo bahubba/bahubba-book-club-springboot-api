@@ -68,8 +68,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthDTO authenticate(@NotNull AuthRequest req) throws AuthenticationException, UserNotFoundException {
         authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsernameOrEmail(), req.getPassword()));
 
-        User user = userRepo
-                .findByUsernameOrEmail(req.getUsernameOrEmail(), req.getUsernameOrEmail())
+        User user = userRepo.findByUsernameOrEmail(req.getUsernameOrEmail(), req.getUsernameOrEmail())
                 .orElseThrow(() -> new UserNotFoundException(req.getUsernameOrEmail()));
 
         ResponseCookie jwtCookie = jwtService.generateJwtCookie(user);

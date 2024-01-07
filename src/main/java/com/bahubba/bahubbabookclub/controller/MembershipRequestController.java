@@ -45,9 +45,7 @@ public class MembershipRequestController {
      * @throws UserNotFoundException The user was not found
      */
     @GetMapping("/has-pending-request/{bookClubName}")
-    @Operation(
-            summary = "Has Pending Request",
-            description = "Check if the user has a pending request for a book club")
+    @Operation(summary = "Has Pending Request", description = "Check if the user has a pending request for a book club")
     public ResponseEntity<Boolean> hasPendingRequest(@PathVariable String bookClubName) throws UserNotFoundException {
         return ResponseEntity.ok(membershipRequestService.hasPendingRequest(bookClubName));
     }

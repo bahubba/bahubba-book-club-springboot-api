@@ -33,8 +33,7 @@ public class AppConfig {
      */
     @Bean
     public UserDetailsService userDetailsService() throws UsernameNotFoundException {
-        return username -> userRepo
-                .findByUsernameAndDepartedIsNull(username)
+        return username -> userRepo.findByUsernameAndDepartedIsNull(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 

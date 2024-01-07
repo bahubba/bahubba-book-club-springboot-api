@@ -171,8 +171,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         // Get the requesting user's membership in the book club to ensure they're an admin
         bookClubMembershipRepo
-                .findByBookClubNameAndUserIdAndClubRoleAndDepartedIsNull(
-                        bookClubName, user.getId(), BookClubRole.ADMIN)
+                .findByBookClubNameAndUserIdAndClubRoleAndDepartedIsNull(bookClubName, user.getId(), BookClubRole.ADMIN)
                 .orElseThrow(UnauthorizedBookClubActionException::new);
 
         // Get the target user's membership in the book club

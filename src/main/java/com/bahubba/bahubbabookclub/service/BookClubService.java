@@ -39,8 +39,7 @@ public interface BookClubService {
      * @throws UserNotFoundException The book club was private or user was not logged in
      * @throws MembershipNotFoundException The user was not a member of the book club
      */
-    BookClubDTO findByID(UUID id)
-            throws BookClubNotFoundException, UserNotFoundException, MembershipNotFoundException;
+    BookClubDTO findByID(UUID id) throws BookClubNotFoundException, UserNotFoundException, MembershipNotFoundException;
 
     /**
      * Find a book club by its name

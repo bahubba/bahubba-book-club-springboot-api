@@ -402,8 +402,7 @@ class MembershipRequestServiceTest {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
-                .thenReturn(
-                        User.builder().id(UUID.randomUUID()).username("foo").build());
+                .thenReturn(User.builder().id(UUID.randomUUID()).username("foo").build());
         when(membershipRequestRepo.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(MembershipRequestNotFoundException.class, () -> {

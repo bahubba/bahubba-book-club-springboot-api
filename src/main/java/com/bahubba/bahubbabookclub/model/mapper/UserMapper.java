@@ -6,7 +6,6 @@ import com.bahubba.bahubbabookclub.model.mapper.custom.EncodeMapping;
 import com.bahubba.bahubbabookclub.model.mapper.custom.PasswordEncoderMapper;
 import com.bahubba.bahubbabookclub.model.payload.NewUser;
 import java.util.List;
-
 import lombok.Generated;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

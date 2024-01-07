@@ -165,8 +165,7 @@ class BookClubServiceTest {
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
                 .thenReturn(User.builder().id(UUID.randomUUID()).build());
-        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class)))
-                .thenReturn(Page.empty());
+        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class))).thenReturn(Page.empty());
         Page<BookClubDTO> result = bookClubService.findAllForUser(1, 1);
         verify(bookClubRepo, times(1)).findAllForUser(any(UUID.class), any(Pageable.class));
         assertThat(result).isNotNull();
@@ -184,8 +183,7 @@ class BookClubServiceTest {
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
                 .thenReturn(User.builder().id(UUID.randomUUID()).build());
-        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class)))
-                .thenReturn(Page.empty());
+        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class))).thenReturn(Page.empty());
 
         assertThrows(PageSizeTooSmallException.class, () -> bookClubService.findAllForUser(1, -1));
         verify(bookClubRepo, times(1)).findAllForUser(any(UUID.class), any(Pageable.class));
@@ -199,8 +197,7 @@ class BookClubServiceTest {
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
                 .thenReturn(User.builder().id(UUID.randomUUID()).build());
-        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class)))
-                .thenReturn(Page.empty());
+        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class))).thenReturn(Page.empty());
 
         assertThrows(PageSizeTooLargeException.class, () -> bookClubService.findAllForUser(1, 51));
         verify(bookClubRepo, times(1)).findAllForUser(any(UUID.class), any(Pageable.class));

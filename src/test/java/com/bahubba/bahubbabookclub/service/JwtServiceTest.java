@@ -5,13 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import com.bahubba.bahubbabookclub.exception.UserNotFoundException;
 import com.bahubba.bahubbabookclub.exception.TokenRefreshException;
+import com.bahubba.bahubbabookclub.exception.UserNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
-import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
-import com.bahubba.bahubbabookclub.repository.UserRepo;
+import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
+import com.bahubba.bahubbabookclub.repository.UserRepo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
