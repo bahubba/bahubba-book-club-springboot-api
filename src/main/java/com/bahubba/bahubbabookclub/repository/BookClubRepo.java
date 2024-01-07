@@ -23,7 +23,7 @@ public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
             value = "SELECT bc.* FROM book_club bc "
                     + "INNER JOIN book_club_users bcr "
                     + "ON bc.id = bcr.book_club_id "
-                    + "INNER JOIN user r "
+                    + "INNER JOIN app_user r "
                     + "ON bcr.user_id = r.id "
                     + "WHERE bc.disbanded IS NULL "
                     + "AND bcr.departed IS NULL "
