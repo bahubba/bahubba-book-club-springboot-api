@@ -17,17 +17,28 @@ import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
+import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.http.SdkHttpRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 /** Unit tests for the {@link BookClubService} business logic */
 @SpringBootTest
@@ -45,16 +56,52 @@ class BookClubServiceTest {
     @MockBean
     NotificationRepo notificationRepo;
 
+    @MockBean
+    S3Presigner s3Presigner;
+
+    private static final PresignedGetObjectRequest dummyPresignedGetObjectRequest = PresignedGetObjectRequest.builder()
+            .httpRequest(SdkHttpRequest.builder()
+                    .method(SdkHttpMethod.GET)
+                    .host("localhost")
+                    .protocol("https")
+                    .build())
+            .signedHeaders(Map.of("someHeader", List.of("someVal")))
+            .isBrowserExecutable(false)
+            .expiration(Instant.now().plus(Duration.ofSeconds(1)))
+            .build();
+
+    @BeforeEach
+    void setUp() {
+        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class)))
+                .thenReturn(dummyPresignedGetObjectRequest);
+    }
+
     @Test
     void testCreate() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
         securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(new User());
+
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
-        BookClubDTO result = bookClubService.create(new NewBookClub());
+
+        BookClubDTO result =
+                bookClubService.create(NewBookClub.builder().name("Test").build());
         verify(bookClubRepo, times(1)).save(any(BookClub.class));
         verify(bookClubMembershipRepo, times(1)).save(any(BookClubMembership.class));
         verify(notificationRepo, times(1)).save(any(Notification.class));
         assertThat(result).isNotNull();
+        securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testCreate_ReservedName() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(new User());
+
+        assertThrows(
+                BadBookClubActionException.class,
+                () -> bookClubService.create(
+                        NewBookClub.builder().name("Default").build()));
+
         securityUtilMockedStatic.close();
     }
 
@@ -91,9 +138,12 @@ class BookClubServiceTest {
 
     @Test
     void testFindByID() {
+        // imageUploaded set here to add coverage for BookClubAspect
         when(bookClubRepo.findById(any(UUID.class)))
-                .thenReturn(Optional.of(
-                        BookClub.builder().publicity(Publicity.PUBLIC).build()));
+                .thenReturn(Optional.of(BookClub.builder()
+                        .imageUploaded(true)
+                        .publicity(Publicity.PUBLIC)
+                        .build()));
         BookClubDTO result = bookClubService.findByID(UUID.randomUUID());
         verify(bookClubRepo, times(1)).findById(any(UUID.class));
         assertThat(result).isNotNull();
@@ -165,7 +215,11 @@ class BookClubServiceTest {
         securityUtilMockedStatic
                 .when(SecurityUtil::getCurrentUserDetails)
                 .thenReturn(User.builder().id(UUID.randomUUID()).build());
-        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class))).thenReturn(Page.empty());
+        // Book clubs filled in here to add coverage for BookClubAspect
+        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(
+                        BookClub.builder().build(),
+                        BookClub.builder().name("Test").imageUploaded(true).build())));
         Page<BookClubDTO> result = bookClubService.findAllForUser(1, 1);
         verify(bookClubRepo, times(1)).findAllForUser(any(UUID.class), any(Pageable.class));
         assertThat(result).isNotNull();

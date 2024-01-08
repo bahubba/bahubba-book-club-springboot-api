@@ -16,8 +16,9 @@ public interface BookClubService {
      * @param newBookClub Metadata for the new book club
      * @return The new book club's persisted entity
      * @throws UserNotFoundException The user was not found
+     * @throws BadBookClubActionException The book club's name was a reserved word
      */
-    BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException;
+    BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException, BadBookClubActionException;
 
     /**
      * Update a book club
@@ -114,4 +115,12 @@ public interface BookClubService {
     BookClubDTO disbandBookClubByName(String name)
             throws UserNotFoundException, MembershipNotFoundException, UnauthorizedBookClubActionException,
                     BadBookClubActionException;
+
+    /**
+     * Get a pre-signed URL for an image
+     *
+     * @param fileName The name of the image file
+     * @return The pre-signed URL for the image
+     */
+    String getPreSignedImageURL(String fileName);
 }

@@ -10,22 +10,28 @@ import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
-import com.bahubba.bahubbabookclub.model.mapper.BookClubMembershipMapper;
-import com.bahubba.bahubbabookclub.model.mapper.UserMapper;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.service.BookClubService;
+import com.bahubba.bahubbabookclub.util.APIConstants;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
 import jakarta.validation.constraints.NotNull;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 /** {@link BookClub} business logic implementation */
 @Service
@@ -34,23 +40,40 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookClubServiceImpl implements BookClubService {
 
     private final BookClubRepo bookClubRepo;
-    private final BookClubMapper bookClubMapper;
-    private final UserMapper userMapper;
-    private final BookClubMembershipMapper bookClubMembershipMapper;
     private final BookClubMembershipRepo bookClubMembershipRepo;
     private final NotificationRepo notificationRepo;
+    private final BookClubMapper bookClubMapper;
+    private final S3Presigner s3Presigner;
+
+    @Value("${aws.s3.bucket}")
+    private String bucketName;
 
     @Override
-    public BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException {
+    public BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException, BadBookClubActionException {
         // Get the current user from the security context
         User user = SecurityUtil.getCurrentUserDetails();
         if (user == null) {
             throw new UserNotFoundException();
         }
 
-        // Convert the book club to an entity, add the user as a member/owner, and persist it
+        // Ensure the book club's name is not a reserved word
+        if (Arrays.stream(APIConstants.RESERVED_NAMES).anyMatch(newBookClub.getName()::equalsIgnoreCase)) {
+            throw new BadBookClubActionException();
+        }
+
+        // Convert the book club to an entity and, if it included an image, set the flag indicating so
+        // TODO - Persist a passed-in image to S3 (unless we have a pick-list of images instead, which may be a starting
+        // point)
         BookClub newBookClubEntity = bookClubMapper.modelToEntity(newBookClub);
-        newBookClubEntity = bookClubRepo.save(newBookClubEntity);
+        if (!newBookClub.getImageURL().isEmpty()) {
+            newBookClubEntity.setImageUploaded(true);
+            newBookClubEntity.setImageExtension(newBookClub
+                    .getImageURL()
+                    .substring(newBookClub.getImageURL().lastIndexOf('.')));
+        }
+
+        // Persist the new book club so that we get an ID
+        bookClubRepo.save(newBookClubEntity);
 
         // Add the user as a member/owner
         bookClubMembershipRepo.save(BookClubMembership.builder()
@@ -88,13 +111,17 @@ public class BookClubServiceImpl implements BookClubService {
         bookClub.setDescription(bookClubDTO.getDescription());
         bookClub.setImageURL(bookClubDTO.getImageURL());
         bookClub.setPublicity(bookClubDTO.getPublicity());
-
-        // Persist the updated book club
-        bookClub = bookClubRepo.save(bookClub);
+        if (!bookClubDTO.getImageURL().isEmpty()) {
+            bookClub.setImageUploaded(true);
+            bookClub.setImageExtension(bookClubDTO
+                    .getImageURL()
+                    .substring(bookClubDTO.getImageURL().lastIndexOf('.')));
+        }
 
         // TODO - Add notifications for each piece of metadata that was updated
 
-        return bookClubMapper.entityToDTO(bookClub);
+        // Persist and return the book club
+        return bookClubMapper.entityToDTO(bookClubRepo.save(bookClub));
     }
 
     @Override
@@ -224,6 +251,19 @@ public class BookClubServiceImpl implements BookClubService {
         return disbandBookClub(membership);
     }
 
+    @Override
+    public String getPreSignedImageURL(String fileName) {
+        GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.between(Instant.now(), Instant.now().plus(Duration.ofMinutes(5))))
+                .getObjectRequest(getObjectRequest ->
+                        getObjectRequest.bucket(bucketName).key(APIConstants.BOOK_CLUB_IMAGE_KEY_PREFIX + fileName))
+                .build();
+
+        PresignedGetObjectRequest presignedGetObjectRequest = s3Presigner.presignGetObject(preSignRequest);
+
+        return presignedGetObjectRequest.url().toString();
+    }
+
     /**
      * Ensure a user is a member of a book club before returning the book club
      *
@@ -242,7 +282,7 @@ public class BookClubServiceImpl implements BookClubService {
         }
 
         // Check if the user is a member of the book club
-        if (!bookClubMembershipRepo.existsByBookClubIdAndUserId(bookClub.getId(), user.getId())) {
+        if (Boolean.FALSE.equals(bookClubMembershipRepo.existsByBookClubIdAndUserId(bookClub.getId(), user.getId()))) {
             throw new MembershipNotFoundException(user.getUsername(), bookClub.getName());
         }
 

@@ -27,6 +27,10 @@ logging:
   level:
     org.springframework: info
     org.hibernate: info
+#    com:
+#      amazonaws:
+#        util:
+#          EC2MetadataUtils: error
 
 server:
   port: ${BOOK_CLUB_APP_PORT:8443}
@@ -44,3 +48,11 @@ app:
     secret_key: ${BOOK_CLUB_SECRET_KEY}
     auth_cookie_name: ${BOOK_CLUB_AUTH_COOKIE:bbcm_auth}
     refresh_cookie_name: ${BOOK_CLUB_REFRESH_COOKIE:bbcm_refresh}
+
+aws:
+  region:
+    static: ${AWS_REGION:us-east-1}
+  credentials:
+    profile-name: ${BBCM_AWS_PROFILE}
+  s3:
+    bucket: ${BBCM_S3_BUCKET}

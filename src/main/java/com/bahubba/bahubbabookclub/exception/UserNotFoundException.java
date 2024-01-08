@@ -1,6 +1,6 @@
 package com.bahubba.bahubbabookclub.exception;
 
-import com.bahubba.bahubbabookclub.util.APIConstants.ErrorMessages;
+import com.bahubba.bahubbabookclub.util.APIConstants;
 import java.util.UUID;
 
 /**
@@ -11,7 +11,7 @@ public class UserNotFoundException extends RuntimeException {
 
     /** Generates exception for missing user in security context */
     public UserNotFoundException() {
-        super(ErrorMessages.USER_NOT_FOUND);
+        super(APIConstants.USER_NOT_FOUND);
     }
 
     /**
