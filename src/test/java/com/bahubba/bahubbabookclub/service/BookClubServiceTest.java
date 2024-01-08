@@ -140,8 +140,10 @@ class BookClubServiceTest {
     void testFindByID() {
         // imageUploaded set here to add coverage for BookClubAspect
         when(bookClubRepo.findById(any(UUID.class)))
-                .thenReturn(Optional.of(
-                        BookClub.builder().imageUploaded(true).publicity(Publicity.PUBLIC).build()));
+                .thenReturn(Optional.of(BookClub.builder()
+                        .imageUploaded(true)
+                        .publicity(Publicity.PUBLIC)
+                        .build()));
         BookClubDTO result = bookClubService.findByID(UUID.randomUUID());
         verify(bookClubRepo, times(1)).findById(any(UUID.class));
         assertThat(result).isNotNull();
@@ -214,10 +216,10 @@ class BookClubServiceTest {
                 .when(SecurityUtil::getCurrentUserDetails)
                 .thenReturn(User.builder().id(UUID.randomUUID()).build());
         // Book clubs filled in here to add coverage for BookClubAspect
-        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(
-                BookClub.builder().build(),
-                BookClub.builder().name("Test").imageUploaded(true).build()
-        )));
+        when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(
+                        BookClub.builder().build(),
+                        BookClub.builder().name("Test").imageUploaded(true).build())));
         Page<BookClubDTO> result = bookClubService.findAllForUser(1, 1);
         verify(bookClubRepo, times(1)).findAllForUser(any(UUID.class), any(Pageable.class));
         assertThat(result).isNotNull();

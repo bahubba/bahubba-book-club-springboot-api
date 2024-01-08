@@ -61,8 +61,19 @@ public class BookClubServiceImpl implements BookClubService {
             throw new BadBookClubActionException();
         }
 
-        // Convert the book club to an entity, add the user as a member/owner, and persist it
-        BookClub newBookClubEntity = bookClubRepo.save(bookClubMapper.modelToEntity(newBookClub));
+        // Convert the book club to an entity and, if it included an image, set the flag indicating so
+        // TODO - Persist a passed-in image to S3 (unless we have a pick-list of images instead, which may be a starting
+        // point)
+        BookClub newBookClubEntity = bookClubMapper.modelToEntity(newBookClub);
+        if (!newBookClub.getImageURL().isEmpty()) {
+            newBookClubEntity.setImageUploaded(true);
+            newBookClubEntity.setImageExtension(newBookClub
+                    .getImageURL()
+                    .substring(newBookClub.getImageURL().lastIndexOf('.')));
+        }
+
+        // Persist the new book club so that we get an ID
+        bookClubRepo.save(newBookClubEntity);
 
         // Add the user as a member/owner
         bookClubMembershipRepo.save(BookClubMembership.builder()
@@ -100,13 +111,17 @@ public class BookClubServiceImpl implements BookClubService {
         bookClub.setDescription(bookClubDTO.getDescription());
         bookClub.setImageURL(bookClubDTO.getImageURL());
         bookClub.setPublicity(bookClubDTO.getPublicity());
-
-        // Persist the updated book club
-        bookClub = bookClubRepo.save(bookClub);
+        if (!bookClubDTO.getImageURL().isEmpty()) {
+            bookClub.setImageUploaded(true);
+            bookClub.setImageExtension(bookClubDTO
+                    .getImageURL()
+                    .substring(bookClubDTO.getImageURL().lastIndexOf('.')));
+        }
 
         // TODO - Add notifications for each piece of metadata that was updated
 
-        return bookClubMapper.entityToDTO(bookClub);
+        // Persist and return the book club
+        return bookClubMapper.entityToDTO(bookClubRepo.save(bookClub));
     }
 
     @Override
