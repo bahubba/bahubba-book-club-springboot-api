@@ -28,10 +28,12 @@ public class BookClubController {
      * @param newBookClub Metadata for a new book club
      * @return Persisted version of the new book club
      * @throws UserNotFoundException The user was not found
+     * @throws BadBookClubActionException The book club's name was a reserved word
      */
     @PostMapping("/create")
     @Operation(summary = "Create", description = "Creates a new book club")
-    public ResponseEntity<BookClubDTO> create(@RequestBody NewBookClub newBookClub) throws UserNotFoundException {
+    public ResponseEntity<BookClubDTO> create(@RequestBody NewBookClub newBookClub)
+            throws UserNotFoundException, BadBookClubActionException {
         return ResponseEntity.ok(bookClubService.create(newBookClub));
     }
 
