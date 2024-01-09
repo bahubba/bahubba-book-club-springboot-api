@@ -7,7 +7,11 @@ import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.List;
 import java.util.UUID;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -166,10 +170,21 @@ public class BookClubController {
      */
     @PostMapping(value = "/search")
     @Operation(summary = "Search", description = "Searches for book clubs by name")
-    public ResponseEntity<Page<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch)
+    public ResponseEntity<Page<BookClubDTO>> search(@RequestBody @NotNull BookClubSearch bookClubSearch)
             throws PageSizeTooSmallException, PageSizeTooLargeException {
 
         return ResponseEntity.ok(bookClubService.search(
                 bookClubSearch.getSearchTerm(), bookClubSearch.getPageNum(), bookClubSearch.getPageSize()));
+    }
+
+    /**
+     * Gets pre-signed URLs for all stock book club images
+     *
+     * @return A list of pre-signed URLs for all stock book club images
+     */
+    @GetMapping(value = "/stock-images")
+    @Operation(summary = "Get Stock Images", description = "Gets pre-signed URLs for all stock book club images")
+    public ResponseEntity<List<String>> getPreSignedStockBookClubImageURLs() {
+        return ResponseEntity.ok(bookClubService.getPreSignedStockBookClubImageURLs());
     }
 }

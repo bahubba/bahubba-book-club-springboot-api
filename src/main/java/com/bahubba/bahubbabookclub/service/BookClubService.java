@@ -4,6 +4,8 @@ import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 
@@ -117,10 +119,9 @@ public interface BookClubService {
                     BadBookClubActionException;
 
     /**
-     * Get a pre-signed URL for an image
+     * Get all stock book club images
      *
-     * @param fileName The name of the image file
-     * @return The pre-signed URL for the image
+     * @return A list of stock book club image objects in S3
      */
-    String getPreSignedImageURL(String fileName);
+    List<String> getPreSignedStockBookClubImageURLs();
 }

@@ -36,6 +36,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.http.SdkHttpRequest;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -48,6 +52,9 @@ class BookClubServiceTest {
     BookClubService bookClubService;
 
     @MockBean
+    S3Service s3Service;
+
+    @MockBean
     BookClubRepo bookClubRepo;
 
     @MockBean
@@ -56,24 +63,9 @@ class BookClubServiceTest {
     @MockBean
     NotificationRepo notificationRepo;
 
-    @MockBean
-    S3Presigner s3Presigner;
-
-    private static final PresignedGetObjectRequest dummyPresignedGetObjectRequest = PresignedGetObjectRequest.builder()
-            .httpRequest(SdkHttpRequest.builder()
-                    .method(SdkHttpMethod.GET)
-                    .host("localhost")
-                    .protocol("https")
-                    .build())
-            .signedHeaders(Map.of("someHeader", List.of("someVal")))
-            .isBrowserExecutable(false)
-            .expiration(Instant.now().plus(Duration.ofSeconds(1)))
-            .build();
-
     @BeforeEach
     void setUp() {
-        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class)))
-                .thenReturn(dummyPresignedGetObjectRequest);
+        when(s3Service.getPreSignedURL(anyString())).thenReturn("https://test.com");
     }
 
     @Test
@@ -89,6 +81,7 @@ class BookClubServiceTest {
         verify(bookClubMembershipRepo, times(1)).save(any(BookClubMembership.class));
         verify(notificationRepo, times(1)).save(any(Notification.class));
         assertThat(result).isNotNull();
+
         securityUtilMockedStatic.close();
     }
 
@@ -121,7 +114,7 @@ class BookClubServiceTest {
                 .id(UUID.randomUUID())
                 .name("foo")
                 .description("bar")
-                .imageURL("baz")
+                .image("baz")
                 .publicity(Publicity.PUBLIC)
                 .build());
 
@@ -141,7 +134,6 @@ class BookClubServiceTest {
         // imageUploaded set here to add coverage for BookClubAspect
         when(bookClubRepo.findById(any(UUID.class)))
                 .thenReturn(Optional.of(BookClub.builder()
-                        .imageUploaded(true)
                         .publicity(Publicity.PUBLIC)
                         .build()));
         BookClubDTO result = bookClubService.findByID(UUID.randomUUID());
@@ -219,7 +211,7 @@ class BookClubServiceTest {
         when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(
                         BookClub.builder().build(),
-                        BookClub.builder().name("Test").imageUploaded(true).build())));
+                        BookClub.builder().name("Test").build())));
         Page<BookClubDTO> result = bookClubService.findAllForUser(1, 1);
         verify(bookClubRepo, times(1)).findAllForUser(any(UUID.class), any(Pageable.class));
         assertThat(result).isNotNull();
@@ -502,5 +494,17 @@ class BookClubServiceTest {
         assertThrows(MembershipNotFoundException.class, () -> bookClubService.findByID(UUID.randomUUID()));
 
         securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testGetPreSignedStockBookClubImageURLs() {
+        when(s3Service.listS3ObjectsAtPrefix(anyString())).thenReturn(List.of(
+                S3Object.builder().key("test").build(),
+                S3Object.builder().key("test2").build()));
+
+        List<String> result = bookClubService.getPreSignedStockBookClubImageURLs();
+
+        verify(s3Service, times(1)).listS3ObjectsAtPrefix(anyString());
+        assertThat(result).isNotNull();
     }
 }
