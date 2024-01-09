@@ -17,11 +17,8 @@ import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,15 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-import software.amazon.awssdk.http.SdkHttpMethod;
-import software.amazon.awssdk.http.SdkHttpRequest;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 /** Unit tests for the {@link BookClubService} business logic */
 @SpringBootTest
@@ -133,9 +122,8 @@ class BookClubServiceTest {
     void testFindByID() {
         // imageUploaded set here to add coverage for BookClubAspect
         when(bookClubRepo.findById(any(UUID.class)))
-                .thenReturn(Optional.of(BookClub.builder()
-                        .publicity(Publicity.PUBLIC)
-                        .build()));
+                .thenReturn(Optional.of(
+                        BookClub.builder().publicity(Publicity.PUBLIC).build()));
         BookClubDTO result = bookClubService.findByID(UUID.randomUUID());
         verify(bookClubRepo, times(1)).findById(any(UUID.class));
         assertThat(result).isNotNull();
@@ -498,9 +486,10 @@ class BookClubServiceTest {
 
     @Test
     void testGetPreSignedStockBookClubImageURLs() {
-        when(s3Service.listS3ObjectsAtPrefix(anyString())).thenReturn(List.of(
-                S3Object.builder().key("test").build(),
-                S3Object.builder().key("test2").build()));
+        when(s3Service.listS3ObjectsAtPrefix(anyString()))
+                .thenReturn(List.of(
+                        S3Object.builder().key("test").build(),
+                        S3Object.builder().key("test2").build()));
 
         List<String> result = bookClubService.getPreSignedStockBookClubImageURLs();
 

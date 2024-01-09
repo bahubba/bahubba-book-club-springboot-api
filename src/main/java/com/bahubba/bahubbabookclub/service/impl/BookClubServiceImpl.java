@@ -19,26 +19,17 @@ import com.bahubba.bahubbabookclub.service.S3Service;
 import com.bahubba.bahubbabookclub.util.APIConstants;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
 import jakarta.validation.constraints.NotNull;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 /** {@link BookClub} business logic implementation */
 @Service

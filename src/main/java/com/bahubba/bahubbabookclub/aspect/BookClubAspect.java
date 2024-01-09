@@ -22,7 +22,8 @@ public class BookClubAspect {
                     "execution(com.bahubba.bahubbabookclub.model.dto.BookClubDTO com.bahubba.bahubbabookclub.service.*.*(..))",
             returning = "bookClubDTO")
     public void addPreSignedURL(JoinPoint joinPoint, @NotNull BookClubDTO bookClubDTO) {
-        bookClubDTO.setImage(s3Service.getPreSignedURL(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX + bookClubDTO.getImage()));
+        bookClubDTO.setImage(
+                s3Service.getPreSignedURL(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX + bookClubDTO.getImage()));
     }
 
     @AfterReturning(
@@ -30,6 +31,7 @@ public class BookClubAspect {
                     "execution(org.springframework.data.domain.Page<com.bahubba.bahubbabookclub.model.dto.BookClubDTO> com.bahubba.bahubbabookclub.service.*.*(..))",
             returning = "bookClubDTOs")
     public void addPreSignedURL(JoinPoint joinPoint, @NotNull Page<BookClubDTO> bookClubDTOs) {
-        bookClubDTOs.forEach(bookClubDTO -> bookClubDTO.setImage(s3Service.getPreSignedURL(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX + bookClubDTO.getImage())));
+        bookClubDTOs.forEach(bookClubDTO -> bookClubDTO.setImage(
+                s3Service.getPreSignedURL(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX + bookClubDTO.getImage())));
     }
 }
