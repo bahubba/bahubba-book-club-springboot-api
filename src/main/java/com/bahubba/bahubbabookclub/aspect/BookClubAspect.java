@@ -1,6 +1,7 @@
 package com.bahubba.bahubbabookclub.aspect;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.service.S3Service;
 import com.bahubba.bahubbabookclub.util.APIConstants;
 import jakarta.validation.constraints.NotNull;
@@ -23,7 +24,12 @@ public class BookClubAspect {
             returning = "bookClubDTO")
     public void addPreSignedURL(JoinPoint joinPoint, @NotNull BookClubDTO bookClubDTO) {
         bookClubDTO.setImage(
-                s3Service.getPreSignedURL(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX + bookClubDTO.getImage()));
+                S3ImageDTO
+                        .builder()
+                        .fileName(bookClubDTO.getImage().getFileName())
+                        .url(s3Service.getPreSignedURL(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX + bookClubDTO.getImage().getFileName()))
+                        .build()
+                );
     }
 
     @AfterReturning(
@@ -32,6 +38,10 @@ public class BookClubAspect {
             returning = "bookClubDTOs")
     public void addPreSignedURL(JoinPoint joinPoint, @NotNull Page<BookClubDTO> bookClubDTOs) {
         bookClubDTOs.forEach(bookClubDTO -> bookClubDTO.setImage(
-                s3Service.getPreSignedURL(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX + bookClubDTO.getImage())));
+                S3ImageDTO
+                        .builder()
+                        .fileName(bookClubDTO.getImage().getFileName())
+                        .url(s3Service.getPreSignedURL(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX + bookClubDTO.getImage().getFileName()))
+                        .build()));
     }
 }

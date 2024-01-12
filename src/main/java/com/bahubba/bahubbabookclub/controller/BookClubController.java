@@ -2,6 +2,7 @@ package com.bahubba.bahubbabookclub.controller;
 
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
@@ -42,17 +43,17 @@ public class BookClubController {
     /**
      * Updates a book club
      *
-     * @param bookClub New book club metadata
+     * @param updatedBookClub New book club metadata
      * @return Persisted version of the new book club
      * @throws UserNotFoundException The user was not found
      * @throws BookClubNotFoundException The book club was not found
      */
     @Operation(summary = "Update", description = "Updates a book club's metadata")
     @PatchMapping("/update")
-    public ResponseEntity<BookClubDTO> update(@RequestBody BookClubDTO bookClub)
+    public ResponseEntity<BookClubDTO> update(@RequestBody BookClubDTO updatedBookClub)
             throws UserNotFoundException, BookClubNotFoundException {
 
-        return ResponseEntity.ok(bookClubService.update(bookClub));
+        return ResponseEntity.ok(bookClubService.update(updatedBookClub));
     }
 
     /**
@@ -182,7 +183,7 @@ public class BookClubController {
      */
     @GetMapping(value = "/stock-images")
     @Operation(summary = "Get Stock Images", description = "Gets pre-signed URLs for all stock book club images")
-    public ResponseEntity<List<String>> getPreSignedStockBookClubImageURLs() {
-        return ResponseEntity.ok(bookClubService.getPreSignedStockBookClubImageURLs());
+    public ResponseEntity<List<S3ImageDTO>> getPreSignedStockBookClubImageURLs() {
+        return ResponseEntity.ok(bookClubService.getStockBookClubImages());
     }
 }

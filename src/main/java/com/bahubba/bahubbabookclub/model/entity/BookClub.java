@@ -32,8 +32,8 @@ public class BookClub implements Serializable {
     @Column(nullable = false, unique = true)
     @NotNull private String name;
 
-    @Column
-    private String image;
+    @Column(name = "image_file_name", nullable = false)
+    private String imageFileName;
 
     @Column(nullable = false)
     @NotNull @Builder.Default

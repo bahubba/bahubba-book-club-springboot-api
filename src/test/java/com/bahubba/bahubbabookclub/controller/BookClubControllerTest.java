@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
@@ -115,11 +116,11 @@ class BookClubControllerTest {
 
     @Test
     void testGetPreSignedStockBookClubImageURLs() {
-        when(bookClubService.getPreSignedStockBookClubImageURLs()).thenReturn(new ArrayList<>());
+        when(bookClubService.getStockBookClubImages()).thenReturn(new ArrayList<>());
 
-        ResponseEntity<List<String>> rsp = bookClubController.getPreSignedStockBookClubImageURLs();
+        ResponseEntity<List<S3ImageDTO>> rsp = bookClubController.getPreSignedStockBookClubImageURLs();
 
-        verify(bookClubService, times(1)).getPreSignedStockBookClubImageURLs();
+        verify(bookClubService, times(1)).getStockBookClubImages();
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }

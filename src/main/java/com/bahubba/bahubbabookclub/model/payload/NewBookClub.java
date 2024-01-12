@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NewBookClub {
     private String name;
-    private String imageURL;
+    private String imageFileName;
     private String description;
     private Publicity publicity;
 }

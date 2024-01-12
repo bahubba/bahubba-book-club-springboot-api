@@ -19,7 +19,20 @@ public interface BookClubMapper {
     BookClub modelToEntity(NewBookClub newBookClub);
 
     @Generated
+    @Mapping(target = "image.fileName", source = "imageFileName")
+    @Mapping(target = "image.url", ignore = true)
     BookClubDTO entityToDTO(BookClub bookClub);
+
+    @Generated
+    @Mapping(target = "id", source = "entity.id")
+    @Mapping(target = "name", source = "dto.name")
+    @Mapping(target = "imageFileName", source = "dto.image.fileName")
+    @Mapping(target = "description", source = "dto.description")
+    @Mapping(target = "publicity", source = "dto.publicity")
+    @Mapping(target = "members", source = "entity.members")
+    @Mapping(target = "created", source = "entity.created")
+    @Mapping(target = "disbanded", source = "entity.disbanded")
+    BookClub mergeDTOToEntity(BookClubDTO dto, BookClub entity);
 
     @Generated
     List<BookClubDTO> entityListToDTO(List<BookClub> bookClubs);

@@ -2,6 +2,7 @@ package com.bahubba.bahubbabookclub.service;
 
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import java.util.List;
@@ -24,12 +25,12 @@ public interface BookClubService {
     /**
      * Update a book club
      *
-     * @param bookClubDTO The book club's new metadata
+     * @param updatedBookClub The book club's new metadata
      * @return The updated book club's persisted entity
      * @throws UserNotFoundException The user was not found
-     * @throws BookClubNotFoundException The book club was not found
+     * @throws UnauthorizedBookClubActionException The book club was not found where the reader was an active admin
      */
-    BookClubDTO update(BookClubDTO bookClubDTO) throws UserNotFoundException, BookClubNotFoundException;
+    BookClubDTO update(BookClubDTO updatedBookClub) throws UserNotFoundException, UnauthorizedBookClubActionException;
 
     /**
      * Find a book club by its ID
@@ -122,5 +123,5 @@ public interface BookClubService {
      *
      * @return A list of stock book club image objects in S3
      */
-    List<String> getPreSignedStockBookClubImageURLs();
+    List<S3ImageDTO> getStockBookClubImages();
 }

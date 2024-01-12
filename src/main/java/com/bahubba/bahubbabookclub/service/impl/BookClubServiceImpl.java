@@ -2,6 +2,7 @@ package com.bahubba.bahubbabookclub.service.impl;
 
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
@@ -78,7 +79,8 @@ public class BookClubServiceImpl implements BookClubService {
         return bookClubMapper.entityToDTO(newBookClubEntity);
     }
 
-    public BookClubDTO update(BookClubDTO bookClubDTO) throws UserNotFoundException, BookClubNotFoundException {
+    @Override
+    public BookClubDTO update(BookClubDTO updatedBookClub) throws UserNotFoundException, UnauthorizedBookClubActionException {
         // Get the current user from the security context
         User user = SecurityUtil.getCurrentUserDetails();
         if (user == null) {
@@ -87,14 +89,14 @@ public class BookClubServiceImpl implements BookClubService {
 
         // Find the book club to update
         BookClub bookClub = bookClubRepo
-                .findById(bookClubDTO.getId())
-                .orElseThrow(() -> new BookClubNotFoundException(bookClubDTO.getId()));
+                .findByIdAndUserIsAdmin(updatedBookClub.getId(), user.getId())
+                .orElseThrow(() -> new BookClubNotFoundException(updatedBookClub.getId()));
 
         // Update the book club's metadata
-        bookClub.setName(bookClubDTO.getName());
-        bookClub.setDescription(bookClubDTO.getDescription());
-        bookClub.setImage(bookClubDTO.getImage());
-        bookClub.setPublicity(bookClubDTO.getPublicity());
+        bookClub.setName(updatedBookClub.getName());
+        bookClub.setDescription(updatedBookClub.getDescription());
+        bookClub.setImageFileName(updatedBookClub.getImage().getFileName());
+        bookClub.setPublicity(updatedBookClub.getPublicity());
 
         // TODO - Add notifications for each piece of metadata that was updated
 
@@ -230,18 +232,23 @@ public class BookClubServiceImpl implements BookClubService {
     }
 
     @Override
-    public List<String> getPreSignedStockBookClubImageURLs() {
-        List<String> preSignedURLs = new ArrayList<>();
+    public List<S3ImageDTO> getStockBookClubImages() {
+        List<S3ImageDTO> stockImages = new ArrayList<>();
 
         // Get the list of stock book club images from S3
         List<S3Object> s3ImageObjects = s3Service.listS3ObjectsAtPrefix(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX);
 
         // Get the pre-signed URLs for each image
         for (S3Object s3ImageObject : s3ImageObjects) {
-            preSignedURLs.add(s3Service.getPreSignedURL(s3ImageObject.key()));
+            if (s3ImageObject.size() > 0) {
+                stockImages.add(S3ImageDTO.builder()
+                    .fileName(s3ImageObject.key())
+                    .url(s3Service.getPreSignedURL(s3ImageObject.key()))
+                    .build());
+            }
         }
 
-        return preSignedURLs;
+        return stockImages;
     }
 
     /**

@@ -9,5 +9,5 @@ public interface APIConstants {
     String USER_NOT_FOUND = "Not logged in or user not found";
 
     /* S3 CONSTANTS */
-    String BOOK_CLUB_STOCK_IMAGE_PREFIX = "book-clubs/images/";
+    String BOOK_CLUB_STOCK_IMAGE_PREFIX = "book-clubs/images/stock/";
 }
