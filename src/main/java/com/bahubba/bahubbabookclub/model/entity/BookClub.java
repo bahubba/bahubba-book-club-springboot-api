@@ -32,15 +32,8 @@ public class BookClub implements Serializable {
     @Column(nullable = false, unique = true)
     @NotNull private String name;
 
-    @Column(name = "image_url")
-    private String imageURL;
-
-    @Column(name = "image_uploaded")
-    @Builder.Default
-    private boolean imageUploaded = false;
-
-    @Column(name = "image_extension")
-    private String imageExtension;
+    @Column(name = "image_file_name", nullable = false)
+    private String imageFileName;
 
     @Column(nullable = false)
     @NotNull @Builder.Default

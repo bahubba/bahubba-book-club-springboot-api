@@ -7,21 +7,19 @@ import static org.mockito.Mockito.*;
 
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
 import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
-import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.model.payload.BookClubPayload;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,11 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-import software.amazon.awssdk.http.SdkHttpMethod;
-import software.amazon.awssdk.http.SdkHttpRequest;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 /** Unit tests for the {@link BookClubService} business logic */
 @SpringBootTest
@@ -46,6 +40,9 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 class BookClubServiceTest {
     @Autowired
     BookClubService bookClubService;
+
+    @MockBean
+    S3Service s3Service;
 
     @MockBean
     BookClubRepo bookClubRepo;
@@ -56,24 +53,9 @@ class BookClubServiceTest {
     @MockBean
     NotificationRepo notificationRepo;
 
-    @MockBean
-    S3Presigner s3Presigner;
-
-    private static final PresignedGetObjectRequest dummyPresignedGetObjectRequest = PresignedGetObjectRequest.builder()
-            .httpRequest(SdkHttpRequest.builder()
-                    .method(SdkHttpMethod.GET)
-                    .host("localhost")
-                    .protocol("https")
-                    .build())
-            .signedHeaders(Map.of("someHeader", List.of("someVal")))
-            .isBrowserExecutable(false)
-            .expiration(Instant.now().plus(Duration.ofSeconds(1)))
-            .build();
-
     @BeforeEach
     void setUp() {
-        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class)))
-                .thenReturn(dummyPresignedGetObjectRequest);
+        when(s3Service.getPreSignedURL(anyString())).thenReturn("https://test.com");
     }
 
     @Test
@@ -84,11 +66,12 @@ class BookClubServiceTest {
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
 
         BookClubDTO result =
-                bookClubService.create(NewBookClub.builder().name("Test").build());
+                bookClubService.create(BookClubPayload.builder().name("Test").build());
         verify(bookClubRepo, times(1)).save(any(BookClub.class));
         verify(bookClubMembershipRepo, times(1)).save(any(BookClubMembership.class));
         verify(notificationRepo, times(1)).save(any(Notification.class));
         assertThat(result).isNotNull();
+
         securityUtilMockedStatic.close();
     }
 
@@ -100,32 +83,35 @@ class BookClubServiceTest {
         assertThrows(
                 BadBookClubActionException.class,
                 () -> bookClubService.create(
-                        NewBookClub.builder().name("Default").build()));
+                        BookClubPayload.builder().name("Default").build()));
 
         securityUtilMockedStatic.close();
     }
 
     @Test
     void testCreate_NoUser() {
-        assertThrows(UserNotFoundException.class, () -> bookClubService.create(new NewBookClub()));
+        assertThrows(
+                UserNotFoundException.class,
+                () -> bookClubService.create(BookClubPayload.builder().build()));
     }
 
     @Test
     void testUpdate() {
         MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
-        securityUtilMockedStatic.when(SecurityUtil::getCurrentUserDetails).thenReturn(new User());
-        when(bookClubRepo.findById(any(UUID.class))).thenReturn(Optional.of(new BookClub()));
+        securityUtilMockedStatic
+                .when(SecurityUtil::getCurrentUserDetails)
+                .thenReturn(User.builder().id(UUID.randomUUID()).build());
+        when(bookClubRepo.findByIdAndUserIsAdmin(any(UUID.class), any(UUID.class)))
+                .thenReturn(Optional.of(new BookClub()));
         when(bookClubRepo.save(any(BookClub.class))).thenReturn(new BookClub());
 
-        BookClubDTO result = bookClubService.update(BookClubDTO.builder()
+        BookClubDTO result = bookClubService.update(BookClubPayload.builder()
                 .id(UUID.randomUUID())
-                .name("foo")
-                .description("bar")
-                .imageURL("baz")
-                .publicity(Publicity.PUBLIC)
+                .name("Test")
+                .imageFileName("foobar")
                 .build());
 
-        verify(bookClubRepo, times(1)).findById(any(UUID.class));
+        verify(bookClubRepo, times(1)).findByIdAndUserIsAdmin(any(UUID.class), any(UUID.class));
         verify(bookClubRepo, times(1)).save(any(BookClub.class));
         assertThat(result).isNotNull();
         securityUtilMockedStatic.close();
@@ -133,17 +119,39 @@ class BookClubServiceTest {
 
     @Test
     void testUpdate_NoUser() {
-        assertThrows(UserNotFoundException.class, () -> bookClubService.update(new BookClubDTO()));
+        assertThrows(
+                UserNotFoundException.class,
+                () -> bookClubService.update(BookClubPayload.builder().build()));
+
+        verify(bookClubRepo, times(0)).findByIdAndUserIsAdmin(any(UUID.class), any(UUID.class));
+        verify(bookClubRepo, times(0)).save(any(BookClub.class));
+    }
+
+    @Test
+    void testUpdate_NotFound() {
+        MockedStatic<SecurityUtil> securityUtilMockedStatic = mockStatic(SecurityUtil.class);
+        securityUtilMockedStatic
+                .when(SecurityUtil::getCurrentUserDetails)
+                .thenReturn(User.builder().id(UUID.randomUUID()).build());
+        when(bookClubRepo.findByIdAndUserIsAdmin(any(UUID.class), any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                BookClubNotFoundException.class,
+                () -> bookClubService.update(
+                        BookClubPayload.builder().id(UUID.randomUUID()).build()));
+
+        verify(bookClubRepo, times(1)).findByIdAndUserIsAdmin(any(UUID.class), any(UUID.class));
+        verify(bookClubRepo, times(0)).save(any(BookClub.class));
+        securityUtilMockedStatic.close();
     }
 
     @Test
     void testFindByID() {
         // imageUploaded set here to add coverage for BookClubAspect
         when(bookClubRepo.findById(any(UUID.class)))
-                .thenReturn(Optional.of(BookClub.builder()
-                        .imageUploaded(true)
-                        .publicity(Publicity.PUBLIC)
-                        .build()));
+                .thenReturn(Optional.of(
+                        BookClub.builder().publicity(Publicity.PUBLIC).build()));
         BookClubDTO result = bookClubService.findByID(UUID.randomUUID());
         verify(bookClubRepo, times(1)).findById(any(UUID.class));
         assertThat(result).isNotNull();
@@ -219,7 +227,7 @@ class BookClubServiceTest {
         when(bookClubRepo.findAllForUser(any(UUID.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(
                         BookClub.builder().build(),
-                        BookClub.builder().name("Test").imageUploaded(true).build())));
+                        BookClub.builder().name("Test").build())));
         Page<BookClubDTO> result = bookClubService.findAllForUser(1, 1);
         verify(bookClubRepo, times(1)).findAllForUser(any(UUID.class), any(Pageable.class));
         assertThat(result).isNotNull();
@@ -502,5 +510,19 @@ class BookClubServiceTest {
         assertThrows(MembershipNotFoundException.class, () -> bookClubService.findByID(UUID.randomUUID()));
 
         securityUtilMockedStatic.close();
+    }
+
+    @Test
+    void testGetPreSignedStockBookClubImageURLs() {
+        when(s3Service.listS3ObjectsAtPrefix(anyString()))
+                .thenReturn(List.of(
+                        S3Object.builder().key("test").size(1L).build(),
+                        S3Object.builder().key("test2").size(0L).build()));
+
+        List<S3ImageDTO> result = bookClubService.getStockBookClubImages();
+
+        verify(s3Service, times(1)).listS3ObjectsAtPrefix(anyString());
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(1);
     }
 }

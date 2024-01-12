@@ -2,11 +2,14 @@ package com.bahubba.bahubbabookclub.controller;
 
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
+import com.bahubba.bahubbabookclub.model.payload.BookClubPayload;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
-import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,7 +35,7 @@ public class BookClubController {
      */
     @PostMapping("/create")
     @Operation(summary = "Create", description = "Creates a new book club")
-    public ResponseEntity<BookClubDTO> create(@RequestBody NewBookClub newBookClub)
+    public ResponseEntity<BookClubDTO> create(@RequestBody BookClubPayload newBookClub)
             throws UserNotFoundException, BadBookClubActionException {
         return ResponseEntity.ok(bookClubService.create(newBookClub));
     }
@@ -40,17 +43,17 @@ public class BookClubController {
     /**
      * Updates a book club
      *
-     * @param bookClub New book club metadata
+     * @param updatedBookClub New book club metadata
      * @return Persisted version of the new book club
      * @throws UserNotFoundException The user was not found
-     * @throws BookClubNotFoundException The book club was not found
+     * @throws UnauthorizedBookClubActionException The book club was not found where the reader was an active admin
      */
     @Operation(summary = "Update", description = "Updates a book club's metadata")
     @PatchMapping("/update")
-    public ResponseEntity<BookClubDTO> update(@RequestBody BookClubDTO bookClub)
-            throws UserNotFoundException, BookClubNotFoundException {
+    public ResponseEntity<BookClubDTO> update(@RequestBody BookClubPayload updatedBookClub)
+            throws UserNotFoundException, UnauthorizedBookClubActionException {
 
-        return ResponseEntity.ok(bookClubService.update(bookClub));
+        return ResponseEntity.ok(bookClubService.update(updatedBookClub));
     }
 
     /**
@@ -166,10 +169,21 @@ public class BookClubController {
      */
     @PostMapping(value = "/search")
     @Operation(summary = "Search", description = "Searches for book clubs by name")
-    public ResponseEntity<Page<BookClubDTO>> search(@RequestBody BookClubSearch bookClubSearch)
+    public ResponseEntity<Page<BookClubDTO>> search(@RequestBody @NotNull BookClubSearch bookClubSearch)
             throws PageSizeTooSmallException, PageSizeTooLargeException {
 
         return ResponseEntity.ok(bookClubService.search(
                 bookClubSearch.getSearchTerm(), bookClubSearch.getPageNum(), bookClubSearch.getPageSize()));
+    }
+
+    /**
+     * Gets pre-signed URLs for all stock book club images
+     *
+     * @return A list of pre-signed URLs for all stock book club images
+     */
+    @GetMapping(value = "/stock-images")
+    @Operation(summary = "Get Stock Images", description = "Gets pre-signed URLs for all stock book club images")
+    public ResponseEntity<List<S3ImageDTO>> getPreSignedStockBookClubImageURLs() {
+        return ResponseEntity.ok(bookClubService.getStockBookClubImages());
     }
 }

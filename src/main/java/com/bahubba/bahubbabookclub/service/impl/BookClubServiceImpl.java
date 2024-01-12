@@ -2,6 +2,7 @@ package com.bahubba.bahubbabookclub.service.impl;
 
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
 import com.bahubba.bahubbabookclub.model.entity.BookClubMembership;
 import com.bahubba.bahubbabookclub.model.entity.Notification;
@@ -10,28 +11,26 @@ import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
-import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.model.payload.BookClubPayload;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.service.BookClubService;
+import com.bahubba.bahubbabookclub.service.S3Service;
 import com.bahubba.bahubbabookclub.util.APIConstants;
 import com.bahubba.bahubbabookclub.util.SecurityUtil;
 import jakarta.validation.constraints.NotNull;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 /** {@link BookClub} business logic implementation */
 @Service
@@ -39,17 +38,14 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 @RequiredArgsConstructor
 public class BookClubServiceImpl implements BookClubService {
 
+    private final S3Service s3Service;
     private final BookClubRepo bookClubRepo;
     private final BookClubMembershipRepo bookClubMembershipRepo;
     private final NotificationRepo notificationRepo;
     private final BookClubMapper bookClubMapper;
-    private final S3Presigner s3Presigner;
-
-    @Value("${aws.s3.bucket}")
-    private String bucketName;
 
     @Override
-    public BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException, BadBookClubActionException {
+    public BookClubDTO create(BookClubPayload newBookClub) throws UserNotFoundException, BadBookClubActionException {
         // Get the current user from the security context
         User user = SecurityUtil.getCurrentUserDetails();
         if (user == null) {
@@ -61,19 +57,8 @@ public class BookClubServiceImpl implements BookClubService {
             throw new BadBookClubActionException();
         }
 
-        // Convert the book club to an entity and, if it included an image, set the flag indicating so
-        // TODO - Persist a passed-in image to S3 (unless we have a pick-list of images instead, which may be a starting
-        // point)
-        BookClub newBookClubEntity = bookClubMapper.modelToEntity(newBookClub);
-        if (!newBookClub.getImageURL().isEmpty()) {
-            newBookClubEntity.setImageUploaded(true);
-            newBookClubEntity.setImageExtension(newBookClub
-                    .getImageURL()
-                    .substring(newBookClub.getImageURL().lastIndexOf('.')));
-        }
-
-        // Persist the new book club so that we get an ID
-        bookClubRepo.save(newBookClubEntity);
+        // Convert the book club to an entity and persist it
+        BookClub newBookClubEntity = bookClubRepo.save(bookClubMapper.payloadToEntity(newBookClub));
 
         // Add the user as a member/owner
         bookClubMembershipRepo.save(BookClubMembership.builder()
@@ -94,7 +79,9 @@ public class BookClubServiceImpl implements BookClubService {
         return bookClubMapper.entityToDTO(newBookClubEntity);
     }
 
-    public BookClubDTO update(BookClubDTO bookClubDTO) throws UserNotFoundException, BookClubNotFoundException {
+    @Override
+    public BookClubDTO update(BookClubPayload updatedBookClub)
+            throws UserNotFoundException, UnauthorizedBookClubActionException {
         // Get the current user from the security context
         User user = SecurityUtil.getCurrentUserDetails();
         if (user == null) {
@@ -103,20 +90,14 @@ public class BookClubServiceImpl implements BookClubService {
 
         // Find the book club to update
         BookClub bookClub = bookClubRepo
-                .findById(bookClubDTO.getId())
-                .orElseThrow(() -> new BookClubNotFoundException(bookClubDTO.getId()));
+                .findByIdAndUserIsAdmin(updatedBookClub.getId(), user.getId())
+                .orElseThrow(() -> new BookClubNotFoundException(updatedBookClub.getId()));
 
         // Update the book club's metadata
-        bookClub.setName(bookClubDTO.getName());
-        bookClub.setDescription(bookClubDTO.getDescription());
-        bookClub.setImageURL(bookClubDTO.getImageURL());
-        bookClub.setPublicity(bookClubDTO.getPublicity());
-        if (!bookClubDTO.getImageURL().isEmpty()) {
-            bookClub.setImageUploaded(true);
-            bookClub.setImageExtension(bookClubDTO
-                    .getImageURL()
-                    .substring(bookClubDTO.getImageURL().lastIndexOf('.')));
-        }
+        bookClub.setName(updatedBookClub.getName());
+        bookClub.setDescription(updatedBookClub.getDescription());
+        bookClub.setImageFileName(updatedBookClub.getImageFileName());
+        bookClub.setPublicity(updatedBookClub.getPublicity());
 
         // TODO - Add notifications for each piece of metadata that was updated
 
@@ -252,16 +233,25 @@ public class BookClubServiceImpl implements BookClubService {
     }
 
     @Override
-    public String getPreSignedImageURL(String fileName) {
-        GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(Duration.between(Instant.now(), Instant.now().plus(Duration.ofMinutes(5))))
-                .getObjectRequest(getObjectRequest ->
-                        getObjectRequest.bucket(bucketName).key(APIConstants.BOOK_CLUB_IMAGE_KEY_PREFIX + fileName))
-                .build();
+    public List<S3ImageDTO> getStockBookClubImages() {
+        List<S3ImageDTO> stockImages = new ArrayList<>();
 
-        PresignedGetObjectRequest presignedGetObjectRequest = s3Presigner.presignGetObject(preSignRequest);
+        // Get the list of stock book club images from S3
+        List<S3Object> s3ImageObjects = s3Service.listS3ObjectsAtPrefix(APIConstants.BOOK_CLUB_STOCK_IMAGE_PREFIX);
 
-        return presignedGetObjectRequest.url().toString();
+        // Get the pre-signed URLs for each image
+        for (S3Object s3ImageObject : s3ImageObjects) {
+            if (s3ImageObject.size() > 0) {
+                stockImages.add(S3ImageDTO.builder()
+                        .fileName(s3ImageObject
+                                .key()
+                                .substring(s3ImageObject.key().lastIndexOf("/") + 1))
+                        .url(s3Service.getPreSignedURL(s3ImageObject.key()))
+                        .build());
+            }
+        }
+
+        return stockImages;
     }
 
     /**

@@ -12,7 +12,7 @@ import com.bahubba.bahubbabookclub.model.entity.RefreshToken;
 import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.enums.Role;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
-import com.bahubba.bahubbabookclub.model.payload.NewUser;
+import com.bahubba.bahubbabookclub.model.payload.UserPayload;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.repository.RefreshTokenRepo;
 import com.bahubba.bahubbabookclub.repository.UserRepo;
@@ -72,7 +72,7 @@ class AuthServiceTest {
                 .thenReturn(ResponseCookie.from("foo", "bar").build());
 
         AuthDTO result =
-                authService.register(NewUser.builder().password("password").build());
+                authService.register(UserPayload.builder().password("password").build());
 
         verify(notificationRepo, times(1)).save(any(Notification.class));
         verify(jwtService, times(1)).generateJwtCookie(any(User.class));

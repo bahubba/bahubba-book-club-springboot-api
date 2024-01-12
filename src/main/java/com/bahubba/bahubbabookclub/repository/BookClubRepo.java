@@ -32,4 +32,19 @@ public interface BookClubRepo extends JpaRepository<BookClub, UUID> {
 
     Page<BookClub> findAllByPublicityNotAndNameContainsIgnoreCase(
             final Publicity publicity, final String searchTerm, Pageable pageable);
+
+    @Query(
+            nativeQuery = true,
+            value = "SELECT bc.* FROM book_club bc "
+                    + "INNER JOIN book_club_users bcu "
+                    + "ON bc.id = bcu.book_club_id "
+                    + "INNER JOIN app_user r "
+                    + "ON bcu.user_id = r.id "
+                    + "WHERE bc.id = :id "
+                    + "AND r.id = :userID "
+                    + "AND bc.disbanded IS NULL "
+                    + "AND bcu.departed IS NULL "
+                    + "AND r.departed IS NULL "
+                    + "AND bcu.club_role = 'ADMIN'")
+    Optional<BookClub> findByIdAndUserIsAdmin(final UUID id, final UUID userID);
 }

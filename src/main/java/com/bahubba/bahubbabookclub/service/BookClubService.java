@@ -2,8 +2,10 @@ package com.bahubba.bahubbabookclub.service;
 
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
+import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
-import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.model.payload.BookClubPayload;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 
@@ -18,17 +20,18 @@ public interface BookClubService {
      * @throws UserNotFoundException The user was not found
      * @throws BadBookClubActionException The book club's name was a reserved word
      */
-    BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException, BadBookClubActionException;
+    BookClubDTO create(BookClubPayload newBookClub) throws UserNotFoundException, BadBookClubActionException;
 
     /**
      * Update a book club
      *
-     * @param bookClubDTO The book club's new metadata
+     * @param updatedBookClub The book club's new metadata
      * @return The updated book club's persisted entity
      * @throws UserNotFoundException The user was not found
-     * @throws BookClubNotFoundException The book club was not found
+     * @throws UnauthorizedBookClubActionException The book club was not found where the reader was an active admin
      */
-    BookClubDTO update(BookClubDTO bookClubDTO) throws UserNotFoundException, BookClubNotFoundException;
+    BookClubDTO update(BookClubPayload updatedBookClub)
+            throws UserNotFoundException, UnauthorizedBookClubActionException;
 
     /**
      * Find a book club by its ID
@@ -117,10 +120,9 @@ public interface BookClubService {
                     BadBookClubActionException;
 
     /**
-     * Get a pre-signed URL for an image
+     * Get all stock book club images
      *
-     * @param fileName The name of the image file
-     * @return The pre-signed URL for the image
+     * @return A list of stock book club image objects in S3
      */
-    String getPreSignedImageURL(String fileName);
+    List<S3ImageDTO> getStockBookClubImages();
 }

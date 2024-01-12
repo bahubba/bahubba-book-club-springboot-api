@@ -7,7 +7,7 @@ import com.bahubba.bahubbabookclub.model.dto.MessageResponseDTO;
 import com.bahubba.bahubbabookclub.model.dto.ResponseWrapperDTO;
 import com.bahubba.bahubbabookclub.model.dto.UserDTO;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
-import com.bahubba.bahubbabookclub.model.payload.NewUser;
+import com.bahubba.bahubbabookclub.model.payload.UserPayload;
 import com.bahubba.bahubbabookclub.service.AuthService;
 import com.bahubba.bahubbabookclub.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,7 +45,7 @@ public class AuthController {
      */
     @PostMapping("/register")
     @Operation(summary = "Register", description = "Registers a user")
-    public ResponseEntity<ResponseWrapperDTO<UserDTO>> register(@RequestBody NewUser newUser)
+    public ResponseEntity<ResponseWrapperDTO<UserDTO>> register(@RequestBody UserPayload newUser)
             throws UserNotFoundException {
 
         try {

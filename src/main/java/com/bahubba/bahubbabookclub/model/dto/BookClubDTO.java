@@ -16,9 +16,7 @@ import lombok.NoArgsConstructor;
 public class BookClubDTO {
     private UUID id;
     private String name;
-    private String imageURL;
-    private boolean imageUploaded;
-    private String imageExtension;
+    private S3ImageDTO image;
     private String description;
     private Publicity publicity;
     private LocalDateTime created;
