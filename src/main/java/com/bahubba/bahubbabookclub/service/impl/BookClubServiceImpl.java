@@ -11,7 +11,7 @@ import com.bahubba.bahubbabookclub.model.enums.BookClubRole;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import com.bahubba.bahubbabookclub.model.enums.Publicity;
 import com.bahubba.bahubbabookclub.model.mapper.BookClubMapper;
-import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.model.payload.BookClubPayload;
 import com.bahubba.bahubbabookclub.repository.BookClubMembershipRepo;
 import com.bahubba.bahubbabookclub.repository.BookClubRepo;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
@@ -45,7 +45,7 @@ public class BookClubServiceImpl implements BookClubService {
     private final BookClubMapper bookClubMapper;
 
     @Override
-    public BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException, BadBookClubActionException {
+    public BookClubDTO create(BookClubPayload newBookClub) throws UserNotFoundException, BadBookClubActionException {
         // Get the current user from the security context
         User user = SecurityUtil.getCurrentUserDetails();
         if (user == null) {
@@ -58,7 +58,7 @@ public class BookClubServiceImpl implements BookClubService {
         }
 
         // Convert the book club to an entity and persist it
-        BookClub newBookClubEntity = bookClubRepo.save(bookClubMapper.modelToEntity(newBookClub));
+        BookClub newBookClubEntity = bookClubRepo.save(bookClubMapper.payloadToEntity(newBookClub));
 
         // Add the user as a member/owner
         bookClubMembershipRepo.save(BookClubMembership.builder()
@@ -80,7 +80,8 @@ public class BookClubServiceImpl implements BookClubService {
     }
 
     @Override
-    public BookClubDTO update(BookClubDTO updatedBookClub) throws UserNotFoundException, UnauthorizedBookClubActionException {
+    public BookClubDTO update(BookClubPayload updatedBookClub)
+            throws UserNotFoundException, UnauthorizedBookClubActionException {
         // Get the current user from the security context
         User user = SecurityUtil.getCurrentUserDetails();
         if (user == null) {
@@ -95,7 +96,7 @@ public class BookClubServiceImpl implements BookClubService {
         // Update the book club's metadata
         bookClub.setName(updatedBookClub.getName());
         bookClub.setDescription(updatedBookClub.getDescription());
-        bookClub.setImageFileName(updatedBookClub.getImage().getFileName());
+        bookClub.setImageFileName(updatedBookClub.getImageFileName());
         bookClub.setPublicity(updatedBookClub.getPublicity());
 
         // TODO - Add notifications for each piece of metadata that was updated
@@ -242,9 +243,11 @@ public class BookClubServiceImpl implements BookClubService {
         for (S3Object s3ImageObject : s3ImageObjects) {
             if (s3ImageObject.size() > 0) {
                 stockImages.add(S3ImageDTO.builder()
-                    .fileName(s3ImageObject.key())
-                    .url(s3Service.getPreSignedURL(s3ImageObject.key()))
-                    .build());
+                        .fileName(s3ImageObject
+                                .key()
+                                .substring(s3ImageObject.key().lastIndexOf("/") + 1))
+                        .url(s3Service.getPreSignedURL(s3ImageObject.key()))
+                        .build());
             }
         }
 

@@ -4,7 +4,7 @@ import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
 import com.bahubba.bahubbabookclub.model.entity.BookClub;
-import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
+import com.bahubba.bahubbabookclub.model.payload.BookClubPayload;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -20,7 +20,7 @@ public interface BookClubService {
      * @throws UserNotFoundException The user was not found
      * @throws BadBookClubActionException The book club's name was a reserved word
      */
-    BookClubDTO create(NewBookClub newBookClub) throws UserNotFoundException, BadBookClubActionException;
+    BookClubDTO create(BookClubPayload newBookClub) throws UserNotFoundException, BadBookClubActionException;
 
     /**
      * Update a book club
@@ -30,7 +30,8 @@ public interface BookClubService {
      * @throws UserNotFoundException The user was not found
      * @throws UnauthorizedBookClubActionException The book club was not found where the reader was an active admin
      */
-    BookClubDTO update(BookClubDTO updatedBookClub) throws UserNotFoundException, UnauthorizedBookClubActionException;
+    BookClubDTO update(BookClubPayload updatedBookClub)
+            throws UserNotFoundException, UnauthorizedBookClubActionException;
 
     /**
      * Find a book club by its ID

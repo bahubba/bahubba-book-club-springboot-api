@@ -7,7 +7,7 @@ import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.enums.NotificationType;
 import com.bahubba.bahubbabookclub.model.mapper.UserMapper;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
-import com.bahubba.bahubbabookclub.model.payload.NewUser;
+import com.bahubba.bahubbabookclub.model.payload.UserPayload;
 import com.bahubba.bahubbabookclub.repository.NotificationRepo;
 import com.bahubba.bahubbabookclub.repository.UserRepo;
 import com.bahubba.bahubbabookclub.service.AuthService;
@@ -40,9 +40,9 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
 
     @Override
-    public AuthDTO register(NewUser newUser) throws UserNotFoundException {
+    public AuthDTO register(UserPayload newUser) throws UserNotFoundException {
         // Generate and persist a User entity
-        User user = userRepo.save(userMapper.modelToEntity(newUser));
+        User user = userRepo.save(userMapper.payloadToEntity(newUser));
 
         // Generate and persist a notification
         notificationRepo.save(Notification.builder()

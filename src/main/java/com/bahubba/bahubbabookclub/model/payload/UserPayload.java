@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NewUser {
+public class UserPayload {
     private String username;
     private String email;
     private String givenName;

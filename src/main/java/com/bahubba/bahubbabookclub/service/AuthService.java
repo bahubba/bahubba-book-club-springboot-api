@@ -3,7 +3,7 @@ package com.bahubba.bahubbabookclub.service;
 import com.bahubba.bahubbabookclub.exception.UserNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.AuthDTO;
 import com.bahubba.bahubbabookclub.model.payload.AuthRequest;
-import com.bahubba.bahubbabookclub.model.payload.NewUser;
+import com.bahubba.bahubbabookclub.model.payload.UserPayload;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.AuthenticationException;
@@ -19,7 +19,7 @@ public interface AuthService {
      * @throws UserNotFoundException The user's info wasn't persisted to the DB for creating the
      *     auth tokens
      */
-    AuthDTO register(NewUser newUser) throws UserNotFoundException;
+    AuthDTO register(UserPayload newUser) throws UserNotFoundException;
 
     /**
      * Accepts user credentials and returns auth and refresh JWTs in HTTP-Only cookies

@@ -4,7 +4,7 @@ import com.bahubba.bahubbabookclub.model.dto.UserDTO;
 import com.bahubba.bahubbabookclub.model.entity.User;
 import com.bahubba.bahubbabookclub.model.mapper.custom.EncodeMapping;
 import com.bahubba.bahubbabookclub.model.mapper.custom.PasswordEncoderMapper;
-import com.bahubba.bahubbabookclub.model.payload.NewUser;
+import com.bahubba.bahubbabookclub.model.payload.UserPayload;
 import java.util.List;
 import lombok.Generated;
 import org.mapstruct.Mapper;
@@ -20,7 +20,7 @@ public interface UserMapper {
     @Mapping(target = "joined", ignore = true) // defaults to now
     @Mapping(target = "departed", ignore = true) // default should be null
     @Mapping(source = "password", target = "password", qualifiedBy = EncodeMapping.class)
-    User modelToEntity(NewUser newUser);
+    User payloadToEntity(UserPayload newUser);
 
     @Generated
     UserDTO entityToDTO(User user);

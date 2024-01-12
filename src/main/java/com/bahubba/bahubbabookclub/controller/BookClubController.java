@@ -3,8 +3,8 @@ package com.bahubba.bahubbabookclub.controller;
 import com.bahubba.bahubbabookclub.exception.*;
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
+import com.bahubba.bahubbabookclub.model.payload.BookClubPayload;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
-import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,7 +35,7 @@ public class BookClubController {
      */
     @PostMapping("/create")
     @Operation(summary = "Create", description = "Creates a new book club")
-    public ResponseEntity<BookClubDTO> create(@RequestBody NewBookClub newBookClub)
+    public ResponseEntity<BookClubDTO> create(@RequestBody BookClubPayload newBookClub)
             throws UserNotFoundException, BadBookClubActionException {
         return ResponseEntity.ok(bookClubService.create(newBookClub));
     }
@@ -46,12 +46,12 @@ public class BookClubController {
      * @param updatedBookClub New book club metadata
      * @return Persisted version of the new book club
      * @throws UserNotFoundException The user was not found
-     * @throws BookClubNotFoundException The book club was not found
+     * @throws UnauthorizedBookClubActionException The book club was not found where the reader was an active admin
      */
     @Operation(summary = "Update", description = "Updates a book club's metadata")
     @PatchMapping("/update")
-    public ResponseEntity<BookClubDTO> update(@RequestBody BookClubDTO updatedBookClub)
-            throws UserNotFoundException, BookClubNotFoundException {
+    public ResponseEntity<BookClubDTO> update(@RequestBody BookClubPayload updatedBookClub)
+            throws UserNotFoundException, UnauthorizedBookClubActionException {
 
         return ResponseEntity.ok(bookClubService.update(updatedBookClub));
     }

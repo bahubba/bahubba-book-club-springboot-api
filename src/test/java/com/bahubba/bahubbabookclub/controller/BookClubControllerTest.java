@@ -6,8 +6,8 @@ import static org.mockito.Mockito.*;
 
 import com.bahubba.bahubbabookclub.model.dto.BookClubDTO;
 import com.bahubba.bahubbabookclub.model.dto.S3ImageDTO;
+import com.bahubba.bahubbabookclub.model.payload.BookClubPayload;
 import com.bahubba.bahubbabookclub.model.payload.BookClubSearch;
-import com.bahubba.bahubbabookclub.model.payload.NewBookClub;
 import com.bahubba.bahubbabookclub.service.BookClubService;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,17 +32,20 @@ class BookClubControllerTest {
 
     @Test
     void testCreate() {
-        when(bookClubService.create(any(NewBookClub.class))).thenReturn(new BookClubDTO());
-        ResponseEntity<BookClubDTO> rsp = bookClubController.create(new NewBookClub());
-        verify(bookClubService, times(1)).create(any(NewBookClub.class));
+        when(bookClubService.create(any(BookClubPayload.class))).thenReturn(new BookClubDTO());
+        ResponseEntity<BookClubDTO> rsp =
+                bookClubController.create(BookClubPayload.builder().build());
+        verify(bookClubService, times(1)).create(any(BookClubPayload.class));
         assertThat(rsp).isNotNull();
     }
 
     @Test
     void testUpdate() {
-        when(bookClubService.update(any(BookClubDTO.class))).thenReturn(new BookClubDTO());
-        ResponseEntity<BookClubDTO> rsp = bookClubController.update(new BookClubDTO());
-        verify(bookClubService, times(1)).update(any(BookClubDTO.class));
+        when(bookClubService.update(any(BookClubPayload.class))).thenReturn(new BookClubDTO());
+
+        ResponseEntity<BookClubDTO> rsp = bookClubController.update(new BookClubPayload());
+
+        verify(bookClubService, times(1)).update(any(BookClubPayload.class));
         assertThat(rsp).isNotNull();
         assertThat(rsp.getBody()).isNotNull();
     }
