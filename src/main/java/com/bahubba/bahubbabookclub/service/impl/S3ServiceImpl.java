@@ -1,6 +1,7 @@
 package com.bahubba.bahubbabookclub.service.impl;
 
 import com.bahubba.bahubbabookclub.service.S3Service;
+import com.bahubba.bahubbabookclub.util.APIConstants;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -33,7 +34,9 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String getPreSignedURL(String key) {
         GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(Duration.between(Instant.now(), Instant.now().plus(Duration.ofMinutes(5))))
+                .signatureDuration(Duration.between(
+                        Instant.now(),
+                        Instant.now().plus(Duration.ofMinutes(APIConstants.BOOK_CLUB_IMAGE_URL_TIMEOUT_MINUTES))))
                 .getObjectRequest(
                         getObjectRequest -> getObjectRequest.bucket(bucket).key(key))
                 .build();

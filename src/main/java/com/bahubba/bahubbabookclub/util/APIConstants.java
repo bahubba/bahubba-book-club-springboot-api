@@ -10,4 +10,5 @@ public interface APIConstants {
 
     /* S3 CONSTANTS */
     String BOOK_CLUB_STOCK_IMAGE_PREFIX = "book-clubs/images/stock/";
+    int BOOK_CLUB_IMAGE_URL_TIMEOUT_MINUTES = 10;
 }
