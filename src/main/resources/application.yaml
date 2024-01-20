@@ -53,6 +53,6 @@ aws:
   region:
     static: ${AWS_REGION:us-east-1}
   credentials:
-    profile-name: ${BBCM_AWS_PROFILE}
+    profile-name: ${BBCM_AWS_PROFILE:default}
   s3:
     bucket: ${BBCM_S3_BUCKET}
