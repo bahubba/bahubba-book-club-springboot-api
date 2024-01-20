@@ -58,6 +58,10 @@ public class User implements UserDetails, Serializable {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<BookClubMembership> memberships;
 
+    // TODO - Preferred provider? Possibly useful for consistent profile picture
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private Set<OAuth2Info> oAuth2Info;
+
     @Column(nullable = false)
     @NotNull @Builder.Default
     private LocalDateTime joined = LocalDateTime.now();
