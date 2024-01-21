@@ -64,3 +64,7 @@ aws:
     profile-name: ${BBCM_AWS_PROFILE:default}
   s3:
     bucket: ${BBCM_S3_BUCKET}
+
+app:
+  ui:
+    url: ${BBCM_UI_URL:https://localhost:3000}

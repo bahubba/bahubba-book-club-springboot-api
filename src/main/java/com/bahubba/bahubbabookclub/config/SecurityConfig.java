@@ -1,6 +1,7 @@
 package com.bahubba.bahubbabookclub.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,7 +17,12 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    @Value("${app.ui.url}")
+    private String uiURL;
+
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -30,7 +36,6 @@ public class SecurityConfig {
                 config.addAllowedHeader("X-Requested-With");
                 config.addAllowedHeader("Authorization");
                 config.addAllowedHeader("Access-Control-Allow-Origin");
-                config.setAllowCredentials(true);
                 config.addAllowedMethod("GET");
                 config.addAllowedMethod("PUT");
                 config.addAllowedMethod("PATCH");
@@ -40,13 +45,16 @@ public class SecurityConfig {
                 config.setMaxAge(3600L);
                 return config;
             }))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**", "/api/v1/auth/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated())
-            .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)))
+            .oauth2Login(oauth2 -> {
+                oauth2.loginPage(uiURL + "/login");
+                oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService));
+                oauth2.successHandler(oAuth2SuccessHandler);
+            })
             .build();
     }
 }
