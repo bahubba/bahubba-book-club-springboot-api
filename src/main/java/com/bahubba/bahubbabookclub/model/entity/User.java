@@ -6,17 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /** Users (users) */
 @Entity
@@ -25,7 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails, Serializable {
+public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -59,7 +54,11 @@ public class User implements UserDetails, Serializable {
     private Set<BookClubMembership> memberships;
 
     // TODO - Preferred provider? Possibly useful for consistent profile picture
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_oauth2_info", joinColumns = @JoinColumn(name = "user_id"))
+    @AttributeOverride(name = "provider", column = @Column(name = "provider"))
+    @AttributeOverride(name = "name", column = @Column(name = "name"))
+    @AttributeOverride(name = "imageURL", column = @Column(name = "image_url"))
     private Set<OAuth2Info> oAuth2Info;
 
     @Column(nullable = false)
@@ -73,32 +72,4 @@ public class User implements UserDetails, Serializable {
     @NotNull @Enumerated(EnumType.STRING)
     @Builder.Default
     private Role role = Role.USER;
-
-    @Column(nullable = false)
-    @NotNull private String password;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return departed == null;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }

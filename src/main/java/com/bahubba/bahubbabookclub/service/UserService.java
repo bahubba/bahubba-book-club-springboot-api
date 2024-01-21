@@ -2,14 +2,10 @@ package com.bahubba.bahubbabookclub.service;
 
 import com.bahubba.bahubbabookclub.exception.UserNotFoundException;
 import com.bahubba.bahubbabookclub.model.dto.UserDTO;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-
 import java.util.List;
 import java.util.UUID;
 
-public interface UserService extends OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public interface UserService {
 
     /**
      * Retrieve a user by ID

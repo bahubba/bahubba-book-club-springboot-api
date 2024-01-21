@@ -1,11 +1,38 @@
+server:
+  port: 8443
+  ssl:
+    key-store-type: ${BC_KEYSTORE_TYPE:PKCS12}
+    key-store: ${BC_KEYSTORE:classpath:BBCMDev.p12}
+    key-store-password: ${BC_KEYSTORE_PW:bbcmDev}
+    key-alias: ${BC_KEYSTORE_ALIAS:BBCMDev}
+
+security:
+  require-ssl: true
+
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${BBCM_GH_CLIENT_ID}
+            client-secret: ${BBCM_GH_CLIENT_SECRET}
+            scope:
+              - user:email
+              - read:user
+          google:
+            client-id: ${BBCM_GOOGLE_CLIENT_ID}
+            client-secret: ${BBCM_GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${BOOK_CLUB_DB_HOST}/${BOOK_CLUB_DB_NAME:book_club} #jdbc:postgresql://${BOOK_CLUB_DB_HOST:127.0.0.1}:${BOOK_CLUB_DB_PORT:5432}/${BOOK_CLUB_DB_NAME:book_club}
     username: ${BOOK_CLUB_DB_USERNAME:postgres}
     password: ${BOOK_CLUB_DB_PASSWORD}
   jpa:
-#    generate-ddl: true
+    #    generate-ddl: true
     properties:
       hibernate:
         default_schema: ${BOOK_CLUB_DB_SCHEMA:public}
@@ -17,38 +44,6 @@ spring:
     show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-  security:
-    oauth2:
-      client:
-        registration:
-          facebook:
-            # TODO - Look up difference between ${} and {} and determine appropriate redirect-uri
-            client-id: ${BBCM_FB_CLIENT_ID}
-            client-secret: ${BBCM_FB_CLIENT_SECRET}
-            redirect-uri: "${BBCM_UI_URL}/oauth2/callback/${registrationId}"
-            scope:
-              - email
-              - public_profile
-          github:
-            client-id: ${BBCM_GH_CLIENT_ID}
-            client-secret: ${BBCM_GH_CLIENT_SECRET}
-            redirect-uri: "${BBCM_UI_URL}/oauth2/callback/${registrationId}"
-            scope:
-              - user:email
-              - read:user
-          google:
-            client-id: ${BBCM_GOOGLE_CLIENT_ID}
-            client-secret: ${BBCM_GOOGLE_CLIENT_SECRET}
-            redirect-uri: "${BBCM_UI_URL}/oauth2/callback/${registrationId}"
-            scope:
-              - email
-              - profile
-        provider:
-          # TODO - Look up FB OAuth2 app docs to find appropriate values
-          facebook:
-            authorization-uri: https://www.facebook.com/v3.0/dialog/oauth
-            token-uri: https://graph.facebook.com/v3.0/oauth/access_token
-            user-info-uri: https://graph.facebook.com/v3.0/me?fields=id,first_name,middle_name,last_name,name,email,verified,is_verified,picture.width(250).height(250)
   sql:
     init:
       platform: postgresql
@@ -61,23 +56,6 @@ logging:
 #      amazonaws:
 #        util:
 #          EC2MetadataUtils: error
-
-server:
-  port: ${BOOK_CLUB_APP_PORT:8443}
-  ssl:
-    key-store-type: ${BC_KEYSTORE_TYPE:PKCS12}
-    key-store: ${BC_KEYSTORE:classpath:BBCMDev.p12}
-    key-store-password: ${BC_KEYSTORE_PW:bbcmDev}
-    key-alias: ${BC_KEYSTORE_ALIAS:BBCMDev}
-
-security:
-  require-ssl: true
-
-app:
-  properties:
-    secret_key: ${BOOK_CLUB_SECRET_KEY}
-    auth_cookie_name: ${BOOK_CLUB_AUTH_COOKIE:bbcm_auth}
-    refresh_cookie_name: ${BOOK_CLUB_REFRESH_COOKIE:bbcm_refresh}
 
 aws:
   region:

@@ -19,8 +19,7 @@ public class BookClubAspect {
     private final S3Service s3Service;
 
     @AfterReturning(
-            pointcut =
-                    "execution(com.bahubba.bahubbabookclub.model.dto.BookClubDTO com.bahubba.bahubbabookclub.service.*.*(..))",
+            pointcut = "execution(com.bahubba.bahubbabookclub.model.dto.BookClubDTO com.bahubba.bahubbabookclub.service.*.*(..))",
             returning = "bookClubDTO")
     public void addPreSignedURL(JoinPoint joinPoint, @NotNull BookClubDTO bookClubDTO) {
         bookClubDTO.setImage(S3ImageDTO.builder()
